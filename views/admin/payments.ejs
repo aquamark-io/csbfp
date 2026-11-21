@@ -1,0 +1,20 @@
+<%- include('../partials/head') %>
+<h1>Payments <% if (mode === 'test') { %><span class="status">Test mode</span><% } %></h1>
+<p class="muted">Refunds, if ever needed, are made by hand in the Stripe dashboard.</p>
+<h2>Renewals in the next 45 days</h2>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Renews</th><th>Registrant</th><th>Automatic renewal</th><th>Stripe status</th></tr></thead>
+  <tbody>
+  <% upcoming.forEach(s => { %><tr><td><%= fmtDate(s.current_period_end) %></td><td><a href="/admin/registrants/<%= s.registrant_id %>"><%= s.person ? fullName(s.person) : 'Registrant' %></a></td><td><%= s.cancel_at_period_end ? 'Canceled' : 'On' %></td><td><%= s.stripe_status %></td></tr><% }) %>
+  <% if (!upcoming.length) { %><tr><td colspan="4" class="muted">None.</td></tr><% } %>
+  </tbody>
+</table></div>
+<h2>Recent payments</h2>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Date</th><th>Registrant</th><th>Type</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  <% payments.forEach(p => { %><tr class="<%= p.status === 'failed' ? 'row-alert' : '' %>"><td><%= fmtDate(p.paid_at || p.created_at) %></td><td><a href="/admin/registrants/<%= p.registrant_id %>"><%= p.person ? fullName(p.person) : 'Registrant' %></a></td><td><%= p.billing_reason %></td><td>$<%= (p.amount_cents / 100).toFixed(2) %></td><td><%= p.status %></td><td><% if (p.hosted_invoice_url) { %><a href="<%= p.hosted_invoice_url %>" target="_blank" rel="noopener">Invoice</a><% } %></td></tr><% }) %>
+  <% if (!payments.length) { %><tr><td colspan="6" class="muted">No payments yet.</td></tr><% } %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

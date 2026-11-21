@@ -1,0 +1,22 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/training/v/<%= v.id %>">← <%= v.label %></a></p>
+<h1>Questions</h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<p class="muted">Shown to registrants in this order. Inactive questions are kept but not used. Past attempts are never affected by edits.</p>
+<p><a class="button small" href="/admin/training/v/<%= v.id %>/questions/new">Add Question</a></p>
+<% const modTitle = new Map(modules.map(m => [m.stable_key, m.title])); %>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Order</th><th>Question</th><th>Correct answer</th><th>Module</th><th></th></tr></thead>
+  <tbody>
+  <% questions.forEach(q => { const c = q.options.find(o => o.is_correct); %>
+    <tr class="<%= q.active ? '' : 'inactive' %>">
+      <td><%= q.position %></td>
+      <td><a href="/admin/training/v/<%= v.id %>/questions/<%= q.id %>"><%= q.prompt %></a><% if (!q.active) { %> <span class="tag">Inactive</span><% } %></td>
+      <td><%= c ? c.text : '(none marked)' %></td>
+      <td><%= modTitle.get(q.module_stable_key) || '—' %></td>
+      <td><a class="button secondary small" href="/admin/training/v/<%= v.id %>/questions/<%= q.id %>">Edit</a></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

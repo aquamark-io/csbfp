@@ -1,0 +1,23 @@
+<%- include('../partials/head') %>
+<h1>Stripe</h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<% if (blocked) { %>
+  <p class="alert"><%= blocked %></p>
+<% } else { %>
+  <dl class="kv panel">
+    <dt>Mode</dt><dd><%= mode === 'test' ? 'Test mode (no real charges)' : 'LIVE (real charges)' %></dd>
+    <dt>Account</dt><dd><%= account ? ((account.business_profile && account.business_profile.name) || (account.settings && account.settings.dashboard && account.settings.dashboard.display_name) || account.id) : `Could not read the account: ${accountError}` %></dd>
+    <dt>$99/year price</dt><dd><%= cfg.priceId || 'Not set up' %></dd>
+    <dt>Billing portal</dt><dd><%= cfg.portalId ? 'Configured' : 'Not set up' %></dd>
+    <dt>Webhook</dt><dd><%= cfg.webhookSecret ? `Configured: ${webhookUrl}` : 'Not set up' %></dd>
+  </dl>
+  <% if (account && account.business_profile && account.business_profile.name && !/broker registry/i.test(account.business_profile.name)) { %>
+  <p class="alert">This key belongs to "<%= account.business_profile.name %>", not the Broker Registry Stripe account. Check STRIPE_SECRET_KEY in Render before continuing.</p>
+  <% } %>
+  <form method="post" action="/admin/stripe/setup">
+    <p class="muted">Creates (or updates) the "Broker Registry Annual Registration" product with a $99/year price, the customer billing portal (update card, receipts, cancel at period end) and the webhook to <%= webhookUrl %>. Safe to run again.</p>
+    <button class="button" type="submit"><%= cfg.ready ? 'Run Setup Again' : 'Set Up Stripe' %></button>
+  </form>
+<% } %>
+<%- include('../partials/foot') %>

@@ -1,0 +1,27 @@
+<%- include('../partials/head') %>
+<h1>Possible Duplicates</h1>
+<p class="muted">An open flag blocks payment for that registrant until it's resolved. Matching details point to a likely match but don't prove identity, so check before deciding.</p>
+<p class="tabs">
+  <% [['open', 'Open'], ['dismissed', 'Different people'], ['merged', 'Same person']].forEach(([k, l]) => { %>
+  <a href="/admin/duplicates?status=<%= k %>" class="<%= status === k ? 'active' : '' %>"><%= l %></a>
+  <% }) %>
+</p>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (!flags.length) { %><p class="muted">Nothing here.</p><% } %>
+<% flags.forEach(f => { %>
+<section class="panel flag">
+  <p><strong><%= MATCH_LABEL[f.match_reason] %></strong> · flagged <%= fmtDate(f.created_at) %></p>
+  <p>New account: <% if (f.a) { %><a href="/admin/registrants/<%= f.a.id %>"><%= fullName(f.a) %></a> (<%= f.a.email %>, signed up <%= fmtDate(f.a.created_at) %>)<% } %><br>
+     Matches: <% if (f.b) { %><a href="/admin/registrants/<%= f.b.id %>"><%= fullName(f.b) %></a> (<%= f.b.email %>, signed up <%= fmtDate(f.b.created_at) %>)<% } %></p>
+  <% if (f.note) { %><p class="muted-inline">Note: <%= f.note %></p><% } %>
+  <% if (f.status === 'open') { %>
+  <form method="post" action="/admin/duplicates/<%= f.id %>" class="stack">
+    <div class="check"><input id="o1-<%= f.id %>" type="radio" name="outcome" value="different_people"><label for="o1-<%= f.id %>">Different people: clear the flag (payment allowed)</label></div>
+    <div class="check"><input id="o2-<%= f.id %>" type="radio" name="outcome" value="same_person"><label for="o2-<%= f.id %>">Same person: close the flag (deal with the extra account separately)</label></div>
+    <input name="note" type="text" maxlength="500" placeholder="Note (required): what you checked">
+    <button class="button small" type="submit">Resolve</button>
+  </form>
+  <% } %>
+</section>
+<% }) %>
+<%- include('../partials/foot') %>

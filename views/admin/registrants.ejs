@@ -1,0 +1,27 @@
+<%- include('../partials/head') %>
+<h1>Registrants</h1>
+<form method="get" action="/admin/registrants" class="search-row">
+  <label for="q" class="visually-hidden">Search</label>
+  <input id="q" name="q" type="search" placeholder="Name, email or registration number" value="<%= q %>">
+  <button class="button" type="submit">Search</button>
+  <% if (q) { %><a class="button secondary" href="/admin/registrants">Clear</a><% } %>
+</form>
+<p class="muted"><%= rows.length %> <%= rows.length === 1 ? 'result' : 'results' %><%= q ? '' : ' (newest first, up to 100)' %></p>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Name</th><th>Email</th><th>Number</th><th>Status</th><th>Signed up</th></tr></thead>
+  <tbody>
+  <% rows.forEach(r => { %>
+    <tr>
+      <td><a href="/admin/registrants/<%= r.id %>"><%= fullName(r) %></a><% if (r.flagged) { %> <span class="status status-hold">Possible duplicate</span><% } %><% if (r.account_status === 'locked') { %> <span class="tag">Locked</span><% } %></td>
+      <td><%= r.email %><% if (!r.email_verified_at) { %> <span class="tag">Unverified</span><% } %></td>
+      <td><%= r.reg.registration_number || '—' %></td>
+      <td><%- statusPill(r.reg.status, r.reg.admin_hold) %></td>
+      <td><%= fmtDate(r.created_at) %></td>
+    </tr>
+  <% }) %>
+  <% if (!rows.length) { %><tr><td colspan="5" class="muted">No registrants found.</td></tr><% } %>
+  </tbody>
+</table>
+</div>
+<%- include('../partials/foot') %>

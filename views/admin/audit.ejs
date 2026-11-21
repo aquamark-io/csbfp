@@ -1,0 +1,19 @@
+<%- include('../partials/head') %>
+<h1>Audit Log</h1>
+<p class="muted">Every admin sign-in and change, newest first (latest 200).</p>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>When</th><th>Who</th><th>Action</th><th>About</th><th>Reason / details</th></tr></thead>
+  <tbody>
+  <% rows.forEach(a => { %>
+    <tr>
+      <td><%= fmtTime(a.created_at) %></td>
+      <td><%= a.who %></td>
+      <td><%= a.action.replace(/_/g, ' ') %></td>
+      <td><% if (a.target_type === 'registrant') { %><a href="/admin/registrants/<%= a.target_id %>">Registrant</a><% } else if (a.target_type) { %><%= a.target_type %><% } %></td>
+      <td><%= a.reason || '' %><% if (a.detail && a.detail.fields) { %> <span class="muted-inline">(<%= a.detail.fields.join(', ') %>)</span><% } %><% if (a.detail && a.detail.label) { %> <span class="muted-inline"><%= a.detail.label %></span><% } %><% if (a.detail && a.detail.outcome) { %> <span class="muted-inline"><%= a.detail.outcome === 'merged' ? 'same person' : 'different people' %></span><% } %></td>
+    </tr>
+  <% }) %>
+  <% if (!rows.length) { %><tr><td colspan="5" class="muted">Nothing yet.</td></tr><% } %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

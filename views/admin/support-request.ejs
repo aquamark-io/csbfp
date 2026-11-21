@@ -1,0 +1,21 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/support">← Support</a></p>
+<h1><%= reference %>: <%= CATEGORIES[sr.category] || sr.category %></h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<p class="muted">Received <%= fmtTime(sr.created_at) %> from <a href="mailto:<%= sr.contact_email %>?subject=<%= encodeURIComponent(`Re: your Broker Registry request ${reference}`) %>"><%= sr.contact_email %></a></p>
+<% if (registrant) { %>
+<p>Account: <a href="/admin/registrants/<%= registrant.id %>"><%= fullName(registrant) %></a> (<%= registrant.email || 'deleted' %>)<% if (sr.registrant_id && registrant.email && registrant.email !== sr.contact_email) { %>. <strong>Note:</strong> the request came from a different address than the account's.<% } %></p>
+<% } else { %>
+<p class="muted">No account matches this email address.</p>
+<% } %>
+<% if (sr.category === 'data_deletion') { %>
+<p class="message">Deletion request. Confirm it really came from the account holder, then open their record and use <strong>Delete registrant data</strong> at the bottom of the page.</p>
+<% } %>
+<section class="panel"><h2>Message</h2><p class="pre-line"><%= sr.message %></p></section>
+<form method="post" action="/admin/support/<%= sr.id %>" class="panel">
+  <div class="field"><label for="st">Status</label>
+    <select id="st" name="status"><% [['open', 'Open'], ['in_progress', 'In progress'], ['closed', 'Closed']].forEach(([v, l]) => { %><option value="<%= v %>" <%= sr.status === v ? 'selected' : '' %>><%= l %></option><% }) %></select></div>
+  <div class="field"><label for="nt">Internal note</label><textarea id="nt" name="admin_note" rows="4"><%= sr.admin_note || '' %></textarea></div>
+  <button class="button" type="submit">Save</button>
+</form>
+<%- include('../partials/foot') %>

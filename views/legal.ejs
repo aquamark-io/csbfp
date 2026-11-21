@@ -1,0 +1,9 @@
+<%- include('partials/head') %>
+<h1><%= title %></h1>
+<% if (doc) { %>
+<p class="muted meta">Version <%= doc.version %><% if (doc.effective_at) { %> · Effective <%= new Date(doc.effective_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) %><% } %></p>
+<div class="legal-body"><%- html %></div>
+<% } else { %>
+<p class="message">This document is being prepared and will be published before registration opens.</p>
+<% } %>
+<%- include('partials/foot') %>

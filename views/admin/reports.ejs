@@ -1,0 +1,47 @@
+<%- include('../partials/head') %>
+<h1>Reports <% if (mode === 'test') { %><span class="status">Stripe test mode</span><% } %></h1>
+<p class="muted">Counts only; no personal information. Figures update each time you open this page.</p>
+<div class="stat-grid">
+  <div class="stat"><p class="stat-label">Active</p><p class="stat-value"><%= statuses.active %></p></div>
+  <div class="stat"><p class="stat-label">Pending</p><p class="stat-value"><%= statuses.pending %></p></div>
+  <div class="stat"><p class="stat-label">Inactive</p><p class="stat-value"><%= statuses.inactive %></p></div>
+  <div class="stat"><p class="stat-label">Expired</p><p class="stat-value"><%= statuses.expired %></p></div>
+  <div class="stat"><p class="stat-label">Total registrations</p><p class="stat-value"><%= statuses.active + statuses.inactive + statuses.expired %></p><p class="stat-note">ever activated</p></div>
+  <div class="stat"><p class="stat-label">Accounts</p><p class="stat-value"><%= accounts %></p><p class="stat-note"><%= verified %> verified<%= deleted ? `, ${deleted} deleted` : '' %></p></div>
+</div>
+<h2>Last 12 months</h2>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Month</th><th>New accounts</th><th>New registrations (first payment)</th></tr></thead>
+  <tbody><% monthly.slice().reverse().forEach(m => { %><tr><td><%= new Date(m.month + '-01T00:00:00Z').toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }) %></td><td><%= m.signups %></td><td><%= m.activations %></td></tr><% }) %></tbody>
+</table></div>
+<div class="admin-grid">
+<section class="panel">
+  <h2>Renewal</h2>
+  <dl class="kv">
+    <dt>Renewal rate (12 months)</dt><dd><%= renewalRate == null ? '—' : `${renewalRate}%` %></dd>
+    <dt>Renewals paid</dt><dd><%= renewalsPaid %></dd>
+    <dt>Lapsed (inactive or expired)</dt><dd><%= lapsed %></dd>
+    <dt>Automatic renewal off</dt><dd><%= payments.autoOff %></dd>
+  </dl>
+</section>
+<section class="panel">
+  <h2>Training<% if (trainingStats) { %> (<%= trainingStats.label %>)<% } %></h2>
+  <% if (!trainingStats) { %><p class="muted">No training published.</p><% } else { %>
+  <dl class="kv">
+    <dt>Completion rate</dt><dd><%= trainingStats.rate == null ? '—' : `${trainingStats.rate}%` %> (<%= trainingStats.completed %> of <%= trainingStats.started %> who started)</dd>
+    <dt>Assessment pass rate</dt><dd><%= trainingStats.passRate == null ? '—' : `${trainingStats.passRate}%` %> (<%= trainingStats.passed %> of <%= trainingStats.tried %>)</dd>
+    <dt>Attempts taken</dt><dd><%= trainingStats.attempts %></dd>
+  </dl>
+  <% } %>
+</section>
+<section class="panel">
+  <h2>Payments</h2>
+  <dl class="kv">
+    <dt>Last 30 days</dt><dd><%= payments.count30 %> paid, $<%= payments.revenue30.toFixed(2) %></dd>
+    <dt>Last 12 months</dt><dd><%= payments.count12 %> paid, $<%= payments.revenue12.toFixed(2) %></dd>
+    <dt>Failed, unpaid</dt><dd><%= payments.failedOpen %></dd>
+  </dl>
+  <p class="muted"><a href="/admin/payments">Payment details →</a></p>
+</section>
+</div>
+<%- include('../partials/foot') %>

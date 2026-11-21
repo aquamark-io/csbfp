@@ -1,0 +1,27 @@
+<%- include('partials/head') %>
+<div class="narrow-wide">
+<h1>Contact Us</h1>
+<% if (sent) { %>
+  <p class="notice-ok" role="status">Thanks, we received your message<% if (sent.reference !== 'received') { %> (reference <strong><%= sent.reference %></strong>)<% } %>. We'll reply by email, usually within one business day.</p>
+  <p><a href="/">Return to the home page</a></p>
+<% } else { %>
+  <p class="lead">We reply by email, usually within one business day.</p>
+  <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+  <form method="post" action="/support" novalidate>
+    <div class="field"><label for="name">Your name</label><input id="name" name="name" type="text" maxlength="100" autocomplete="name" value="<%= values.name || '' %>"></div>
+    <div class="field"><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" value="<%= values.email || '' %>" <% if (errors.email) { %>aria-invalid="true"<% } %>>
+      <%- include('partials/err', { field: 'email' }) %></div>
+    <div class="field"><label for="category">Topic</label>
+      <select id="category" name="category"><option value="">Choose</option>
+        <% categories.forEach(c => { %><option value="<%= c %>" <%= values.category === c ? 'selected' : '' %>><%= labels[c].charAt(0).toUpperCase() + labels[c].slice(1) %></option><% }) %>
+      </select><%- include('partials/err', { field: 'category' }) %></div>
+    <div class="field"><label for="message">Message</label><textarea id="message" name="message" rows="6" maxlength="5000"><%= values.message || '' %></textarea>
+      <%- include('partials/err', { field: 'message' }) %>
+      <p class="hint">Please don't include your Social Security number, date of birth or card details.</p></div>
+    <div class="hp" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+    <% if (turnstileKey) { %><div class="cf-turnstile" data-sitekey="<%= turnstileKey %>"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script><% } %>
+    <button class="button" type="submit">Send Message</button>
+  </form>
+<% } %>
+</div>
+<%- include('partials/foot') %>

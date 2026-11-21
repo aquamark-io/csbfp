@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <% if (preLaunch) { %><meta name="robots" content="noindex, nofollow"><% } %>
+  <title><%= pageTitle ? pageTitle + ' | ' : '' %>Broker Registry</title>
+  <% const shareTitle = (pageTitle ? pageTitle + ' | ' : '') + 'Broker Registry';
+     const shareDesc = 'A national registry of commercial finance brokers.'; %>
+  <meta name="description" content="<%= shareDesc %>">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Broker Registry">
+  <meta property="og:title" content="<%= shareTitle %>">
+  <meta property="og:description" content="<%= shareDesc %>">
+  <meta property="og:url" content="https://broker-registry.org<%= currentPath %>">
+  <meta property="og:image" content="https://broker-registry.org/img/share.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Broker Registry seal and name">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="apple-touch-icon" href="/img/seal.png">
+  <link rel="icon" href="/favicon.svg?v=<%= assetV %>" type="image/svg+xml">
+  <link rel="preload" href="/fonts/inter-latin-var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/css/site.css?v=<%= assetV %>">
+</head>
+<body>
+<header class="header<%= signedIn && !(typeof adminArea !== 'undefined' && adminArea) ? ' burger' : '' %>">
+  <div class="header-inner">
+    <a class="brand" href="<%= typeof adminArea !== 'undefined' && adminArea ? '/admin' : '/' %>" aria-label="Broker Registry home">
+      <img class="seal" src="/img/seal.png?v=<%= assetV %>" alt="" width="70" height="70">
+      <span class="brand-text"><span class="brand-name">Broker Registry</span><span class="brand-tag"><span>Commercial Finance</span><span>Broker Registration</span></span></span>
+      <% if (typeof adminArea !== 'undefined' && adminArea) { %><span class="admin-badge">Admin</span><% } %>
+    </a>
+    <% const nav = (href, label) => {
+         const active = currentPath === href || currentPath.startsWith(href + '/');
+         return `<a href="${href}"${active ? ' class="active" aria-current="page"' : ''}>${label}</a>`;
+       }; %>
+    <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+      <span class="menu-bars" aria-hidden="true"><span></span><span></span><span></span></span>
+      <span class="menu-word" aria-hidden="true"><span class="w-open">Menu</span><span class="w-close">Close</span></span>
+    </button>
+    <% if (typeof adminArea !== 'undefined' && adminArea) { %>
+    <nav class="nav" id="site-nav" aria-label="Admin">
+      <% if (typeof admin !== 'undefined' && admin) { %>
+      <%- nav('/admin/registrants', 'Registrants') %>
+      <%- nav('/admin/reports', 'Reports') %>
+      <%- nav('/admin/duplicates', 'Duplicates') %>
+      <%- nav('/admin/support', 'Support') %>
+      <%- nav('/admin/training', 'Training') %>
+      <%- nav('/admin/payments', 'Payments') %>
+      <%- nav('/admin/emails', 'Emails') %>
+      <%- nav('/admin/announce', 'Announce') %>
+      <%- nav('/admin/lookups', 'Lookups') %>
+      <%- nav('/admin/lists', 'Lists') %>
+      <%- nav('/admin/stripe', 'Stripe') %>
+      <%- nav('/admin/legal', 'Legal') %>
+      <%- nav('/admin/launch', 'Launch') %>
+      <%- nav('/admin/audit', 'Audit Log') %>
+      <form method="post" action="/admin/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form>
+      <% } %>
+    </nav>
+    <% } else { %>
+    <nav class="nav" id="site-nav" aria-label="Main">
+      <% if (signedIn && currentPath !== '/portal/dashboard') { %><%- nav('/portal/dashboard', 'Dashboard') %><% } %>
+      <%- nav('/about', 'About') %>
+      <%- nav('/faq', 'FAQ') %>
+      <%- nav('/verify', 'Verify Registration') %>
+      <%- nav('/support', 'Contact') %>
+      <% if (signedIn) { %><form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form><% } else { %><%- nav('/portal', 'Sign In') %><% } %>
+    </nav>
+    <% } %>
+  </div>
+</header>
+<script src="/js/nav.js?v=<%= assetV %>" defer></script>
+<main class="main<%= typeof adminArea !== 'undefined' && adminArea ? ' wide' : '' %>">

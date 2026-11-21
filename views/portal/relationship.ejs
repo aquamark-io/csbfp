@@ -1,0 +1,55 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1><%= rel ? 'Edit Employer' : 'Add Employer' %></h1>
+<% if (Object.keys(errors).length) { %><p class="alert" role="alert">Please correct the highlighted fields.</p><% } %>
+
+<form method="post" action="/portal/employment/<%= rel ? rel.id : 'new' %>" class="employer-form" novalidate>
+  <div class="field">
+    <label for="company_name">Company name</label>
+    <input id="company_name" name="company_name" type="text" maxlength="120" value="<%= values.company_name || '' %>">
+    <%- include('../partials/err', { field: 'company_name' }) %>
+  </div>
+  <div class="field">
+    <label for="company_website">Website (optional)</label>
+    <input id="company_website" name="company_website" type="text" inputmode="url" placeholder="example.com" value="<%= values.company_website || '' %>">
+    <%- include('../partials/err', { field: 'company_website' }) %>
+  </div>
+  <div class="field">
+    <label for="job_title_id">Job title</label>
+    <select id="job_title_id" name="job_title_id">
+      <option value="">Choose</option>
+      <% titles.forEach(t => { %><option value="<%= t.id %>" <%= t.label === 'Other' ? 'data-other' : '' %> <%= String(values.job_title_id) === String(t.id) ? 'selected' : '' %>><%= t.label %></option><% }) %>
+    </select>
+    <%- include('../partials/err', { field: 'job_title_id' }) %>
+  </div>
+  <div class="field title-other">
+    <label for="job_title_other">Your job title</label>
+    <input id="job_title_other" name="job_title_other" type="text" maxlength="80" value="<%= values.job_title_other || '' %>">
+    <%- include('../partials/err', { field: 'job_title_other' }) %>
+  </div>
+  <fieldset class="field">
+    <legend>How do you work with this company?</legend>
+    <% [['employee','Employee'],['contractor_1099','Independent contractor'],['self_employed','Self-employed']].forEach(([val, lab]) => { %>
+    <div class="check"><input id="rt-<%= val %>" type="radio" name="relationship_type" value="<%= val %>" <%= values.relationship_type === val ? 'checked' : '' %>><label for="rt-<%= val %>"><%= lab %></label></div>
+    <% }) %>
+    <%- include('../partials/err', { field: 'relationship_type' }) %>
+  </fieldset>
+  <fieldset class="field">
+    <legend>Work arrangement</legend>
+    <% [['remote','Remote'],['hybrid','Hybrid'],['on_site','On-site']].forEach(([val, lab]) => { %>
+    <div class="check"><input id="wa-<%= val %>" type="radio" name="work_arrangement" value="<%= val %>" <%= values.work_arrangement === val ? 'checked' : '' %>><label for="wa-<%= val %>"><%= lab %></label></div>
+    <% }) %>
+    <%- include('../partials/err', { field: 'work_arrangement' }) %>
+  </fieldset>
+  <%- include('../partials/month-year', { name: 'start', label: 'Start date', values, errors }) %>
+  <div class="actions">
+    <button class="button" type="submit">Save</button>
+    <a class="button secondary" href="/portal/employment">Cancel</a>
+  </div>
+</form>
+<% if (rel) { %>
+<form method="post" action="/portal/employment/<%= rel.id %>/delete" class="danger-zone">
+  <p class="muted">No longer work here? <button class="link-button" type="submit">Remove this employer</button>.</p>
+</form>
+<% } %>
+<%- include('../partials/foot') %>

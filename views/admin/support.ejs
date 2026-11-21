@@ -1,0 +1,19 @@
+<%- include('../partials/head') %>
+<h1>Support</h1>
+<p class="tabs">
+  <a href="/admin/support?status=open" class="<%= status === 'open' ? 'active' : '' %>">Open (<%= counts.open %>)</a>
+  <a href="/admin/support?status=in_progress" class="<%= status === 'in_progress' ? 'active' : '' %>">In progress (<%= counts.in_progress %>)</a>
+  <a href="/admin/support?status=closed" class="<%= status === 'closed' ? 'active' : '' %>">Closed</a>
+</p>
+<p class="muted">Reply to people by email from your own inbox (requests come from the contact form and portal; the requester got a confirmation with their reference).</p>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Received</th><th>Reference</th><th>Topic</th><th>From</th></tr></thead>
+  <tbody>
+  <% rows.forEach(r => { %>
+    <tr class="<%= r.category === 'data_deletion' ? 'row-alert' : '' %>"><td><%= fmtTime(r.created_at) %></td><td><a href="/admin/support/<%= r.id %>"><%= r.reference %></a></td>
+      <td><%= CATEGORIES[r.category] || r.category %></td><td><%= r.contact_email %><% if (r.registrant_id) { %> <span class="tag">Has account</span><% } %></td></tr>
+  <% }) %>
+  <% if (!rows.length) { %><tr><td colspan="4" class="muted">Nothing here.</td></tr><% } %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

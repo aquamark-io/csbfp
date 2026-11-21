@@ -1,0 +1,75 @@
+<%- include('../partials/head') %>
+<h1>Registration Dashboard</h1>
+<%
+  const reg = progress.registration || {};
+  const statusLabel = { pending: 'Pending', active: 'Active', inactive: 'Inactive', expired: 'Expired' }[reg.status] || 'Pending';
+  const fmt = d => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—';
+%>
+<dl class="summary">
+  <div><dt>Status</dt><dd><span class="status status-<%= reg.status || 'pending' %>"><%= statusLabel %></span></dd></div>
+  <div><dt>Registration number</dt><dd><%= reg.registration_number || '—' %></dd></div>
+  <% if (reg.first_activated_at) { %><div><dt>Registration date</dt><dd><%= fmt(reg.first_activated_at) %></dd></div><% } %>
+  <% if (reg.expires_at) { %><div><dt>Valid through</dt><dd><%= fmt(reg.expires_at) %></dd></div><% } %>
+</dl>
+
+<% const renewSoon = reg.status === 'active' && reg.expires_at && Date.parse(reg.expires_at) - Date.now() < 30 * 864e5;
+   const confirmedRecently = registrant.info_confirmed_at && Date.now() - Date.parse(registrant.info_confirmed_at) < 300 * 864e5; %>
+<% if (renewSoon && !confirmedRecently) { %>
+<div class="message review-box">
+  <p><strong>Annual review:</strong> your registration renews soon. Please check that your <a href="/portal/personal">contact details</a>, <a href="/portal/employment">employment</a> and <a href="/portal/products">products</a> are current.</p>
+  <form method="post" action="/portal/confirm-info"><button class="button small" type="submit">My Information Is Current</button></form>
+</div>
+<% } %>
+<% if (flagged) { %>
+<p class="alert">We need to confirm a few details before your registration can be completed. Please contact <a href="mailto:support@broker-registry.org">support@broker-registry.org</a>.</p>
+<% } %>
+
+<div class="list-card">
+<h2 class="list-card-head">Steps to complete</h2>
+<%
+  const steps = [
+    { done: progress.personal, label: 'Personal information', href: '/portal/personal' },
+    { done: progress.employment, label: 'Employment', href: '/portal/employment' },
+    { done: progress.products, label: 'Financing products', href: '/portal/products' },
+    { done: progress.acknowledgments, label: 'Acknowledgments', href: '/portal/acknowledgments' },
+    { done: train.allComplete, label: `Training (${train.modules.filter(m => m.completed).length} of ${train.modules.length} modules)`, href: '/portal/training',
+      state: train.allComplete ? 'Complete' : train.modules.some(m => m.started) ? 'In progress' : 'Start' },
+    { done: Boolean(train.assessment && train.assessment.passed), label: 'Assessment', href: train.allComplete ? '/portal/assessment' : null, divider: true,
+      locked: !train.allComplete,
+      state: train.assessment && train.assessment.passed ? 'Passed' : !train.allComplete ? '' : 'Start' },
+    { done: ['active'].includes(reg.status) || Boolean(reg.first_activated_at && reg.status !== 'pending'), label: 'Annual registration fee ($99)',
+      href: train.assessment && train.assessment.passed ? '/portal/checkout' : null, divider: true,
+      locked: !(train.assessment && train.assessment.passed) && !reg.first_activated_at,
+      state: reg.status === 'active' ? 'Paid' : reg.status === 'inactive' ? 'Payment due' : reg.status === 'expired' ? 'Renew' : !(train.assessment && train.assessment.passed) ? '' : 'Start' },
+  ];
+  const next = steps.find(s => !s.done && !s.later && s.href);
+%>
+<ol class="checklist">
+  <% steps.forEach(s => { %>
+  <li class="<%= [s.done ? 'done' : '', s.locked ? 'locked' : '', s.divider ? 'divider' : ''].filter(Boolean).join(' ') %>">
+    <span class="mark" aria-hidden="true"><% if (s.done) { %><%- include('../partials/check') %><% } %></span>
+    <% if (s.href) { %><a href="<%= s.href %>"><%= s.label %></a><% } else { %><span><%= s.label %></span><% } %>
+    <% if (!s.done) { %><span class="state"><%= s.state != null ? s.state : 'Start' %></span><% } else { %><span class="visually-hidden"><%= s.state || 'Complete' %></span><% } %>
+  </li>
+  <% }) %>
+</ol>
+</div>
+<% if (reg.status === 'inactive') { %>
+<p class="alert">Your renewal payment didn't go through, so your registration is Inactive. <a href="/portal/billing">Pay now to reactivate it.</a></p>
+<% } else if (reg.status === 'expired') { %>
+<p class="message">Your registration has expired. <a href="/portal/checkout">Renew it</a> to make it active again with the same number.</p>
+<% } else if (reg.status === 'active') { %>
+<div class="actions"><a class="button" href="/portal/confirmation">View Registration Confirmation</a><a class="button secondary" href="/portal/billing">Billing</a></div>
+<div class="seal-card">
+  <img src="/img/seal.png?v=<%= assetV %>" alt="" width="72" height="72">
+  <div>
+    <p class="seal-card-title">Your registered seal</p>
+    <p class="muted">Show it with your registration number, <strong><%= reg.registration_number %></strong>, or link it to your <a href="/verify?number=<%= encodeURIComponent(reg.registration_number) %>">verification page</a>. Remove it if your registration is no longer Active. <a href="/legal/terms#5-using-your-registration-accurately">Seal rules</a></p>
+    <a class="button secondary small" href="/portal/seal">Download Seal</a>
+  </div>
+</div>
+<% } else if (next) { %>
+<div class="actions"><a class="button" href="<%= next.href %>">Continue: <%= next.label.replace(/ \(.*\)$/, '') %></a></div>
+<% } %>
+<p class="muted portal-links"><a href="/portal/account">Account settings</a><% if (reg.status === 'expired') { %> · <a href="/portal/billing">Billing history</a><% } %></p>
+<%- include('../partials/foot') %>

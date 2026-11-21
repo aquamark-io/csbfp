@@ -1,0 +1,20 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/training">← Training</a></p>
+<h1>Assessment Results</h1>
+<p class="muted">Latest 200 attempts. Scores are never shown publicly.</p>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Started</th><th>Registrant</th><th>Version</th><th>Score</th><th>Result</th></tr></thead>
+  <tbody>
+  <% attempts.forEach(a => { %>
+    <tr>
+      <td><%= fmtTime(a.started_at) %></td>
+      <td><a href="/admin/registrants/<%= a.registrant_id %>"><%= a.person ? fullName(a.person) : 'Registrant' %></a></td>
+      <td><%= a.version || '' %></td>
+      <td><%= a.submitted_at ? `${a.correct_count} of ${a.question_count}` : '—' %></td>
+      <td><%= !a.submitted_at ? 'In progress' : a.passed ? 'Passed' : 'Not passed' %></td>
+    </tr>
+  <% }) %>
+  <% if (!attempts.length) { %><tr><td colspan="5" class="muted">No attempts yet.</td></tr><% } %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

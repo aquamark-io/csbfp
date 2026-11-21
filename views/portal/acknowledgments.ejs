@@ -1,0 +1,22 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1>Acknowledgments</h1>
+<% if (!doc) { %>
+<p class="message">The acknowledgments are not available yet. Please check back soon.</p>
+<% } else if (current) { %>
+<p class="notice-ok">You confirmed these statements on <%= new Date(accepted.accepted_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>.</p>
+<ul class="plain-list"><% statements.forEach(s => { %><li><%= s %></li><% }) %></ul>
+<% } else { %>
+<p class="lead">Please read and confirm each statement.</p>
+<% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+<form method="post" action="/portal/acknowledgments" novalidate>
+  <fieldset class="field">
+    <legend class="visually-hidden">Acknowledgments</legend>
+    <% statements.forEach((s, i) => { %>
+    <div class="check"><input id="ack-<%= i %>" type="checkbox" name="ack_<%= i %>" value="yes" <%= checked[i] ? 'checked' : '' %>><label for="ack-<%= i %>"><%= s %></label></div>
+    <% }) %>
+  </fieldset>
+  <button class="button" type="submit">Confirm</button>
+</form>
+<% } %>
+<%- include('../partials/foot') %>

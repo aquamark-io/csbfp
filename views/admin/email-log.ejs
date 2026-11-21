@@ -1,0 +1,25 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/emails">← Emails</a></p>
+<h1>Email Log</h1>
+<p class="tabs">
+  <a href="/admin/emails/log" class="<%= !status ? 'active' : '' %>">All</a>
+  <a href="/admin/emails/log?status=failed" class="<%= status === 'failed' ? 'active' : '' %>">Failed</a>
+  <a href="/admin/emails/log?status=bounced" class="<%= status === 'bounced' ? 'active' : '' %>">Bounced</a>
+  <a href="/admin/emails/log?status=queued" class="<%= status === 'queued' ? 'active' : '' %>">Stuck</a>
+</p>
+<p class="muted">Latest 200. "Sent" means Postmark accepted it; "delivered" means the recipient's mail server accepted it.</p>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>When</th><th>Email</th><th>To</th><th>Status</th></tr></thead>
+  <tbody>
+  <% rows.forEach(m => { %>
+    <tr class="<%= ['failed', 'bounced'].includes(m.status) ? 'row-alert' : '' %>">
+      <td><%= fmtTime(m.sent_at || m.created_at) %></td>
+      <td><%= names[m.template_key] || m.template_key %></td>
+      <td><% if (m.registrant_id) { %><a href="/admin/registrants/<%= m.registrant_id %>"><%= m.to_email %></a><% } else { %><%= m.to_email %><% } %></td>
+      <td><strong><%= m.status %></strong><% if (m.error) { %><br><span class="muted-inline"><%= m.error %></span><% } %></td>
+    </tr>
+  <% }) %>
+  <% if (!rows.length) { %><tr><td colspan="4" class="muted">Nothing here.</td></tr><% } %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

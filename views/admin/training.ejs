@@ -1,0 +1,20 @@
+<%- include('../partials/head') %>
+<h1>Training</h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<p class="muted">The <strong>current</strong> version is what registrants take. Corrections to it apply immediately. To require new training, open the current version, create a new draft from it, edit the draft, and publish it.</p>
+<p><a href="/admin/training/results">Assessment results →</a></p>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Version</th><th>Status</th><th>Modules</th><th>Active questions</th><th>Published</th></tr></thead>
+  <tbody>
+  <% versions.forEach(v => { %>
+    <tr>
+      <td><a href="/admin/training/v/<%= v.id %>"><%= v.label %></a></td>
+      <td><% if (v.is_required) { %><span class="status status-active">Current</span><% } else { %><span class="status"><%= v.status === 'draft' ? 'Draft' : v.status === 'retired' ? 'Retired' : 'Published' %></span><% } %></td>
+      <td><%= v.modules %></td><td><%= v.questions %></td><td><%= fmtDate(v.published_at) %></td>
+    </tr>
+  <% }) %>
+  <% if (!versions.length) { %><tr><td colspan="5" class="muted">No training loaded yet.</td></tr><% } %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

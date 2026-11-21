@@ -1,0 +1,17 @@
+<%- include('../partials/head') %>
+<h1>Verify Lookups</h1>
+<p class="muted">Last 24 hours. Networks are shown as anonymous codes (a keyed hash of the IP address). Limits: 20 lookups per 10 minutes and 100 per day per network. Many "not found" results from one network can mean someone is guessing numbers.</p>
+<dl class="kv panel">
+  <dt>Lookups</dt><dd><%= total %></dd>
+  <dt>Found</dt><dd><%= found %></dd>
+  <dt>Not found</dt><dd><%= total - found %></dd>
+  <dt>Networks</dt><dd><%= networks %></dd>
+</dl>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Network</th><th>Lookups</th><th>Not found</th><th>Last</th></tr></thead>
+  <tbody>
+  <% top.forEach(n => { %><tr class="<%= n.notFound >= 20 ? 'row-alert' : '' %>"><td><code><%= n.hash.slice(0, 10) %></code></td><td><%= n.total %></td><td><%= n.notFound %></td><td><%= fmtTime(n.last) %></td></tr><% }) %>
+  <% if (!top.length) { %><tr><td colspan="4" class="muted">No lookups yet.</td></tr><% } %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

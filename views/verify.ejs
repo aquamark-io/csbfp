@@ -1,0 +1,48 @@
+<%- include('partials/head') %>
+<h1>Verify Registration</h1>
+<p class="lead">Enter a registration number to check whether a registration is current.</p>
+
+<form class="lookup" method="get" action="/verify">
+  <label for="number">Registration number</label>
+  <div class="lookup-row">
+    <input id="number" name="number" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false"
+           placeholder="BR-12345678" maxlength="20" value="<%= number %>" required>
+    <button class="button" type="submit">Verify</button>
+  </div>
+  <% if (turnstileKey) { %>
+  <div class="cf-turnstile" data-sitekey="<%= turnstileKey %>"></div>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <% } %>
+</form>
+
+<% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+
+<% if (result) { %>
+<% const d = x => x ? new Date(x).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—'; %>
+<section class="verify-card" aria-live="polite">
+  <div class="verify-head">
+    <div><p class="verify-org">Broker Registry</p><p class="verify-title">Registration Verification</p></div>
+    <svg class="verify-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+  </div>
+  <p class="verify-label">Registration number</p>
+  <p class="verify-number"><%= result.number %></p>
+  <dl class="verify-rows">
+    <div><dt>Full Name</dt><dd><%= result.name %></dd></div>
+    <div><dt>Registration Status</dt><dd>
+      <% if (result.status === 'active') { %><span class="verify-status ok"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="m8 12 3 3 5-6" fill="none" stroke="currentColor" stroke-width="2"/></svg>Active</span>
+      <% } else { %><span class="verify-status off"><%= result.status === 'inactive' ? 'Inactive' : 'Expired' %></span><% } %>
+    </dd></div>
+    <div><dt><%= result.status === 'expired' ? 'Expired On' : 'Valid Through' %></dt><dd><%= d(result.date) %></dd></div>
+  </dl>
+</section>
+<p class="muted">Checked <%= new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Los_Angeles' }) %> Pacific time.</p>
+<% } else if (typeof notFound !== 'undefined' && notFound) { %>
+<p class="message" role="status">No registration was found for <strong><%= number %></strong>. Check the number and try again.</p>
+<% } %>
+
+<p class="muted">
+  Verification shows only the registrant's name, registration number, registration status and the date the
+  registration is valid through. Broker Registry does not provide a directory or search by name to protect privacy
+  and prevent solicitation.
+</p>
+<%- include('partials/foot') %>

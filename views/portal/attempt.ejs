@@ -1,0 +1,30 @@
+<%- include('../partials/head') %>
+<h1>Assessment</h1>
+<% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+<form method="post" action="/portal/assessment/submit" class="assessment">
+  <div class="deck" data-deck data-require-answer>
+    <div class="deck-progress" aria-hidden="true"><div class="deck-bar"><span></span></div><span class="deck-count"></span></div>
+    <div class="slides">
+      <% questions.forEach((q, i) => { %>
+      <section class="slide question<%= error && !answers[q.id] ? ' unanswered' : '' %>" data-slide="<%= i + 1 %>">
+        <fieldset>
+          <legend><span class="qnum">Question <%= i + 1 %> of <%= questions.length %></span><%= q.prompt %></legend>
+          <div class="options">
+          <% q.options.forEach((o, j) => { %>
+            <label class="option<%= o.text.includes(' → ') ? ' seq' : '' %>" for="q<%= i %>o<%= j %>"><input id="q<%= i %>o<%= j %>" type="radio" name="q_<%= q.id %>" value="<%= o.id %>" <%= answers[q.id] === o.id ? 'checked' : '' %>><span class="opt-letter"><%= 'ABCDEFGH'[j] %></span><span class="opt-text"><% if (o.text.includes(' → ')) { %><% o.text.split(' → ').forEach((step, k, all) => { %><span class="step-chip"><%= step %><% if (k < all.length - 1) { %> <span class="arrow" aria-hidden="true">→</span><% } %></span> <% }) %><% } else { %><%= o.text %><% } %></span></label>
+          <% }) %>
+          </div>
+        </fieldset>
+      </section>
+      <% }) %>
+    </div>
+    <div class="deck-nav">
+      <button class="button secondary" type="button" data-prev>← Back</button>
+      <button class="button" type="button" data-next>Next →</button>
+      <button class="button" type="submit" data-finish hidden>Submit Answers</button>
+    </div>
+  </div>
+  <div class="module-footer" data-deck-end><button class="button" type="submit">Submit Answers</button></div>
+</form>
+<script src="/js/slides.js?v=<%= assetV %>" defer></script>
+<%- include('../partials/foot') %>

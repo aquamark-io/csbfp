@@ -1,0 +1,17 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1>Financing Products</h1>
+<% if (saved) { %><p class="notice-ok" role="status">Saved.</p><% } %>
+<% if (Object.keys(errors).length) { %><p class="alert" role="alert">Please correct the highlighted fields.</p><% } %>
+
+<form method="post" action="/portal/products" novalidate>
+  <fieldset class="field">
+    <legend>Which financing products do you broker?</legend>
+    <% products.forEach(p => { %>
+    <div class="check"><input id="p-<%= p.id %>" type="checkbox" name="products" value="<%= p.id %>" <%= values.products.includes(String(p.id)) ? 'checked' : '' %>><label for="p-<%= p.id %>"><%= p.label %></label></div>
+    <% }) %>
+    <%- include('../partials/err', { field: 'products' }) %>
+  </fieldset>
+  <button class="button" type="submit">Save</button>
+</form>
+<%- include('../partials/foot') %>

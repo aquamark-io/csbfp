@@ -1,0 +1,28 @@
+<%- include('../partials/head') %>
+<h1>Lists</h1>
+<p class="muted">These appear in the registration forms. Turning an item off hides it from new choices; people who already chose it keep it.</p>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% [['titles', 'Job titles', titles], ['products', 'Financing products', products]].forEach(([kind, label, items]) => { %>
+<section class="panel">
+  <h2><%= label %></h2>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Order</th><th>Name</th><th>Shown</th><th></th></tr></thead>
+    <tbody>
+    <% items.forEach(i => { %>
+      <% const fid = `f-${kind}-${i.id}`; %>
+      <tr>
+        <td><input form="<%= fid %>" class="num" name="position" type="number" value="<%= i.position %>" aria-label="Order"></td>
+        <td><input form="<%= fid %>" name="label" type="text" maxlength="80" value="<%= i.label %>" aria-label="Name"></td>
+        <td><input form="<%= fid %>" name="active" type="checkbox" value="yes" <%= i.active ? 'checked' : '' %> aria-label="Shown"></td>
+        <td><form id="<%= fid %>" method="post" action="/admin/lists/<%= kind %>/<%= i.id %>"><button class="button secondary small" type="submit">Save</button></form></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+  <form method="post" action="/admin/lists/<%= kind %>" class="search-row">
+    <input name="label" type="text" maxlength="80" placeholder="Add a new <%= kind === 'titles' ? 'job title' : 'product' %>" aria-label="New item">
+    <button class="button small" type="submit">Add</button>
+  </form>
+</section>
+<% }) %>
+<%- include('../partials/foot') %>

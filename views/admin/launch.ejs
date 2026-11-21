@@ -1,0 +1,25 @@
+<%- include('../partials/head') %>
+<h1>Launch Checklist</h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<% const item = (ok, label, detail) => { %><li class="<%= ok ? 'done' : '' %>"><span class="mark" aria-hidden="true"><% if (ok) { %><%- include('../partials/check') %><% } %></span><span><strong><%= label %></strong><% if (detail) { %><br><span class="muted-inline"><%- detail %></span><% } %></span></li><% } %>
+<ol class="checklist launch-list">
+  <% item(placeholders.length === 0, 'Legal documents are final', placeholders.length ? `Still placeholder: ${placeholders.join(', ')}. <a href="/admin/legal">Edit legal documents</a>` : 'All published.') %>
+  <% item(training && !/draft/i.test(training.label), 'Training is the reviewed version', training ? `Current: ${training.label}. <a href="/admin/training">Training</a>` : 'No training published.') %>
+  <% item(postmark, 'Email delivery tracking connected', postmark ? 'Postmark connected.' : '<a href="/admin/emails">Connect Postmark</a>') %>
+  <% item(turnstile, 'Bot protection on sign-up (optional)', turnstile ? 'Cloudflare Turnstile is on.' : 'Off. Add TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY in Render to turn it on.') %>
+  <% item(counts.registrants === 0 || !preLaunch, 'Preview data removed', preLaunch ? `${counts.registrants} accounts, ${counts.registrations} registration numbers, ${counts.payments} payments from testing. Remove them below just before launch.` : 'Done.') %>
+  <% item(mode === 'live' && stripeReady, 'Stripe is live and set up', mode === 'live' ? (stripeReady ? 'Live key, product, price and webhook are set.' : 'Live key set. <a href="/admin/stripe">Run Set Up Stripe</a>.') : 'Still in test mode. At launch: replace STRIPE_SECRET_KEY in Render with the live key, set PRE_LAUNCH=false, then run Set Up Stripe again. In Stripe, turn off its own receipt and renewal emails.') %>
+  <% item(!preLaunch, 'Preview mode off', preLaunch ? 'PRE_LAUNCH is on: preview strip shown, search engines kept out, and only ADMIN_EMAILS / PREVIEW_EMAILS can sign up. Set PRE_LAUNCH=false in Render to open registration.' : 'Registration is open to everyone.') %>
+</ol>
+<% if (preLaunch && mode !== 'live') { %>
+<section class="panel danger-panel">
+  <h2>Remove preview data</h2>
+  <p>Deletes every test account, registration number, payment record, support request and log from testing. Training, legal documents, email wording, lists, settings and the audit log are kept. Stripe test-mode records are not touched. Only works while the site is in preview and Stripe is in test mode.</p>
+  <form method="post" action="/admin/launch/reset" class="stack">
+    <input name="confirm" type="text" placeholder="Type REMOVE PREVIEW DATA" autocomplete="off">
+    <button class="button small" type="submit">Remove Preview Data</button>
+  </form>
+</section>
+<% } %>
+<%- include('../partials/foot') %>

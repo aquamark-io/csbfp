@@ -1,0 +1,24 @@
+<%- include('../partials/head') %>
+<h1>Announce</h1>
+<p class="muted">Send a program update (for example, required training changes) by email. It goes out from no-reply@broker-registry.org using the "Program update" layout. Send a test to yourself first.</p>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<form method="post" action="/admin/announce/send" class="panel">
+  <div class="field"><label for="s">Subject</label><input id="s" name="subject" type="text" maxlength="150" value="<%= values.subject || '' %>"></div>
+  <div class="field"><label for="m">Message</label><p class="hint">Use <code>**bold**</code>, <code>- </code> for bullets, and blank lines between paragraphs. It starts with "Hi (first name),".</p>
+    <textarea id="m" name="message" rows="10"><%= values.message || '' %></textarea></div>
+  <fieldset class="field"><legend>Send to</legend>
+    <% Object.entries(AUDIENCES).forEach(([k, l]) => { %><div class="check"><input id="a-<%= k %>" type="radio" name="audience" value="<%= k %>"><label for="a-<%= k %>"><%= l %> (<%= counts[k] %>)</label></div><% }) %>
+  </fieldset>
+  <div class="field check"><input id="cf" type="checkbox" name="confirm" value="yes"><label for="cf">I've sent myself a test and I'm ready to send this to everyone selected.</label></div>
+  <div class="actions">
+    <button class="button" type="submit">Send Announcement</button>
+    <button class="button secondary" type="submit" formaction="/admin/announce/test">Send Test to Me</button>
+  </div>
+</form>
+<h2>Recent announcements</h2>
+<ul class="plain-list small-list">
+  <% recent.forEach(a => { %><li><%= fmtTime(a.created_at) %>: "<%= a.detail.subject %>" to <%= a.detail.recipients %> (<%= a.detail.audience %>)</li><% }) %>
+  <% if (!recent.length) { %><li class="muted">None yet.</li><% } %>
+</ul>
+<%- include('../partials/foot') %>

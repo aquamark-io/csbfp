@@ -1,0 +1,17 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<% if (activated) { %>
+  <h1>Your Registration Is Active</h1>
+  <dl class="summary">
+    <div><dt>Registration number</dt><dd><%= registration.registration_number %></dd></div>
+    <div><dt>Status</dt><dd><span class="status status-active">Active</span></dd></div>
+    <div><dt>Valid through</dt><dd><%= new Date(registration.expires_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) %></dd></div>
+  </dl>
+  <p>A confirmation email is on its way.</p>
+  <div class="actions"><a class="button" href="/portal/confirmation">View Registration Confirmation</a><a class="button secondary" href="/portal/dashboard">Dashboard</a></div>
+<% } else { %>
+  <h1>Payment Received</h1>
+  <p class="message">We're finishing your registration. This usually takes a few seconds.</p>
+  <div class="actions"><a class="button" href="/portal/dashboard">Check My Dashboard</a></div>
+<% } %>
+<%- include('../partials/foot') %>

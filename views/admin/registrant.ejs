@@ -1,0 +1,220 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/registrants">← Registrants</a></p>
+<h1><%= fullName(r) %></h1>
+<p class="muted meta"><%= r.email %> · Signed up <%= fmtDate(r.created_at) %><% if (r.last_login_at) { %> · Last sign-in <%= fmtTime(r.last_login_at) %><% } %></p>
+
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<% if (revealedDob) { %><p class="notice-ok" role="status">Date of birth: <strong><%= revealedDob %></strong> <span class="muted-inline">(this view was logged)</span></p><% } %>
+<% if (r.account_status === 'locked') { %><p class="alert">Sign-in is locked for this account.</p><% } %>
+<% if (r.account_status === 'deletion_requested') { %><p class="alert">This person asked for their data to be deleted on <%= fmtDate(r.deletion_requested_at) %>. Automatic renewal was turned off. Complete it with <strong>Delete registrant data</strong> at the bottom of this page (within 30 days).</p><% } %>
+<% if (r.account_status === 'deleted') { %><p class="message">This account's personal data was deleted on <%= fmtDate(r.deleted_at) %>. Only the retired number and payment records remain.</p><% } %>
+<% const blocking = flags.filter(f => f.status === 'open' && f.registrant_id === r.id); %>
+<% const matchedBy = flags.filter(f => f.status === 'open' && f.matched_registrant_id === r.id); %>
+<% if (blocking.length) { %><p class="alert">Possible duplicate: this account's payment is blocked until the flag is resolved below.</p><% } %>
+<% if (matchedBy.length) { %><p class="message">A newer account was flagged as a possible duplicate of this one (see below). This account is not blocked.</p><% } %>
+
+<div class="admin-grid">
+<section class="panel">
+  <h2>Registration</h2>
+  <dl class="kv">
+    <dt>Status</dt><dd><%- statusPill(registration && registration.status, registration && registration.admin_hold) %></dd>
+    <dt>Number</dt><dd><%= (registration && registration.registration_number) || '—' %></dd>
+    <dt>Registration date</dt><dd><%= fmtDate(registration && registration.first_activated_at) %></dd>
+    <dt>Valid through</dt><dd><%= fmtDate(registration && registration.expires_at) %></dd>
+    <% if (registration && registration.admin_hold) { %><dt>Hold reason</dt><dd><%= registration.admin_hold_reason %></dd><% } %>
+  </dl>
+</section>
+
+<section class="panel">
+  <h2>Personal</h2>
+  <dl class="kv">
+    <dt>Legal name</dt><dd><%= fullName(r) %></dd>
+    <dt>Date of birth</dt><dd><% if (r.dob_enc) { %>On file<%= age != null ? ` (age ${age})` : '' %>
+      <form method="post" action="/admin/registrants/<%= r.id %>/reveal-dob" class="inline"><button class="link-button" type="submit">Show</button></form><% } else { %>—<% } %></dd>
+    <dt>ZIP</dt><dd><%= r.zip5 || '—' %></dd>
+    <dt>Email</dt><dd><%= r.email %> <%= r.email_verified_at ? '(verified)' : '(not verified)' %></dd>
+    <dt>Mobile</dt><dd><%= fmtPhone(r.phone_e164) %></dd>
+    <dt>In industry since</dt><dd><%= fmtMonth(r.industry_start_month) || '—' %></dd>
+    <dt>Account</dt><dd><%= r.account_status %></dd>
+  </dl>
+</section>
+</div>
+
+<section class="panel">
+  <h2>Employment <span class="muted-inline">(<%= r.employment_status === 'not_currently_employed' ? 'not currently employed' : r.employment_status === 'working' ? 'working' : 'not answered' %>)</span></h2>
+  <% if (!rels.length) { %><p class="muted">None listed.</p><% } %>
+  <ul class="plain-list">
+  <% rels.forEach(x => { %>
+    <li><strong><%= x.company_name %></strong><% if (!x.is_current) { %> <span class="tag">Past</span><% } %>: <%= [x.title,
+      { employee: 'employee', contractor_1099: 'independent contractor', self_employed: 'self-employed' }[x.relationship_type],
+      { remote: 'remote', hybrid: 'hybrid', on_site: 'on-site' }[x.work_arrangement], [x.city, x.state].filter(Boolean).join(', ')].filter(Boolean).join(', ') %>.
+      <%= fmtMonth(x.start_month) %><%= x.end_month ? ` to ${fmtMonth(x.end_month)}` : ' to present' %><% if (x.company_website) { %> · <%= x.company_website %><% } %></li>
+  <% }) %>
+  </ul>
+  <h3>Products</h3>
+  <p><%= products.join(', ') || '—' %><%= r.products_other ? `; other: ${r.products_other}` : '' %></p>
+</section>
+
+<% if (flags.length) { %>
+<section class="panel">
+  <h2>Possible duplicates</h2>
+  <% flags.forEach(f => { %>
+  <div class="flag">
+    <p><strong><%= { dob_last_name_zip: 'Same date of birth, last name and ZIP', dob_full_name: 'Same date of birth and full name', phone: 'Same mobile number' }[f.match_reason] %></strong>
+      as <% if (f.other) { %><a href="/admin/registrants/<%= f.other.id %>"><%= fullName(f.other) %></a> (<%= f.other.email %>)<% } else { %>another account<% } %>
+      · <%= f.status === 'open' ? 'Open' : f.status === 'dismissed' ? 'Resolved: different people' : 'Resolved: same person' %></p>
+    <% if (f.note) { %><p class="muted-inline">Note: <%= f.note %></p><% } %>
+    <% if (f.status === 'open') { %>
+    <form method="post" action="/admin/duplicates/<%= f.id %>" class="stack">
+      <input type="hidden" name="return" value="registrant">
+      <div class="check"><input id="o1-<%= f.id %>" type="radio" name="outcome" value="different_people"><label for="o1-<%= f.id %>">Different people: clear the flag (payment allowed)</label></div>
+      <div class="check"><input id="o2-<%= f.id %>" type="radio" name="outcome" value="same_person"><label for="o2-<%= f.id %>">Same person: close the flag (deal with the extra account separately)</label></div>
+      <input name="note" type="text" maxlength="500" placeholder="Note (required): what you checked">
+      <button class="button small" type="submit">Resolve</button>
+    </form>
+    <% } %>
+  </div>
+  <% }) %>
+</section>
+<% } %>
+
+<section class="panel">
+  <h2>Billing</h2>
+  <% if (!subs.length && !payments.length) { %><p class="muted">No payments yet.</p><% } %>
+  <% subs.forEach(s => { %>
+  <p>Subscription <code><%= s.stripe_subscription_id %></code>: <strong><%= s.stripe_status %></strong>, automatic renewal <%= s.cancel_at_period_end ? 'off' : 'on' %>, current period ends <%= fmtDate(s.current_period_end) %>.</p>
+  <% }) %>
+  <% if (payments.length) { %>
+  <ul class="plain-list small-list">
+    <% payments.forEach(p => { %><li><%= fmtDate(p.paid_at || p.created_at) %>: $<%= (p.amount_cents / 100).toFixed(2) %> <%= p.billing_reason %>, <strong><%= p.status %></strong><% if (p.hosted_invoice_url) { %> (<a href="<%= p.hosted_invoice_url %>" target="_blank" rel="noopener">invoice</a>)<% } %></li><% }) %>
+  </ul>
+  <% } %>
+  <% if (registration && registration.stripe_customer_id) { %><p class="muted-inline">Stripe customer <code><%= registration.stripe_customer_id %></code>. Refunds, if ever needed, are made in the Stripe dashboard.</p><% } %>
+</section>
+
+<section class="panel">
+  <h2>Training and assessment</h2>
+  <% if (!train.curriculum) { %><p class="muted">No training published.</p><% } else { %>
+  <p>Version <%= train.curriculum.label %>: <%= train.modules.filter(m => m.completed).length %> of <%= train.modules.length %> modules complete.
+    Assessment: <strong><%= train.assessment.passed ? 'Passed' : attempts.some(a => a.submitted_at) ? 'Not yet passed' : 'Not taken' %></strong><% if (!train.assessment.passed && train.assessment.attemptsLeft != null) { %>, <%= train.assessment.attemptsLeft %> attempts left<% } %>.</p>
+  <% if (attempts.length) { %>
+  <ul class="plain-list small-list">
+    <% attempts.forEach(a => { %><li><%= fmtTime(a.started_at) %>: <%= a.submitted_at ? `${a.correct_count} of ${a.question_count}, ${a.passed ? 'passed' : 'not passed'}` : 'in progress' %></li><% }) %>
+  </ul>
+  <% } %>
+  <% if (!train.assessment.passed) { %>
+  <form method="post" action="/admin/registrants/<%= r.id %>/reset-attempts" class="stack">
+    <input name="reason" type="text" maxlength="500" placeholder="Reason for resetting the attempt limit (required)">
+    <button class="button secondary small" type="submit">Reset Attempt Limit</button>
+  </form>
+  <% } %>
+  <% } %>
+</section>
+
+<section class="panel">
+  <h2>Correct information</h2>
+  <p class="muted">Change only what needs correcting. Leave date of birth blank to keep it. A reason is required and recorded.</p>
+  <form method="post" action="/admin/registrants/<%= r.id %>/edit" class="edit-grid">
+    <div class="field"><label for="e-first">Legal first name</label><input id="e-first" name="legal_first_name" type="text" value="<%= r.legal_first_name || '' %>"></div>
+    <div class="field"><label for="e-mid">Middle name</label><input id="e-mid" name="middle_name" type="text" value="<%= r.middle_name || '' %>"></div>
+    <div class="field"><label for="e-last">Legal last name</label><input id="e-last" name="legal_last_name" type="text" value="<%= r.legal_last_name || '' %>"></div>
+    <div class="field"><label for="e-dob">New date of birth</label><input id="e-dob" name="dob" type="date"></div>
+    <div class="field"><label for="e-zip">ZIP</label><input id="e-zip" name="zip5" type="text" inputmode="numeric" maxlength="5" value="<%= r.zip5 || '' %>"></div>
+    <div class="field"><label for="e-phone">Mobile</label><input id="e-phone" name="phone" type="tel" value="<%= fmtPhone(r.phone_e164) === '—' ? '' : fmtPhone(r.phone_e164) %>"></div>
+    <div class="field span2"><label for="e-email">Email (sign-in address)</label><input id="e-email" name="email" type="email" value="<%= r.email || '' %>"></div>
+    <div class="field span2"><label for="e-reason">Reason for the change (required)</label><input id="e-reason" name="reason" type="text" maxlength="500" required></div>
+    <div><button class="button" type="submit">Save Correction</button></div>
+  </form>
+</section>
+
+<div class="admin-grid">
+<section class="panel">
+  <h2>Administrative hold</h2>
+  <p class="muted">Internal only. While on hold, payment is blocked and the public lookup shows "not found".</p>
+  <form method="post" action="/admin/registrants/<%= r.id %>/hold" class="stack">
+    <input type="hidden" name="action" value="<%= registration && registration.admin_hold ? 'release' : 'place' %>">
+    <input name="reason" type="text" maxlength="500" placeholder="Reason (required)" required>
+    <button class="button secondary small" type="submit"><%= registration && registration.admin_hold ? 'Release Hold' : 'Place Hold' %></button>
+  </form>
+</section>
+<section class="panel">
+  <h2>Sign-in access</h2>
+  <p class="muted">Locking stops this person signing in. It doesn't change their registration status.</p>
+  <form method="post" action="/admin/registrants/<%= r.id %>/lock" class="stack">
+    <input type="hidden" name="action" value="<%= r.account_status === 'locked' ? 'unlock' : 'lock' %>">
+    <input name="reason" type="text" maxlength="500" placeholder="Reason (required)" required>
+    <button class="button secondary small" type="submit"><%= r.account_status === 'locked' ? 'Unlock Account' : 'Lock Account' %></button>
+  </form>
+</section>
+</div>
+
+<section class="panel">
+  <h2>Agreements</h2>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Document</th><th>Version</th><th>Where</th><th>When</th></tr></thead>
+    <tbody>
+    <% acceptances.forEach(a => { %><tr><td><%= a.document_key.replace(/_/g, ' ') %></td><td>v<%= a.document_version %></td><td><%= a.context %></td><td><%= fmtTime(a.accepted_at) %></td></tr><% }) %>
+    <% if (!acceptances.length) { %><tr><td colspan="4" class="muted">None.</td></tr><% } %>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="panel">
+  <h2>Status history</h2>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>When</th><th>Change</th><th>Reason</th><th>By</th></tr></thead>
+    <tbody>
+    <% history.forEach(h => { %><tr><td><%= fmtTime(h.created_at) %></td><td><%= h.hold_change ? `Hold ${h.hold_change}` : `${h.from_status || '—'} → ${h.to_status}` %></td><td><%= h.reason %></td><td><%= h.actor_type %></td></tr><% }) %>
+    <% if (!history.length) { %><tr><td colspan="4" class="muted">No changes yet.</td></tr><% } %>
+    </tbody>
+  </table></div>
+</section>
+
+<div class="admin-grid">
+<section class="panel">
+  <h2>Emails sent</h2>
+  <ul class="plain-list small-list">
+  <% emails.forEach(e => { %><li><%= e.template_key.replace(/_/g, ' ') %>: <strong><%= e.status %></strong>, <%= fmtTime(e.sent_at || e.created_at) %><% if (e.error) { %> <span class="field-error"><%= e.error.slice(0, 120) %></span><% } %></li><% }) %>
+  <% if (!emails.length) { %><li class="muted">None.</li><% } %>
+  </ul>
+</section>
+<section class="panel">
+  <h2>Activity</h2>
+  <ul class="plain-list small-list">
+  <% events.forEach(e => { %><li><%= e.event.replace(/_/g, ' ') %> <span class="muted-inline">(<%= e.actor %>, <%= fmtTime(e.created_at) %>)</span></li><% }) %>
+  <% if (!events.length) { %><li class="muted">None.</li><% } %>
+  </ul>
+</section>
+</div>
+
+<% if (r.account_status !== 'deleted') { %>
+<div class="admin-grid">
+<section class="panel">
+  <h2>Identity review</h2>
+  <p class="muted">Emails them asking to confirm account details (for account recovery or a duplicate review). Replies come to the support inbox.</p>
+  <form method="post" action="/admin/registrants/<%= r.id %>/identity-review" class="stack">
+    <textarea name="note" rows="3" placeholder="What should they confirm? (included in the email)"></textarea>
+    <button class="button secondary small" type="submit">Send Identity Review Email</button>
+  </form>
+</section>
+<section class="panel danger-panel">
+  <h2>Delete registrant data</h2>
+  <p class="muted">Deletes their personal information, cancels any subscription immediately, and retires the registration number (verification will show "not found"). Payment and consent records are kept without a name. This can't be undone.</p>
+  <form method="post" action="/admin/registrants/<%= r.id %>/delete-data" class="stack">
+    <input name="reason" type="text" maxlength="500" placeholder="Reason (required), e.g. Deletion requested SR-1A2B3C">
+    <input name="confirm" type="text" placeholder="Type DELETE to confirm" autocomplete="off">
+    <button class="button small" type="submit">Delete Data</button>
+  </form>
+</section>
+</div>
+<% } %>
+
+<section class="panel">
+  <h2>Admin actions on this account</h2>
+  <ul class="plain-list small-list">
+  <% audit.forEach(a => { %><li><%= a.action.replace(/_/g, ' ') %><% if (a.detail && a.detail.fields) { %> (<%= a.detail.fields.join(', ') %>)<% } %><% if (a.reason) { %>: "<%= a.reason %>"<% } %> <span class="muted-inline"><%= fmtTime(a.created_at) %></span></li><% }) %>
+  <% if (!audit.length) { %><li class="muted">None.</li><% } %>
+  </ul>
+</section>
+<%- include('../partials/foot') %>

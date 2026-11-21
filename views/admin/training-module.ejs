@@ -1,0 +1,25 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/training/v/<%= v.id %>">← <%= v.label %></a></p>
+<h1><%= m.title %></h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<% if (v.is_required) { %><p class="message">This module is in the current version. Saved changes are visible to registrants immediately.</p><% } %>
+<form method="post" action="/admin/training/v/<%= v.id %>/modules/<%= m.id %>">
+  <div class="edit-grid">
+    <div class="field span2"><label for="t">Title</label><input id="t" name="title" type="text" maxlength="120" value="<%= m.title %>"></div>
+    <div class="field span2"><label for="sum">Short description (shown under the title on the Training page)</label><input id="sum" name="summary" type="text" maxlength="160" value="<%= m.summary || '' %>"></div>
+    <div class="field"><label for="vid">Video link (optional, YouTube or Vimeo)</label><input id="vid" name="video_url" type="url" value="<%= m.video_url || '' %>"></div>
+  </div>
+  <div class="field">
+    <label for="body">Content</label>
+    <p class="hint">Start with "Goal: ..." for the highlighted intro. Use <code>## 1.1 Heading</code> for sections, <code>- </code> for bullets, <code>**bold**</code>, and <code>### Remember</code> or <code>### In practice</code> followed by text for callout boxes.</p>
+    <textarea id="body" name="body_md" rows="28" class="mono"><%= m.body_md %></textarea>
+  </div>
+  <button class="button" type="submit">Save Module</button>
+</form>
+<% if (v.status === 'draft') { %>
+<form method="post" action="/admin/training/v/<%= v.id %>/modules/<%= m.id %>/delete" class="danger-zone"><button class="link-button" type="submit">Remove this module from the draft</button></form>
+<% } %>
+<h2>Preview</h2>
+<div class="panel prose"><%- preview || '<p class="muted">No content yet.</p>' %></div>
+<%- include('../partials/foot') %>

@@ -1,0 +1,28 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/emails">← Emails</a></p>
+<h1><%= def.name %> <% if (t.custom) { %><span class="tag">Edited (v<%= t.version %>)</span><% } else { %><span class="tag">Default wording</span><% } %></h1>
+<p class="muted">Sent: <%= def.trigger %></p>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<div class="admin-grid email-edit">
+  <section>
+    <form method="post" action="/admin/emails/t/<%= key %>">
+      <div class="field"><label for="s">Subject</label><input id="s" name="subject" type="text" maxlength="200" value="<%= t.subject %>"></div>
+      <div class="field">
+        <label for="b">Body</label>
+        <p class="hint">The first line starting with <code>#</code> is the heading. Use <code>**bold**</code> and <code>- </code> for bullets. Placeholders: <% placeholders.concat(['first_name']).filter((x, i, a) => a.indexOf(x) === i).forEach(p => { %><code>{{<%= p %>}}</code> <% }) %></p>
+        <textarea id="b" name="body_md" rows="18" class="mono"><%= t.body %></textarea>
+      </div>
+      <div class="actions"><button class="button" type="submit">Save</button></div>
+    </form>
+    <div class="actions">
+      <form method="post" action="/admin/emails/t/<%= key %>/test" class="inline-form"><button class="button secondary small" type="submit">Send Test to <%= admin.email %></button></form>
+      <% if (t.custom) { %><form method="post" action="/admin/emails/t/<%= key %>/reset" class="inline-form"><button class="link-button" type="submit">Restore default wording</button></form><% } %>
+    </div>
+  </section>
+  <section>
+    <p class="muted">Preview with sample details (save to update):</p>
+    <iframe class="email-preview" src="/admin/emails/t/<%= key %>/preview" title="Email preview"></iframe>
+  </section>
+</div>
+<%- include('../partials/foot') %>

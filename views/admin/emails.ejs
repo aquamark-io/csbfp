@@ -1,0 +1,31 @@
+<%- include('../partials/head') %>
+<h1>Emails</h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<section class="panel">
+  <h2>Delivery tracking</h2>
+  <% if (postmark.connected) { %>
+  <p>Connected to Postmark<% if (postmark.lastEvent) { %>; last report <%= postmark.lastEvent.record_type %>, <%= fmtTime(postmark.lastEvent.received_at) %><% } %>.</p>
+  <% } else { %>
+  <p>Not connected. Connecting tells Broker Registry when each email is delivered or bounces.</p>
+  <% } %>
+  <form method="post" action="/admin/emails/postmark" class="inline-form"><button class="button <%= postmark.connected ? 'secondary ' : '' %>small" type="submit"><%= postmark.connected ? 'Reconnect' : 'Connect Postmark' %></button></form>
+  <p class="muted"><a href="/admin/emails/log">Delivery log</a><% if (problems) { %> · <a href="/admin/emails/log?status=failed">Failed</a> / <a href="/admin/emails/log?status=bounced">bounced</a>: <strong><%= problems %></strong><% } %> · <a href="/admin/jobs">Daily job</a></p>
+</section>
+<p class="muted">Every email can be reworded here. The layout, footer disclaimer and buttons stay the same. Changes apply to new emails right away.</p>
+<% Object.entries(groups).forEach(([group, items]) => { %>
+<section class="panel">
+  <h2><%= group %></h2>
+  <div class="table-wrap"><table class="table">
+    <tbody>
+    <% items.forEach(t => { %>
+      <tr>
+        <td><a href="/admin/emails/t/<%= t.key %>"><%= t.name %></a><% if (t.custom) { %> <span class="tag">Edited</span><% } %></td>
+        <td class="muted-inline"><%= t.trigger %></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+</section>
+<% }) %>
+<%- include('../partials/foot') %>

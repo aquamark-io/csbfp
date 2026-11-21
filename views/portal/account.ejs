@@ -1,0 +1,23 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1>Account</h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<dl class="summary">
+  <div><dt>Email (sign-in)</dt><dd><%= registrant.email %></dd></div>
+  <div><dt>Mobile</dt><dd><%= phone || '—' %> <a href="/portal/personal">Change</a></dd></div>
+</dl>
+<h2>Change your email address</h2>
+<p>We'll send a code to the new address to confirm it. Sign-in codes and notices then go to the new address, and we'll let your current address know about the change.</p>
+<% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+<form method="post" action="/portal/account/email" class="narrow" novalidate>
+  <div class="field"><label for="ne">New email address</label><input id="ne" name="new_email" type="email" autocomplete="email" value="<%= newEmail %>"></div>
+  <button class="button" type="submit">Send Code</button>
+</form>
+<h2>Your data</h2>
+<% if (registrant.account_status === 'deletion_requested') { %>
+<p class="message">You asked us to delete your data. We'll complete the request within 30 days and email you when it's done. To withdraw the request, <a href="/support">contact us</a>.</p>
+<% } else { %>
+<p>You can ask us to correct your information at any time through <a href="/support?topic=data_correction">Contact Us</a>, or to delete your data.</p>
+<p><a href="/portal/account/delete">Delete my data</a></p>
+<% } %>
+<%- include('../partials/foot') %>

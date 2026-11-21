@@ -1,0 +1,18 @@
+<%
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const thisYear = new Date().getFullYear();
+%>
+<fieldset class="field" <% if (errors[name]) { %>aria-describedby="<%= name %>-error"<% } %>>
+  <legend><%= label %></legend>
+  <div class="row">
+    <select name="<%= name %>_month" aria-label="<%= label %> month">
+      <option value="">Month</option>
+      <% MONTHS.forEach((m, i) => { %><option value="<%= i + 1 %>" <%= String(values[name + '_month']) === String(i + 1) ? 'selected' : '' %>><%= m %></option><% }) %>
+    </select>
+    <select name="<%= name %>_year" aria-label="<%= label %> year">
+      <option value="">Year</option>
+      <% for (let y = thisYear; y >= 1950; y--) { %><option value="<%= y %>" <%= String(values[name + '_year']) === String(y) ? 'selected' : '' %>><%= y %></option><% } %>
+    </select>
+  </div>
+  <%- include('err', { field: name, errors }) %>
+</fieldset>

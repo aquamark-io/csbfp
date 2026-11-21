@@ -1,0 +1,17 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/legal">← Legal Documents</a></p>
+<h1><%= title %> <% if (cur) { %><span class="tag">v<%= cur.version %></span><% } %></h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<% if (isList) { %><p class="message">Each line starting with <code>- </code> becomes a checkbox people must tick. Publishing a new version asks registrants to confirm the new statements<%= key === 'conduct_standards' ? ' before their next assessment attempt' : '' %>.</p><% } %>
+<form method="post" action="/admin/legal/<%= key %>" class="panel">
+  <div class="field"><label for="b">Text</label>
+    <p class="hint">Use <code>## Heading</code> for sections, blank lines between paragraphs, <code>- </code> for lists and <code>**bold**</code>. Paste your lawyer's final text here.</p>
+    <textarea id="b" name="body_md" rows="24" class="mono"><%= cur ? cur.body_md : '' %></textarea></div>
+  <div class="field check"><input id="cf" type="checkbox" name="confirm" value="yes"><label for="cf">Publish this as version <%= cur ? cur.version + 1 : 1 %>, effective now.</label></div>
+  <button class="button" type="submit">Publish New Version</button>
+</form>
+<% if (cur) { %><h2>Currently published (v<%= cur.version %>)</h2><div class="panel prose"><%- preview %></div><% } %>
+<h2>History</h2>
+<ul class="plain-list small-list"><% versions.forEach(v => { %><li>v<%= v.version %>: published <%= fmtTime(v.published_at) %></li><% }) %></ul>
+<%- include('../partials/foot') %>

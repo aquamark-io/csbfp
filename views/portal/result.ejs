@@ -1,0 +1,14 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1>Assessment Result</h1>
+<% if (attempt.passed) { %>
+  <p class="notice-ok"><strong>Passed.</strong> You answered <%= attempt.correct_count %> of <%= attempt.question_count %> correctly.</p>
+  <p>Next, pay the annual fee to receive your registration number.</p>
+  <div class="actions"><a class="button" href="/portal/dashboard">Go to Your Dashboard</a></div>
+<% } else { %>
+  <p class="alert"><strong>Not passed.</strong> You answered <%= attempt.correct_count %> of <%= attempt.question_count %> correctly. A score of <%= attempt.pass_percent_applied %>% is needed to pass.</p>
+  <% if (blocked) { %><p><%= blocked %></p><% } %>
+  <% if (state.assessment.attemptsLeft) { %><p class="muted">You have <%= state.assessment.attemptsLeft %> <%= state.assessment.attemptsLeft === 1 ? 'attempt' : 'attempts' %> left.</p><% } %>
+  <div class="actions"><a class="button" href="/portal/training">Review the Training</a><a class="button secondary" href="/portal/assessment">Assessment</a></div>
+<% } %>
+<%- include('../partials/foot') %>

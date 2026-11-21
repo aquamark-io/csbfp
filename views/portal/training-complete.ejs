@@ -1,0 +1,10 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1>Training Complete</h1>
+<div class="prose"><%- html %></div>
+<div class="actions">
+  <% if (state.assessment.passed) { %><a class="button" href="/portal/dashboard">Go to Your Dashboard</a>
+  <% } else { %><a class="button" href="/portal/assessment">Go to the Assessment</a><% } %>
+  <a class="button secondary" href="/portal/training">Review the Modules</a>
+</div>
+<%- include('../partials/foot') %>

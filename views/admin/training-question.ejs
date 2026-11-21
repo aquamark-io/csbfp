@@ -1,0 +1,30 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/training/v/<%= v.id %>/questions">← Questions</a></p>
+<h1><%= q ? 'Edit Question' : 'New Question' %></h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<% const opts = q ? q.options : []; %>
+<form method="post" action="/admin/training/v/<%= v.id %>/questions/<%= q ? q.id : 'new' %>">
+  <div class="field"><label for="p">Question</label><textarea id="p" name="prompt" rows="3"><%= q ? q.prompt : '' %></textarea></div>
+  <fieldset class="field">
+    <legend>Answer choices (mark the correct one; leave extra rows blank)</legend>
+    <% for (let i = 0; i < 6; i++) { const o = opts[i]; %>
+    <div class="option-row">
+      <input type="radio" name="correct" value="<%= i %>" id="c<%= i %>" <%= o && o.is_correct ? 'checked' : '' %> aria-label="Choice <%= 'ABCDEF'[i] %> is correct">
+      <label for="o<%= i %>" class="opt-letter"><%= 'ABCDEF'[i] %>.</label>
+      <input id="o<%= i %>" name="option_<%= i %>" type="text" maxlength="500" value="<%= o ? o.text : '' %>">
+    </div>
+    <% } %>
+  </fieldset>
+  <div class="field"><label for="e">Explanation (shown in the review after passing)</label><textarea id="e" name="explanation" rows="3"><%= q ? (q.explanation || '') : '' %></textarea></div>
+  <div class="edit-grid">
+    <div class="field"><label for="pos">Order</label><input id="pos" name="position" type="number" min="0" value="<%= q ? q.position : '' %>"></div>
+    <div class="field"><label for="mod">Module</label>
+      <select id="mod" name="module_stable_key"><option value="">—</option>
+        <% modules.forEach(m => { %><option value="<%= m.stable_key %>" <%= q && q.module_stable_key === m.stable_key ? 'selected' : '' %>><%= m.title %></option><% }) %>
+      </select></div>
+    <div class="field check"><input id="act" type="checkbox" name="active" value="yes" <%= !q || q.active ? 'checked' : '' %>><label for="act">Active (used in the assessment)</label></div>
+  </div>
+  <button class="button" type="submit">Save Question</button>
+</form>
+<%- include('../partials/foot') %>

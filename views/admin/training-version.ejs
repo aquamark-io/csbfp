@@ -1,0 +1,71 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/training">← Training</a></p>
+<h1><%= v.label %> <% if (v.is_required) { %><span class="status status-active">Current</span><% } else { %><span class="status"><%= v.status === 'draft' ? 'Draft' : v.status === 'retired' ? 'Retired' : 'Published' %></span><% } %></h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<% if (v.is_required) { %><p class="message">This is the version registrants take now. Changes you save here are visible to them immediately.</p><% } %>
+
+<section class="panel">
+  <h2>Modules</h2>
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>#</th><th>Title</th><th>Description</th><th>Order</th><th></th></tr></thead>
+    <tbody>
+    <% modules.forEach((m, i) => { %>
+      <tr>
+        <td><%= i + 1 %></td>
+        <td><a href="/admin/training/v/<%= v.id %>/modules/<%= m.id %>"><%= m.title %></a><% if (!m.body_md) { %> <span class="tag">Empty</span><% } %></td>
+        <td><%= m.summary || '—' %></td>
+        <td class="nowrap">
+          <form method="post" action="/admin/training/v/<%= v.id %>/modules/<%= m.id %>/move" class="inline"><input type="hidden" name="dir" value="up"><button class="link-button" type="submit" <%= i === 0 ? 'disabled' : '' %> aria-label="Move up">↑</button></form>
+          <form method="post" action="/admin/training/v/<%= v.id %>/modules/<%= m.id %>/move" class="inline"><input type="hidden" name="dir" value="down"><button class="link-button" type="submit" <%= i === modules.length - 1 ? 'disabled' : '' %> aria-label="Move down">↓</button></form>
+        </td>
+        <td><a class="button secondary small" href="/admin/training/v/<%= v.id %>/modules/<%= m.id %>">Edit</a></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+  <form method="post" action="/admin/training/v/<%= v.id %>/modules" class="search-row">
+    <input name="title" type="text" maxlength="120" placeholder="New module title" aria-label="New module title">
+    <button class="button small" type="submit">Add Module</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Assessment</h2>
+  <p><a href="/admin/training/v/<%= v.id %>/questions">Questions (<%= questionCount %> active) →</a></p>
+  <form method="post" action="/admin/training/v/<%= v.id %>" class="edit-grid">
+    <input type="hidden" name="section" value="settings">
+    <div class="field"><label for="qc">Questions per attempt</label><input id="qc" name="question_count" type="number" min="1" max="200" value="<%= settings.question_count %>"></div>
+    <div class="field"><label for="pp">Passing score (%)</label><input id="pp" name="pass_percent" type="number" min="1" max="100" value="<%= settings.pass_percent %>"></div>
+    <div class="field"><label for="cd">Minutes between attempts</label><input id="cd" name="cooldown_minutes" type="number" min="0" value="<%= settings.cooldown_minutes %>"></div>
+    <div class="field"><label for="ma">Attempts before admin reset (blank = unlimited)</label><input id="ma" name="max_attempts_total" type="number" min="1" value="<%= settings.max_attempts_total == null ? '' : settings.max_attempts_total %>"></div>
+    <div><button class="button" type="submit">Save Settings</button></div>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Overview and completion text</h2>
+  <p class="muted">Formatting: <code>## Heading</code>, <code>- list item</code>, <code>**bold**</code>, and <code>### Remember</code> or <code>### In practice</code> for callout boxes.</p>
+  <form method="post" action="/admin/training/v/<%= v.id %>">
+    <input type="hidden" name="section" value="text">
+    <div class="field"><label for="lbl">Version name</label><input id="lbl" name="label" type="text" maxlength="60" value="<%= v.label %>"></div>
+    <div class="field"><label for="ov">Training overview (shown at the top of the Training page)</label><textarea id="ov" name="overview_md" rows="12"><%= v.overview_md %></textarea></div>
+    <div class="field"><label for="cm">Completion message (shown after the last module)</label><textarea id="cm" name="completion_md" rows="5"><%= v.completion_md %></textarea></div>
+    <button class="button" type="submit">Save Text</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Versions</h2>
+  <form method="post" action="/admin/training/v/<%= v.id %>/copy" class="search-row">
+    <input name="label" type="text" maxlength="60" placeholder="Name for a new draft, e.g. 2027.1" aria-label="New version name">
+    <button class="button secondary small" type="submit">Create Draft From This Version</button>
+  </form>
+  <% if (!v.is_required) { %>
+  <form method="post" action="/admin/training/v/<%= v.id %>/publish" class="stack">
+    <div class="check"><input id="cf" type="checkbox" name="confirm" value="yes"><label for="cf">I understand that publishing makes this the required training. Registrants who haven't passed yet will need to complete this version's modules and assessment.</label></div>
+    <button class="button small" type="submit">Publish as Current Version</button>
+  </form>
+  <% } %>
+</section>
+<%- include('../partials/foot') %>

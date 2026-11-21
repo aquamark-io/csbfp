@@ -1,0 +1,26 @@
+{
+  "name": "broker-registry",
+  "version": "0.1.0",
+  "description": "Broker Registry: public site, registrant portal and admin",
+  "main": "server.js",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^18.0.10",
+    "ejs": "^7.0.2",
+    "express": "^4.22.3",
+    "express-rate-limit": "^8.7.4",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "stripe": "^23.1.0"
+  }
+}

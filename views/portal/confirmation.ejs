@@ -1,0 +1,19 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<% const d = x => x ? new Date(x).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—'; %>
+<div class="confirmation">
+  <p class="conf-org">Broker Registry</p>
+  <h1>Registration Confirmation</h1>
+  <dl class="summary">
+    <div><dt>Name</dt><dd><%= [r.legal_first_name, r.legal_last_name].filter(Boolean).join(' ') %></dd></div>
+    <div><dt>Registration number</dt><dd><%= registration.registration_number %></dd></div>
+    <div><dt>Status</dt><dd><%- statusPill(registration.status) %></dd></div>
+    <div><dt>Registration date</dt><dd><%= d(registration.first_activated_at) %></dd></div>
+    <div><dt><%= registration.status === 'expired' ? 'Expired on' : 'Valid through' %></dt><dd><%= d(registration.expires_at) %></dd></div>
+  </dl>
+  <p class="muted">Current status can be confirmed at <a href="/verify?number=<%= registration.registration_number %>">broker-registry.org/verify</a> using the registration number. This is a confirmation of registration in a private, voluntary program. It is not a government license or professional certification, and it does not replace any license or registration required by law.</p>
+  <p class="muted">Issued <%= d(new Date()) %>.</p>
+</div>
+<div class="actions no-print"><button class="button" type="button" data-print>Print or Save as PDF</button><a class="button secondary" href="/portal/dashboard">Dashboard</a></div>
+<script src="/js/print.js?v=<%= assetV %>" defer></script>
+<%- include('../partials/foot') %>

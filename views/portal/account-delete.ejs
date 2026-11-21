@@ -1,0 +1,17 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1>Delete My Data</h1>
+<p>If you ask us to delete your data:</p>
+<ul class="plain-list">
+  <li>Automatic renewal is turned off right away, so you won't be charged again.</li>
+  <li>Within 30 days we delete your personal information: your name, date of birth, ZIP code, contact details, employment, training records and assessment results.</li>
+  <li>Your registration will no longer be verifiable, and your account will be closed.</li>
+  <li>We keep only a minimal record without your name: your retired registration number (so it's never given to anyone else), payment records required for accounting, and the record of the terms you agreed to.</li>
+  <li>The registration fee is not refunded.</li>
+</ul>
+<% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+<form method="post" action="/portal/account/delete">
+  <div class="field check"><input id="cf" type="checkbox" name="confirm" value="yes"><label for="cf">I understand, and I want Broker Registry to delete my data.</label></div>
+  <div class="actions"><button class="button" type="submit">Request Deletion</button><a class="button secondary" href="/portal/account">Cancel</a></div>
+</form>
+<%- include('../partials/foot') %>

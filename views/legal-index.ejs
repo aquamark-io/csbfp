@@ -1,0 +1,8 @@
+<%- include('partials/head') %>
+<h1>Legal</h1>
+<ul class="plain-list">
+  <% docs.forEach(d => { %>
+  <li><a href="/legal/<%= d.slug %>"><%= d.title %></a></li>
+  <% }) %>
+</ul>
+<%- include('partials/foot') %>

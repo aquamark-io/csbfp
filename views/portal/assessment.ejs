@@ -1,0 +1,36 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1>Assessment</h1>
+<% const a = state.assessment; %>
+<% if (a && a.passed) { %>
+  <p class="notice-ok">You passed the assessment with <%= a.passedAttempt.correct_count %> of <%= a.passedAttempt.question_count %> correct.</p>
+  <div class="actions"><a class="button" href="/portal/assessment/result/<%= a.passedAttempt.id %>">See Your Results</a><a class="button secondary" href="/portal/dashboard">Dashboard</a></div>
+<% } else if (blocked) { %>
+  <p class="message"><%= blocked %></p>
+  <% if (a && a.lastAttempt) { %><p class="muted">Your last attempt: <%= a.lastAttempt.correct_count %> of <%= a.lastAttempt.question_count %> correct.</p><% } %>
+  <div class="actions"><a class="button secondary" href="/portal/training">Review the Training</a></div>
+<% } else { %>
+  <% const passCount = Math.ceil(state.settings.question_count * state.settings.pass_percent / 100); %>
+  <dl class="stats">
+    <div><dt>Questions</dt><dd><%= state.settings.question_count %></dd></div>
+    <div><dt>To pass</dt><dd><%= passCount %> of <%= state.settings.question_count %></dd></div>
+    <% if (a.attemptsLeft != null) { %><div><dt>Attempts left</dt><dd><%= a.attemptsLeft %></dd></div><% } %>
+  </dl>
+  <p class="muted">One question per screen. Your answers are submitted together at the end.</p>
+  <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+  <form method="post" action="/portal/assessment/start" novalidate>
+    <% if (!acked && statements.length) { %>
+    <div class="list-card ack-card">
+      <h2 class="list-card-head">Before you begin, confirm each statement</h2>
+      <fieldset class="ack-list">
+        <legend class="visually-hidden">Professional standards</legend>
+        <% statements.forEach((s, i) => { %>
+        <div class="check"><input id="ack-<%= i %>" type="checkbox" name="ack_<%= i %>" value="yes" <%= checked[i] ? 'checked' : '' %>><label for="ack-<%= i %>"><%= s %></label></div>
+        <% }) %>
+      </fieldset>
+    </div>
+    <% } %>
+    <div class="actions"><button class="button" type="submit">Begin the Assessment</button></div>
+  </form>
+<% } %>
+<%- include('../partials/foot') %>

@@ -1,0 +1,15 @@
+<%- include('../partials/head') %>
+<h1>Legal Documents</h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<p class="muted">Publishing a new version replaces what the site shows; earlier versions are kept, and every acceptance records which version the person agreed to.</p>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Document</th><th>Current version</th><th>Published</th><th></th></tr></thead>
+  <tbody>
+  <% docs.forEach(d => { %>
+    <tr><td><a href="/admin/legal/<%= d.key %>"><%= d.title %></a> <% if (d.placeholder) { %><span class="status status-hold">Placeholder</span><% } %></td>
+      <td><%= d.cur ? `v${d.cur.version}` : '—' %></td><td><%= d.cur ? fmtDate(d.cur.published_at) : '—' %></td>
+      <td><a class="button secondary small" href="/admin/legal/<%= d.key %>">Edit</a></td></tr>
+  <% }) %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

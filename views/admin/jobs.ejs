@@ -1,0 +1,18 @@
+<%- include('../partials/head') %>
+<h1>Daily Job</h1>
+<p class="muted">Runs automatically once a day after 6 AM Pacific: expires registrations that won't renew, sends 30-day renewal reminders and payment-method reminders, and cleans up old sign-in codes and logs. Running it again is harmless: emails are never sent twice.</p>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (result) { %><pre class="result"><%= JSON.stringify(result, null, 2) %></pre><% } %>
+<form method="post" action="/admin/jobs/run"><button class="button" type="submit">Run Now</button></form>
+<h2>Recent runs</h2>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Day</th><th>Started</th><th>Finished</th><th>Result</th></tr></thead>
+  <tbody>
+  <% runs.forEach(r => { %>
+    <tr><td><%= r.run_date %></td><td><%= fmtTime(r.started_at) %></td><td><%= r.finished_at ? fmtTime(r.finished_at) : 'Running or stopped' %></td>
+      <td class="muted-inline"><% if (r.result) { const x = r.result; %>expired <%= (x.expire && x.expire.expired) || 0 %>, reminders <%= (x.renewal_reminders && x.renewal_reminders.reminded) || 0 %>, payment reminders <%= (x.payment_method_reminders && x.payment_method_reminders.reminded) || 0 %><%= Object.values(x).some(v => v && v.error) ? ', with errors' : '' %><% } %></td></tr>
+  <% }) %>
+  <% if (!runs.length) { %><tr><td colspan="4" class="muted">No runs yet.</td></tr><% } %>
+  </tbody>
+</table></div>
+<%- include('../partials/foot') %>

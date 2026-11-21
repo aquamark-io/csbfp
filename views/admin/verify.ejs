@@ -1,0 +1,15 @@
+<%- include('../partials/head') %>
+<div class="narrow">
+<h1>Enter Your Code</h1>
+<% if (email) { %><p class="lead">If <strong><%= email %></strong> is an administrator address, a 6-digit code is on its way.</p><% } %>
+<% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+<form method="post" action="/admin/login/verify" novalidate>
+  <div class="field">
+    <label for="code">6-digit code</label>
+    <input id="code" class="code-input" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required autofocus>
+  </div>
+  <button class="button" type="submit">Sign In</button>
+</form>
+<p class="muted"><a href="/admin/login">Start over</a></p>
+</div>
+<%- include('../partials/foot') %>

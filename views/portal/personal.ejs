@@ -1,0 +1,33 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1>Personal Information</h1>
+<% if (saved) { %><p class="notice-ok" role="status">Saved.</p><% } %>
+<% if (Object.keys(errors).length) { %><p class="alert" role="alert">Please correct the highlighted fields.</p><% } %>
+<form method="post" action="/portal/personal" novalidate>
+  <% if (locked) { %>
+  <p class="message">Your legal name and date of birth can't be changed online once your registration is active. To correct them, contact <a href="mailto:support@broker-registry.org">support@broker-registry.org</a>.</p>
+  <% } %>
+  <% const input = (name, label, attrs = '') => { %>
+  <div class="field">
+    <label for="<%= name %>"><%= label %></label>
+    <input id="<%= name %>" name="<%= name %>" value="<%= values[name] || '' %>" <%- attrs %> <% if (errors[name]) { %>aria-invalid="true" aria-describedby="<%= name %>-error"<% } %>>
+    <%- include('../partials/err', { field: name }) %>
+  </div>
+  <% } %>
+  <% const ro = locked ? 'readonly' : ''; %>
+  <% input('legal_first_name', 'Legal first name', `type="text" autocomplete="given-name" maxlength="60" ${ro}`) %>
+  <% input('middle_name', 'Middle name (optional)', `type="text" autocomplete="additional-name" maxlength="60" ${ro}`) %>
+  <% input('legal_last_name', 'Legal last name', `type="text" autocomplete="family-name" maxlength="60" ${ro}`) %>
+  <% input('dob', 'Date of birth', `type="date" autocomplete="bday" ${ro}`) %>
+  <% input('zip5', 'Residential ZIP code', 'type="text" inputmode="numeric" autocomplete="postal-code" maxlength="5"') %>
+  <div class="field">
+    <label for="email">Email address</label>
+    <input id="email" type="email" value="<%= registrant.email %>" readonly>
+    <p class="hint">Changing your email address will be available in your account settings.</p>
+  </div>
+  <% input('phone', 'Mobile phone number', 'type="tel" inputmode="tel" autocomplete="tel-national"') %>
+  <%- include('../partials/month-year', { name: 'industry_start', label: 'When did you start working in the industry?', values: { industry_start_month: values.industry_start_month, industry_start_year: values.industry_start_year }, errors }) %>
+  <p class="hint">We never ask for your Social Security number or full home address.</p>
+  <button class="button" type="submit">Save</button>
+</form>
+<%- include('../partials/foot') %>
