@@ -128,7 +128,7 @@ test('checkout needs the automatic-renewal consent, records it, and sends them t
   makeReady('pat@example.com');
   let r = await pat.req('/portal/checkout');
   assert.match(r.text, /\$149 per year/);
-  assert.match(r.text, /I authorize Duncan Consulting LLC, administrator of CSBFP, to charge \$149 today/);
+  assert.match(r.text, /I authorize CSBFP to charge \$149 today/);
   assert.match(r.text, /No refunds\./);
   assert.match(r.text, /issues a DEMO record only/);
   r = await pat.req('/portal/checkout', {});

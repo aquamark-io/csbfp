@@ -61,10 +61,7 @@
     </nav>
     <% } else { %>
     <nav class="nav" id="site-nav" aria-label="Main">
-      <% if (signedIn) { %><%- nav('/portal/dashboard', 'My Account') %><% } else { %><%- nav('/portal/signup', 'Get Certified') %><% } %>
-      <%- nav('/verify', 'Verify Certification') %>
-      <%- nav('/faq', 'FAQ') %>
-      <% if (signedIn) { %><form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form><% } else { %><%- nav('/portal', 'Sign In') %><% } %>
+      <% if (signedIn) { %><%- nav('/portal/dashboard', 'My Account') %><form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form><% } else { %><%- nav('/portal', 'Sign In') %><% } %>
     </nav>
     <% } %>
   </div>
