@@ -563,6 +563,8 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .main:has(.home-cards) { max-width: 1000px; padding: 72px 24px 88px; }
 .home-hero { text-align: center; margin: 0 auto 48px; max-width: 760px; }
 .home-hero h1 { margin: 0 0 12px; font-size: 2rem; line-height: 1.25; font-weight: 650; color: var(--navy); }
+.mobile-br { display: none; }
+@media (max-width: 760px) { .mobile-br { display: inline; } }
 .home-hero p { margin: 0 auto; max-width: 34em; color: var(--muted); font-size: 1.05rem; line-height: 1.6; text-wrap: balance; }
 .home-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .home-card {
@@ -588,15 +590,9 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .home-hero h1 { font-size: 1.5rem; }
   .home-hero p { font-size: 1rem; }
   .home-cards { grid-template-columns: 1fr; gap: 24px; }
-  /* Lighter on phones: no solid blue bars. Title in blue with a short gold rule; Verify stays beside the box. */
-  .home-card { border-top: 3px solid var(--navy); }
-  .home-card-band {
-    padding: 20px 20px 0; background: none; color: var(--navy); border-bottom: 0;
-    font-size: 0.88rem; letter-spacing: 0.1em;
-  }
-  .home-card-band::after { content: ""; display: block; width: 36px; height: 3px; margin-top: 10px; background: var(--gold); }
+  .home-card-band { padding: 14px 20px 12px; font-size: 0.88rem; letter-spacing: 0.1em; }
   .home-card .lookup-row { flex-direction: row; }
-  .home-card-body { padding: 14px 20px 22px; }
+  .home-card-body { padding: 18px 20px 22px; }
 }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
