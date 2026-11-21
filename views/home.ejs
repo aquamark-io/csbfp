@@ -1,27 +1,29 @@
 <%- include('partials/head') %>
-<section class="home">
-  <h1>Certified Small Business Finance Professional</h1>
-  <p class="subtitle">A professional certification program for individuals working in the small business finance industry.</p>
-</section>
-
+<h1 class="visually-hidden">Certified Small Business Finance Professional</h1>
 <div class="home-cards">
   <section class="home-card">
-    <h2>Verify a Certification</h2>
-    <p>Check whether a CSBFP certification is current using its certification number.</p>
-    <form class="lookup" method="get" action="/verify">
-      <label class="visually-hidden" for="number">Certification number</label>
-      <div class="lookup-row">
-        <input id="number" name="number" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false"
-               placeholder="<%= program.numberPrefix %>-12345678" maxlength="20" required>
-        <button class="button" type="submit">Verify</button>
-      </div>
-    </form>
+    <h2 class="home-card-band">Verify a Certification</h2>
+    <div class="home-card-body">
+      <p>Check whether a CSBFP certification is current using its certification number.</p>
+      <form class="lookup" method="get" action="/verify">
+        <label class="visually-hidden" for="number">Certification number</label>
+        <div class="lookup-row">
+          <input id="number" name="number" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                 placeholder="<%= program.numberPrefix %>-12345678" maxlength="20" required>
+          <button class="button" type="submit">Verify</button>
+        </div>
+      </form>
+    </div>
   </section>
   <section class="home-card">
-    <h2>Get Certified</h2>
-    <p>Complete the application, four short training modules and an assessment. <%= program.annualFee %> per year.</p>
-    <a class="button" href="/portal/signup">Get Certified</a>
-    <p class="home-card-note">Already started? <a href="/portal">Sign in</a></p>
+    <h2 class="home-card-band">Get Certified</h2>
+    <div class="home-card-body">
+      <p>Complete the application, four short training modules and an assessment. <%= program.annualFee %> per year.</p>
+      <div class="home-card-actions">
+        <a class="button gold" href="/portal/signup">Get Certified</a>
+        <span class="home-card-note">Already started? <a href="/portal">Sign in</a></span>
+      </div>
+    </div>
   </section>
 </div>
 <%- include('partials/foot') %>
