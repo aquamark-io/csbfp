@@ -559,11 +559,23 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 @media (max-width: 520px) { .logo { width: 88px; } }
 .header.menu-open .logo { background: #fff; border-radius: 4px; padding: 3px; }
 
-/* Home: two cards styled after the logo (blue banner, white capitals, gold rule) */
-.main:has(.home-cards) { max-width: 960px; padding-top: 40px; }
-.home-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin: 0; }
-@media (max-width: 720px) { .home-cards { grid-template-columns: 1fr; gap: 22px; margin: 0; } }
-.home-card { display: flex; flex-direction: column; background: var(--soft); }
+/* Home: quiet hero band, then two cards styled after the logo (blue banner, white capitals, gold rule) */
+.main:has(.home-cards) { max-width: 960px; padding-top: 0; }
+.home-hero {
+  text-align: center; padding: 64px 0 104px; background: var(--soft);
+  box-shadow: 0 0 0 100vmax var(--soft); clip-path: inset(0 -100vmax); /* full-width band without horizontal scroll */
+}
+.home-hero h1 { margin: 0 0 10px; font-size: clamp(1.45rem, 3.2vw, 1.9rem); font-weight: 650; color: var(--navy); }
+.home-hero p { margin: 0 auto; max-width: 34em; color: var(--muted); font-size: 1.04rem; }
+.home-cards { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin: -60px 0 24px; }
+@media (max-width: 720px) {
+  .home-hero { padding: 40px 0 84px; }
+  .home-cards { grid-template-columns: 1fr; gap: 22px; }
+}
+.home-card {
+  display: flex; flex-direction: column; background: #fff; border: 1px solid #d5dbe6; border-top: 0;
+  box-shadow: 0 1px 2px rgba(20, 26, 51, 0.04), 0 8px 24px rgba(20, 26, 51, 0.06);
+}
 .home-card-band {
   margin: 0; padding: 16px 22px 14px; background: var(--navy); color: #fff; border-bottom: 5px solid var(--gold);
   font-size: 1.02rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.3;
@@ -571,7 +583,7 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .home-card-body { flex: 1; display: flex; flex-direction: column; padding: 22px 22px 24px; }
 .home-card-body p { color: var(--body); font-size: 0.96rem; margin-bottom: 20px; }
 .home-card .lookup { margin: auto 0 0; }
-.home-card .lookup-row input { border-radius: 2px; background: #fff; }
+.home-card .lookup-row input { border-radius: 2px; }
 .home-card .button { border-radius: 2px; }
 .home-card-actions { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
 .button.gold { background: var(--gold); color: var(--navy-dark); border-color: var(--gold); font-weight: 700; }
