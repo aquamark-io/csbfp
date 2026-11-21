@@ -588,8 +588,15 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .home-hero h1 { font-size: 1.5rem; }
   .home-hero p { font-size: 1rem; }
   .home-cards { grid-template-columns: 1fr; gap: 24px; }
-  .home-card-band { padding: 16px 20px 14px; }
-  .home-card-body { padding: 20px; }
+  /* Lighter on phones: no solid blue bars. Title in blue with a short gold rule; Verify stays beside the box. */
+  .home-card { border-top: 3px solid var(--navy); }
+  .home-card-band {
+    padding: 20px 20px 0; background: none; color: var(--navy); border-bottom: 0;
+    font-size: 0.88rem; letter-spacing: 0.1em;
+  }
+  .home-card-band::after { content: ""; display: block; width: 36px; height: 3px; margin-top: 10px; background: var(--gold); }
+  .home-card .lookup-row { flex-direction: row; }
+  .home-card-body { padding: 14px 20px 22px; }
 }
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
