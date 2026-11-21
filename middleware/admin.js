@@ -8,7 +8,7 @@ async function requireAdmin(req, res, next) {
   const s = adminSession.readSession(req);
   if (!s) return res.redirect(303, '/admin/login');
   try {
-    const { data: admin, error } = await db().from('br_admin_users').select('*').eq('id', s.sub).maybeSingle();
+    const { data: admin, error } = await db().from('csbfp_admin_users').select('*').eq('id', s.sub).maybeSingle();
     if (error) throw new Error(error.message);
     if (!admin || !admin.active || !config.adminEmails.includes(admin.email)) {
       adminSession.clearSession(res);

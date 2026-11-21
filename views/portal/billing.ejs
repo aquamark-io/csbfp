@@ -4,19 +4,19 @@
 <% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
 <% const d = x => x ? new Date(x).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—'; %>
 <% if (registration.status === 'inactive') { %>
-  <p class="alert">Your renewal payment didn't go through, so your registration is <strong>Inactive</strong>. Pay now to reactivate it.</p>
+  <p class="alert">Your renewal payment didn't go through, so your certification is <strong>Inactive</strong>. Pay now to reactivate it.</p>
   <div class="actions">
     <a class="button" href="/portal/billing/pay">Pay <%= fee %> Now</a>
     <% if (registration.stripe_customer_id) { %><form method="post" action="/portal/billing/manage" class="inline-form"><button class="button secondary" type="submit">Update Payment Method</button></form><% } %>
   </div>
 <% } %>
 <dl class="summary">
-  <div><dt>Annual registration fee</dt><dd><%= fee %> per year</dd></div>
+  <div><dt>Annual certification fee</dt><dd><%= fee %> per year</dd></div>
   <div><dt>Status</dt><dd><%- statusPill(registration.status) %></dd></div>
   <% if (registration.expires_at) { %><div><dt>Valid through</dt><dd><%= d(registration.expires_at) %></dd></div><% } %>
   <% if (live) { %>
   <div><dt>Automatic renewal</dt><dd><%= live.cancel_at_period_end ? 'Off' : 'On' %></dd></div>
-  <div><dt><%= live.cancel_at_period_end ? 'Registration ends' : 'Next renewal' %></dt><dd><%= d(live.current_period_end) %><%= live.cancel_at_period_end ? '' : ` (${fee})` %></dd></div>
+  <div><dt><%= live.cancel_at_period_end ? 'Certification ends' : 'Next renewal' %></dt><dd><%= d(live.current_period_end) %><%= live.cancel_at_period_end ? '' : ` (${fee})` %></dd></div>
   <% } %>
 </dl>
 
@@ -41,7 +41,7 @@
   <% payments.forEach(p => { %>
     <tr>
       <td><%= d(p.paid_at || p.created_at) %></td>
-      <td><%= { initial: 'Registration fee', renewal: 'Annual renewal', reactivation: 'Registration fee (rejoined)' }[p.billing_reason] %><% if (p.period_end) { %>, through <%= d(p.period_end) %><% } %></td>
+      <td><%= { initial: 'Certification fee', renewal: 'Annual renewal', reactivation: 'Certification fee (rejoined)' }[p.billing_reason] %><% if (p.period_end) { %>, through <%= d(p.period_end) %><% } %></td>
       <td>$<%= (p.amount_cents / 100).toFixed(2) %></td>
       <td><%= { paid: 'Paid', failed: 'Failed', open: 'Due', refunded: 'Refunded', partially_refunded: 'Partly refunded' }[p.status] %></td>
       <td><% if (p.hosted_invoice_url) { %><a href="<%= p.hosted_invoice_url %>" target="_blank" rel="noopener"><%= p.status === 'paid' ? 'Receipt' : 'View' %></a><% } %></td>
@@ -50,5 +50,5 @@
   </tbody>
 </table></div>
 <% } %>
-<p class="muted">Payments are processed by Stripe. Broker Registry never sees or stores your card details. The registration fee is not refundable.</p>
+<p class="muted">Payments are processed by Stripe. CSBFP never sees or stores your card details. The certification fee is not refundable.</p>
 <%- include('../partials/foot') %>

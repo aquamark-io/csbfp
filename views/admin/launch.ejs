@@ -15,7 +15,7 @@
 <% if (preLaunch && mode !== 'live') { %>
 <section class="panel danger-panel">
   <h2>Remove preview data</h2>
-  <p>Deletes every test account, registration number, payment record, support request and log from testing. Training, legal documents, email wording, lists, settings and the audit log are kept. Stripe test-mode records are not touched. Only works while the site is in preview and Stripe is in test mode.</p>
+  <p>Deletes every test account, certification number, payment record, support request and log from testing. Training, legal documents, email wording, lists, settings and the audit log are kept. Stripe test-mode records are not touched. Only works while the site is in preview and Stripe is in test mode.</p>
   <form method="post" action="/admin/launch/reset" class="stack">
     <input name="confirm" type="text" placeholder="Type REMOVE PREVIEW DATA" autocomplete="off">
     <button class="button small" type="submit">Remove Preview Data</button>

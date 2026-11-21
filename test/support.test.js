@@ -6,7 +6,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 Object.assign(process.env, {
-  NODE_ENV: 'test', SITE_URL: 'https://broker-registry.org', SUPABASE_URL: 'http://fake.local', SUPABASE_SERVICE_KEY: 'fake',
+  NODE_ENV: 'test', SITE_URL: 'https://csbfp-certification.org', SUPABASE_URL: 'http://fake.local', SUPABASE_SERVICE_KEY: 'fake',
   JWT_SECRET: 's'.repeat(40), FIELD_ENCRYPTION_KEY: 'test-encryption-key-that-is-long-enough-1234',
   FIELD_HASH_KEY: 'test-hash-key-that-is-long-enough-and-different', PRE_LAUNCH: 'true', ADMIN_EMAILS: 'boss@example.com',
   PREVIEW_EMAILS: 'boss@example.com,dee@example.com', POSTMARK_SERVER_TOKEN: '', STRIPE_SECRET_KEY: 'sk_test_fake',
@@ -22,24 +22,24 @@ const docs = ['terms', 'privacy', 'registration_agreement', 'automatic_renewal',
   .map(key => ({ key, version: 1, title: key, body_md: key === 'acknowledgments' ? '- One.' : 'Placeholder.', status: 'published', published_at: iso(Date.now()) }));
 const DEE = '11111111-1111-4111-8111-111111111111';
 const fake = createFake({
-  br_legal_documents: docs,
-  br_registrants: [
+  csbfp_legal_documents: docs,
+  csbfp_registrants: [
     { id: DEE, email: 'dee@example.com', email_verified_at: iso(Date.now()), account_status: 'active', legal_first_name: 'Dee', legal_last_name: 'Lane', dob_enc: 'v1:x', dob_hash: 'h', zip5: '94105', phone_e164: '+14155550909', created_at: iso(Date.now() - 40 * 864e5) },
     { id: 'p2', email: 'old@example.com', email_verified_at: iso(Date.now()), account_status: 'active', legal_first_name: 'Old', created_at: iso(Date.now() - 400 * 864e5) },
   ],
-  br_registrations: [
-    { id: 'g1', registrant_id: DEE, registration_number: 'BR-12121212', status: 'active', admin_hold: false, expires_at: iso(Date.now() + 200 * 864e5), first_activated_at: iso(Date.now() - 30 * 864e5), stripe_customer_id: 'cus_d', created_at: iso(Date.now()) },
-    { id: 'g2', registrant_id: 'p2', registration_number: 'BR-34343434', status: 'expired', admin_hold: false, expires_at: iso(Date.now() - 30 * 864e5), first_activated_at: iso(Date.now() - 395 * 864e5), created_at: iso(Date.now()) },
+  csbfp_registrations: [
+    { id: 'g1', registrant_id: DEE, registration_number: 'CSBFP-12121212', status: 'active', admin_hold: false, expires_at: iso(Date.now() + 200 * 864e5), first_activated_at: iso(Date.now() - 30 * 864e5), stripe_customer_id: 'cus_d', created_at: iso(Date.now()) },
+    { id: 'g2', registrant_id: 'p2', registration_number: 'CSBFP-34343434', status: 'expired', admin_hold: false, expires_at: iso(Date.now() - 30 * 864e5), first_activated_at: iso(Date.now() - 395 * 864e5), created_at: iso(Date.now()) },
   ],
-  br_subscriptions: [{ id: 's1', registrant_id: DEE, registration_id: 'g1', stripe_customer_id: 'cus_d', stripe_subscription_id: 'sub_d', stripe_status: 'active', cancel_at_period_end: false, created_at: iso(Date.now()) }],
-  br_payments: [{ id: 'pay1', registrant_id: DEE, registration_id: 'g1', stripe_invoice_id: 'in_d', status: 'paid', billing_reason: 'initial', amount_cents: 9900, paid_at: iso(Date.now() - 30 * 864e5), created_at: iso(Date.now() - 30 * 864e5) }],
-  br_employment_relationships: [{ id: 'e1', registrant_id: DEE, company_name: 'Acme', city: 'Miami', state: 'FL' }],
-  br_legal_acceptances: [{ id: 1, registrant_id: DEE, document_key: 'automatic_renewal', document_version: 1, context: 'checkout', accepted_at: iso(Date.now()) }],
-  br_settings: [{ key: 'stripe_test_price_id', value: 'p' }],
+  csbfp_subscriptions: [{ id: 's1', registrant_id: DEE, registration_id: 'g1', stripe_customer_id: 'cus_d', stripe_subscription_id: 'sub_d', stripe_status: 'active', cancel_at_period_end: false, created_at: iso(Date.now()) }],
+  csbfp_payments: [{ id: 'pay1', registrant_id: DEE, registration_id: 'g1', stripe_invoice_id: 'in_d', status: 'paid', billing_reason: 'initial', amount_cents: 9900, paid_at: iso(Date.now() - 30 * 864e5), created_at: iso(Date.now() - 30 * 864e5) }],
+  csbfp_employment_relationships: [{ id: 'e1', registrant_id: DEE, company_name: 'Acme', city: 'Miami', state: 'FL' }],
+  csbfp_legal_acceptances: [{ id: 1, registrant_id: DEE, document_key: 'automatic_renewal', document_version: 1, context: 'checkout', accepted_at: iso(Date.now()) }],
+  csbfp_settings: [{ key: 'stripe_test_price_id', value: 'p' }],
 });
 supa.db.set(fake);
 const fs = createFakeStripe();
-fs.state.subscriptions.sub_d = { id: 'sub_d', status: 'active', customer: 'cus_d', cancel_at_period_end: false, metadata: { app: 'broker-registry', registration_id: 'g1' },
+fs.state.subscriptions.sub_d = { id: 'sub_d', status: 'active', customer: 'cus_d', cancel_at_period_end: false, metadata: { app: 'csbfp', registration_id: 'g1' },
   items: { data: [{ current_period_start: 0, current_period_end: Math.floor(Date.now() / 1000) + 200 * 86400 }] } };
 S.stripe.set(fs);
 
@@ -93,7 +93,7 @@ test('contact form: request saved with a reference, confirmation to sender, aler
   assert.equal(r.status, 422);
   r = await browser().req('/support', { name: 'Sam Q', email: 'sam@example.com', category: 'billing', message: 'Question about my renewal date' });
   assert.match(r.text, /reference <strong>SR-[0-9A-F]{6}<\/strong>/);
-  const sr = fake.tables.br_support_requests[0];
+  const sr = fake.tables.csbfp_support_requests[0];
   assert.equal(sr.category, 'billing');
   assert.match(sr.message, /From: Sam Q/);
   await wait(50);
@@ -104,7 +104,7 @@ test('contact form: request saved with a reference, confirmation to sender, aler
 
 test('admin support queue: read, note, close', async () => {
   boss = await signIn('boss@example.com', '/admin');
-  const sr = fake.tables.br_support_requests[0];
+  const sr = fake.tables.csbfp_support_requests[0];
   let r = await boss.req('/admin/support');
   assert.match(r.text, /billing or payment/);
   r = await boss.req(`/admin/support/${sr.id}`);
@@ -120,9 +120,9 @@ test('"delete my data": request turns off auto-renewal and reaches the admin que
   assert.equal(r.status, 422);
   r = await dee.req('/portal/account/delete', { confirm: 'yes' });
   assert.match(decodeURIComponent(r.location), /deletion request was received/);
-  assert.equal(fake.tables.br_registrants.find(x => x.id === DEE).account_status, 'deletion_requested');
+  assert.equal(fake.tables.csbfp_registrants.find(x => x.id === DEE).account_status, 'deletion_requested');
   assert.equal(fs.state.subscriptions.sub_d.cancel_at_period_end, true);
-  assert.ok(fake.tables.br_support_requests.some(s => s.category === 'data_deletion' && s.registrant_id === DEE));
+  assert.ok(fake.tables.csbfp_support_requests.some(s => s.category === 'data_deletion' && s.registrant_id === DEE));
   assert.match((await boss.req(`/admin/registrants/${DEE}`)).text, /asked for their data to be deleted/);
 });
 
@@ -135,22 +135,22 @@ test('identity review email', async () => {
 test('admin deletion: personal data gone, number retired (verification says not found), payment and consent kept', async () => {
   let r = await boss.req(`/admin/registrants/${DEE}/delete-data`, { confirm: 'delete', reason: 'SR request' });
   assert.match(decodeURIComponent(r.location), /Type DELETE/);
-  assert.match((await browser().req('/verify?number=BR-12121212')).text, /Dee Lane/);
+  assert.match((await browser().req('/verify?number=CSBFP-12121212')).text, /Dee Lane/);
   r = await boss.req(`/admin/registrants/${DEE}/delete-data`, { confirm: 'DELETE', reason: 'Deletion requested' });
   assert.match(decodeURIComponent(r.location), /number is retired/);
-  const p = fake.tables.br_registrants.find(x => x.id === DEE);
+  const p = fake.tables.csbfp_registrants.find(x => x.id === DEE);
   assert.equal(p.account_status, 'deleted');
   for (const f of ['email', 'legal_first_name', 'legal_last_name', 'dob_enc', 'dob_hash', 'zip5', 'phone_e164']) assert.equal(p[f], null, f);
-  assert.equal(fake.tables.br_employment_relationships.filter(x => x.registrant_id === DEE).length, 0);
-  assert.equal(fake.tables.br_email_messages.filter(x => x.registrant_id === DEE).length, 0);
+  assert.equal(fake.tables.csbfp_employment_relationships.filter(x => x.registrant_id === DEE).length, 0);
+  assert.equal(fake.tables.csbfp_email_messages.filter(x => x.registrant_id === DEE).length, 0);
   assert.equal(fs.state.subscriptions.sub_d.status, 'canceled', 'no more charges');
-  assert.ok(fake.tables.br_registrations.find(x => x.id === 'g1').retired_at);
-  assert.equal(fake.tables.br_registrations.find(x => x.id === 'g1').registration_number, 'BR-12121212', 'number kept so it is never reissued');
-  assert.equal(fake.tables.br_payments.filter(x => x.registrant_id === DEE).length, 1, 'payment record kept');
-  assert.equal(fake.tables.br_legal_acceptances.filter(x => x.registrant_id === DEE).length, 1, 'consent record kept');
-  assert.match((await browser().req('/verify?number=BR-12121212')).text, /No registration was found/);
+  assert.ok(fake.tables.csbfp_registrations.find(x => x.id === 'g1').retired_at);
+  assert.equal(fake.tables.csbfp_registrations.find(x => x.id === 'g1').registration_number, 'CSBFP-12121212', 'number kept so it is never reissued');
+  assert.equal(fake.tables.csbfp_payments.filter(x => x.registrant_id === DEE).length, 1, 'payment record kept');
+  assert.equal(fake.tables.csbfp_legal_acceptances.filter(x => x.registrant_id === DEE).length, 1, 'consent record kept');
+  assert.match((await browser().req('/verify?number=CSBFP-12121212')).text, /No certification was found/);
   assert.equal(mails('dee@example.com', 'data_deleted').length, 1, 'told before the address was removed');
-  assert.ok(fake.tables.br_admin_audit_log.some(a => a.action === 'registrant_data_deleted'));
+  assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'registrant_data_deleted'));
 });
 
 test('announcements: test to self, then send to the chosen audience once', async () => {
@@ -197,11 +197,11 @@ test('launch checklist, and removing preview data keeps setup but clears account
   assert.match(decodeURIComponent(r.location), /Type REMOVE PREVIEW DATA/);
   r = await boss.req('/admin/launch/reset', { confirm: 'REMOVE PREVIEW DATA' });
   assert.match(decodeURIComponent(r.location), /Removed preview data/);
-  assert.equal(fake.tables.br_registrants.length, 0);
-  assert.equal(fake.tables.br_registrations.length, 0);
-  assert.equal(fake.tables.br_payments.length, 0);
-  assert.ok(fake.tables.br_legal_documents.length >= 7, 'legal documents kept');
-  assert.ok(fake.tables.br_settings.length >= 1, 'settings kept');
-  assert.ok(fake.tables.br_admin_audit_log.some(a => a.action === 'preview_data_removed'), 'audit kept');
+  assert.equal(fake.tables.csbfp_registrants.length, 0);
+  assert.equal(fake.tables.csbfp_registrations.length, 0);
+  assert.equal(fake.tables.csbfp_payments.length, 0);
+  assert.ok(fake.tables.csbfp_legal_documents.length >= 7, 'legal documents kept');
+  assert.ok(fake.tables.csbfp_settings.length >= 1, 'settings kept');
+  assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'preview_data_removed'), 'audit kept');
   assert.equal((await boss.req('/admin/registrants')).status, 200, 'admin still signed in');
 });

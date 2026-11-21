@@ -48,12 +48,12 @@ let lastCleanup = 0;
 function cleanupCodes() {
   if (Date.now() - lastCleanup < 60 * 60 * 1000) return;
   lastCleanup = Date.now();
-  db().from('br_login_codes').delete().lt('expires_at', new Date(Date.now() - 24 * 3600 * 1000).toISOString())
+  db().from('csbfp_login_codes').delete().lt('expires_at', new Date(Date.now() - 24 * 3600 * 1000).toISOString())
     .then(({ error }) => { if (error) console.error('Code cleanup failed:', error.message); });
 }
 
 async function findByEmail(email) {
-  return must(await db().from('br_registrants').select('*').eq('email', email).maybeSingle(), 'Registrant lookup');
+  return must(await db().from('csbfp_registrants').select('*').eq('email', email).maybeSingle(), 'Registrant lookup');
 }
 
 const canSignIn = r => r && ['active', 'deletion_requested'].includes(r.account_status);
@@ -73,7 +73,7 @@ async function issueCode(email, ip) {
     }
 
     const since = new Date(Date.now() - CODE_WINDOW_MS).toISOString();
-    const { count, error: countErr } = await db().from('br_login_codes')
+    const { count, error: countErr } = await db().from('csbfp_login_codes')
       .select('id', { count: 'exact', head: true }).eq('registrant_id', registrant.id).gte('created_at', since);
     if (countErr) throw new Error(`Code count: ${countErr.message}`);
     if ((count || 0) >= MAX_CODES_PER_WINDOW) {
@@ -82,12 +82,12 @@ async function issueCode(email, ip) {
     }
 
     // A new code cancels any earlier unused ones.
-    must(await db().from('br_login_codes').update({ used_at: new Date().toISOString() })
+    must(await db().from('csbfp_login_codes').update({ used_at: new Date().toISOString() })
       .eq('registrant_id', registrant.id).is('used_at', null), 'Cancel old codes');
 
     const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
     const firstTime = !registrant.email_verified_at;
-    const row = must(await db().from('br_login_codes').insert({
+    const row = must(await db().from('csbfp_login_codes').insert({
       registrant_id: registrant.id,
       purpose: firstTime ? 'verify_email' : 'sign_in',
       code_hash: codeHash(registrant.id, code),
@@ -149,11 +149,11 @@ router.post('/signup', signupLimiter, async (req, res, next) => {
 
     const existing = await findByEmail(data.email);
     if (!existing) {
-      const { data: created, error } = await db().from('br_registrants')
+      const { data: created, error } = await db().from('csbfp_registrants')
         .insert({ email: data.email, phone_e164: data.phone }).select('id').single();
       if (error && error.code !== '23505') throw new Error(`Create registrant: ${error.message}`);
       if (created) {
-        must(await db().from('br_registrations').insert({ registrant_id: created.id }), 'Create registration');
+        must(await db().from('csbfp_registrations').insert({ registrant_id: created.id }), 'Create registration');
         await recordAcceptance({ registrantId: created.id, keys: ['terms', 'privacy'], context: 'signup', ip: req.ip, userAgent: req.get('user-agent') });
         await logEvent({ registrantId: created.id, event: 'signed_up', actor: 'registrant', ip: req.ip });
       }
@@ -196,7 +196,7 @@ router.post('/verify', verifyLimiter, async (req, res, next) => {
     const registrant = await findByEmail(email);
     if (!canSignIn(registrant) || !config.previewAllowed(email)) return fail(GENERIC);
 
-    const row = must(await db().from('br_login_codes')
+    const row = must(await db().from('csbfp_login_codes')
       .select('id, code_hash, attempts, expires_at')
       .eq('registrant_id', registrant.id).is('used_at', null).gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false }).limit(1).maybeSingle(), 'Code lookup');
@@ -207,20 +207,20 @@ router.post('/verify', verifyLimiter, async (req, res, next) => {
     const want = Buffer.from(row.code_hash, 'hex');
     if (given.length !== want.length || !crypto.timingSafeEqual(given, want)) {
       const attempts = row.attempts + 1;
-      await db().from('br_login_codes').update({ attempts, ...(attempts >= MAX_ATTEMPTS ? { used_at: new Date().toISOString() } : {}) })
+      await db().from('csbfp_login_codes').update({ attempts, ...(attempts >= MAX_ATTEMPTS ? { used_at: new Date().toISOString() } : {}) })
         .eq('id', row.id).eq('attempts', row.attempts);
       await logEvent({ registrantId: registrant.id, event: 'login_failed', actor: 'registrant', detail: { attempts }, ip: req.ip });
       return fail(attempts >= MAX_ATTEMPTS ? 'Too many incorrect attempts. Please request a new code.' : GENERIC);
     }
 
     // Mark used; the used_at filter makes this single-use even under concurrent submits.
-    const used = must(await db().from('br_login_codes')
+    const used = must(await db().from('csbfp_login_codes')
       .update({ used_at: new Date().toISOString() }).eq('id', row.id).is('used_at', null).select('id').maybeSingle(), 'Code use');
     if (!used) return fail(GENERIC);
 
     const now = new Date().toISOString();
     const firstTime = !registrant.email_verified_at;
-    must(await db().from('br_registrants').update({ last_login_at: now, ...(firstTime ? { email_verified_at: now } : {}) })
+    must(await db().from('csbfp_registrants').update({ last_login_at: now, ...(firstTime ? { email_verified_at: now } : {}) })
       .eq('id', registrant.id), 'Update sign-in time');
     await logEvent({ registrantId: registrant.id, event: firstTime ? 'email_verified' : 'login', actor: 'registrant', ip: req.ip });
     if (firstTime) {

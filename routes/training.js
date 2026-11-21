@@ -15,6 +15,7 @@
  * change past results. Correct answers and explanations are shown only after passing.
  */
 const express = require('express');
+const config = require('../lib/config');
 const { db, must } = require('../lib/supabase');
 const { logEvent } = require('../lib/events');
 const { sendQuietly, registrantVars } = require('../lib/email');
@@ -67,7 +68,7 @@ router.get('/training/:key', async (req, res, next) => {
     if (!mod) return next();
     if (!mod.unlocked) return res.redirect('/portal/training');
     if (!mod.started) {
-      const { error } = await db().from('br_training_progress').insert({ registrant_id: req.registrant.id, module_id: mod.id });
+      const { error } = await db().from('csbfp_training_progress').insert({ registrant_id: req.registrant.id, module_id: mod.id });
       if (error && error.code !== '23505') throw new Error(`Start module: ${error.message}`);
     }
     res.render('portal/module', { pageTitle: mod.title, state, mod, idx, html: renderSlides(mod.body_md), video: embedUrl(mod.video_url),
@@ -82,10 +83,10 @@ router.post('/training/:key/complete', async (req, res, next) => {
     if (!mod.unlocked) return res.redirect(303, '/portal/training');
     if (!mod.completed) {
       const now = new Date().toISOString();
-      const { error } = await db().from('br_training_progress').insert({ registrant_id: req.registrant.id, module_id: mod.id, started_at: now, completed_at: now });
+      const { error } = await db().from('csbfp_training_progress').insert({ registrant_id: req.registrant.id, module_id: mod.id, started_at: now, completed_at: now });
       if (error) {
         if (error.code !== '23505') throw new Error(`Complete module: ${error.message}`);
-        must(await db().from('br_training_progress').update({ completed_at: now })
+        must(await db().from('csbfp_training_progress').update({ completed_at: now })
           .eq('registrant_id', req.registrant.id).eq('module_id', mod.id).is('completed_at', null), 'Complete module');
       }
       await logEvent({ registrantId: req.registrant.id, event: 'module_completed', actor: 'registrant', detail: { module: mod.stable_key, curriculum: state.curriculum.label }, ip: req.ip });
@@ -110,7 +111,7 @@ async function conductDoc() { return legal.currentDoc('conduct_standards'); }
 
 async function hasConductAck(registrantId, doc) {
   if (!doc) return true;
-  const row = must(await db().from('br_legal_acceptances').select('id').eq('registrant_id', registrantId)
+  const row = must(await db().from('csbfp_legal_acceptances').select('id').eq('registrant_id', registrantId)
     .eq('document_key', 'conduct_standards').eq('document_version', doc.version).limit(1).maybeSingle(), 'Conduct acknowledgment');
   return Boolean(row);
 }
@@ -121,7 +122,7 @@ function blockedReason(state) {
   if (!state.curriculum) return 'The assessment is not available yet.';
   if (!state.allComplete) return 'Please complete all of the training modules first.';
   if (a.passed) return 'You have already passed the assessment.';
-  if (a.attemptsLeft === 0) return 'You have used all of your attempts. Please contact support@broker-registry.org to arrange another attempt.';
+  if (a.attemptsLeft === 0) return `You have used all of your attempts. Please contact ${config.program.supportEmail} to arrange another attempt.`;
   if (a.nextAllowedAt) return `You can take the assessment again after ${new Date(a.nextAllowedAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Los_Angeles' })} Pacific time.`;
   return null;
 }
@@ -162,7 +163,7 @@ router.post('/assessment/start', async (req, res, next) => {
       options: q.options.map(o => ({ id: o.id, text: o.text })),
       correct: (q.options.find(o => o.is_correct) || {}).id || null,
     }));
-    must(await db().from('br_assessment_attempts').insert({
+    must(await db().from('csbfp_assessment_attempts').insert({
       registrant_id: req.registrant.id, curriculum_version_id: state.curriculum.id,
       questions_snapshot: snapshot, question_count: snapshot.length, pass_percent_applied: state.settings.pass_percent,
     }), 'Start attempt');
@@ -172,7 +173,7 @@ router.post('/assessment/start', async (req, res, next) => {
 });
 
 async function openAttempt(registrantId) {
-  return must(await db().from('br_assessment_attempts').select('*').eq('registrant_id', registrantId)
+  return must(await db().from('csbfp_assessment_attempts').select('*').eq('registrant_id', registrantId)
     .is('submitted_at', null).order('started_at', { ascending: false }).limit(1).maybeSingle(), 'Open attempt');
 }
 
@@ -206,7 +207,7 @@ router.post('/assessment/submit', async (req, res, next) => {
     const correct = snap.filter(q => answers[q.id] === q.correct).length;
     const score = Math.round((correct / snap.length) * 10000) / 100;
     const passed = correct * 100 >= attempt.pass_percent_applied * snap.length;
-    const done = must(await db().from('br_assessment_attempts').update({
+    const done = must(await db().from('csbfp_assessment_attempts').update({
       answers, correct_count: correct, score_percent: score, passed, submitted_at: new Date().toISOString(),
     }).eq('id', attempt.id).is('submitted_at', null).select('*').maybeSingle(), 'Submit attempt');
     if (!done) return res.redirect(303, '/portal/assessment');
@@ -217,7 +218,7 @@ router.post('/assessment/submit', async (req, res, next) => {
     const left = state.assessment.attemptsLeft;
     const cool = state.settings.cooldown_minutes;
     const retry = left === 0
-      ? 'You have used all of your attempts. Please contact support@broker-registry.org to arrange another attempt.'
+      ? `You have used all of your attempts. Please contact ${config.program.supportEmail} to arrange another attempt.`
       : `You can take the assessment again${cool ? ` after ${cool} minutes` : ''}.${left != null ? ` You have ${left} ${left === 1 ? 'attempt' : 'attempts'} left.` : ''} Reviewing the training modules first may help.`;
     sendQuietly({ dedupeKey: `assessment_result:${done.id}`, registrantId: req.registrant.id, templateKey: passed ? 'assessment_passed' : 'assessment_failed',
       to: req.registrant.email,
@@ -229,7 +230,7 @@ router.post('/assessment/submit', async (req, res, next) => {
 router.get('/assessment/result/:id', async (req, res, next) => {
   try {
     if (!isUuid(req.params.id)) return next();
-    const attempt = must(await db().from('br_assessment_attempts').select('*').eq('id', req.params.id)
+    const attempt = must(await db().from('csbfp_assessment_attempts').select('*').eq('id', req.params.id)
       .eq('registrant_id', req.registrant.id).maybeSingle(), 'Attempt');
     if (!attempt || !attempt.submitted_at) return next();
     const state = await training.stateFor(req.registrant.id);

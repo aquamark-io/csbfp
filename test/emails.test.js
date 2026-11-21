@@ -5,7 +5,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 
 Object.assign(process.env, {
-  NODE_ENV: 'test', SITE_URL: 'https://broker-registry.org', SUPABASE_URL: 'http://fake.local', SUPABASE_SERVICE_KEY: 'fake',
+  NODE_ENV: 'test', SITE_URL: 'https://csbfp-certification.org', SUPABASE_URL: 'http://fake.local', SUPABASE_SERVICE_KEY: 'fake',
   JWT_SECRET: 'e'.repeat(40), FIELD_ENCRYPTION_KEY: 'test-encryption-key-that-is-long-enough-1234',
   FIELD_HASH_KEY: 'test-hash-key-that-is-long-enough-and-different', PRE_LAUNCH: 'true', ADMIN_EMAILS: 'boss@example.com',
   PREVIEW_EMAILS: 'boss@example.com,ann@example.com', POSTMARK_SERVER_TOKEN: '', STRIPE_SECRET_KEY: 'sk_test_fake',
@@ -22,16 +22,16 @@ const DAY = 864e5;
 const iso = ms => new Date(ms).toISOString();
 const docs = ['terms', 'privacy', 'registration_agreement', 'automatic_renewal', 'disclaimer', 'acknowledgments']
   .map(key => ({ key, version: 1, body_md: '- x', status: 'published' }));
-const reg = (id, rid, status, expiresIn, extra = {}) => ({ id, registrant_id: rid, registration_number: `BR-0000000${id.slice(-1)}`, status, admin_hold: false,
+const reg = (id, rid, status, expiresIn, extra = {}) => ({ id, registrant_id: rid, registration_number: `CSBFP-0000000${id.slice(-1)}`, status, admin_hold: false,
   expires_at: iso(Date.now() + expiresIn), first_activated_at: iso(Date.now() - 300 * DAY), ...extra });
 const person = (id, first) => ({ id, email: `${first.toLowerCase()}@example.com`, email_verified_at: iso(Date.now()), account_status: 'active', legal_first_name: first });
 const sub = (id, rid, gid, cancel, status = 'active') => ({ id: `s-${id}`, registrant_id: rid, registration_id: gid, stripe_customer_id: 'cus_x', stripe_subscription_id: id,
   stripe_status: status, cancel_at_period_end: cancel, created_at: iso(Date.now() - 300 * DAY) });
 
 const fake = createFake({
-  br_legal_documents: docs,
-  br_registrants: [person('p1', 'Rita'), person('p2', 'Carl'), person('p3', 'Ed'), person('p4', 'Fay'), person('p5', 'Gus'), person('p6', 'Ann')],
-  br_registrations: [
+  csbfp_legal_documents: docs,
+  csbfp_registrants: [person('p1', 'Rita'), person('p2', 'Carl'), person('p3', 'Ed'), person('p4', 'Fay'), person('p5', 'Gus'), person('p6', 'Ann')],
+  csbfp_registrations: [
     reg('g1', 'p1', 'active', 20 * DAY),                       // renews in 20 days -> reminder
     reg('g2', 'p2', 'active', 20 * DAY),                       // canceled auto-renewal -> no reminder
     reg('g3', 'p3', 'active', -1 * DAY),                       // canceled and past date -> expire
@@ -39,9 +39,9 @@ const fake = createFake({
     reg('g5', 'p5', 'inactive', -5 * DAY),                     // failed renewal 4 days ago -> payment reminder
     reg('g6', 'p6', 'pending', 0, { registration_number: null, expires_at: null, first_activated_at: null }),
   ],
-  br_subscriptions: [sub('sub_1', 'p1', 'g1', false), sub('sub_2', 'p2', 'g2', true), sub('sub_3', 'p3', 'g3', true), sub('sub_4', 'p4', 'g4', false), sub('sub_5', 'p5', 'g5', false, 'past_due')],
-  br_payments: [{ id: 'pay5', registrant_id: 'p5', registration_id: 'g5', stripe_invoice_id: 'in_failed_5', status: 'failed', billing_reason: 'renewal', amount_cents: 9900, created_at: iso(Date.now() - 4 * DAY) }],
-  br_settings: [{ key: 'stripe_test_price_id', value: 'price_x' }, { key: 'stripe_test_portal_configuration_id', value: 'bpc_x' }, { key: 'stripe_test_webhook_secret', value: encrypt('whsec_e') },
+  csbfp_subscriptions: [sub('sub_1', 'p1', 'g1', false), sub('sub_2', 'p2', 'g2', true), sub('sub_3', 'p3', 'g3', true), sub('sub_4', 'p4', 'g4', false), sub('sub_5', 'p5', 'g5', false, 'past_due')],
+  csbfp_payments: [{ id: 'pay5', registrant_id: 'p5', registration_id: 'g5', stripe_invoice_id: 'in_failed_5', status: 'failed', billing_reason: 'renewal', amount_cents: 9900, created_at: iso(Date.now() - 4 * DAY) }],
+  csbfp_settings: [{ key: 'stripe_test_price_id', value: 'price_x' }, { key: 'stripe_test_portal_configuration_id', value: 'bpc_x' }, { key: 'stripe_test_webhook_secret', value: encrypt('whsec_e') },
     { key: 'postmark_webhook_token', value: encrypt('pm-token-123') }],
 });
 supa.db.set(fake);
@@ -87,15 +87,15 @@ test('daily job: reminders, expiry, payment reminders; running again sends nothi
   assert.match(mails('rita@example.com', 'renewal_reminder')[0], /renews automatically on/);
   assert.equal(mails('carl@example.com').length, 0, 'auto-renewal canceled: no reminder');
 
-  assert.equal(fake.tables.br_registrations.find(r => r.id === 'g3').status, 'expired');
+  assert.equal(fake.tables.csbfp_registrations.find(r => r.id === 'g3').status, 'expired');
   assert.equal(mails('ed@example.com', 'registration_expired').length, 1);
-  assert.equal(fake.tables.br_registrations.find(r => r.id === 'g4').status, 'active', 'auto-renewing: left for Stripe');
+  assert.equal(fake.tables.csbfp_registrations.find(r => r.id === 'g4').status, 'active', 'auto-renewing: left for Stripe');
   assert.equal(mails('fay@example.com').length, 0);
   assert.equal(mails('gus@example.com', 'payment_method_reminder').length, 1);
 
   const summary = mails('boss@example.com', 'admin_daily_summary');
   assert.equal(summary.length, 1, 'one daily summary to the admin');
-  assert.match(summary[0], /Active registrations: \d+/);
+  assert.match(summary[0], /Certified: \d+/);
   assert.equal(r1.admin_summary.sent, 1);
 
   await jobs.runTasks(new Date());
@@ -106,10 +106,10 @@ test('daily job: reminders, expiry, payment reminders; running again sends nothi
 });
 
 test('daily job: an overdue auto-renewal is re-checked with Stripe (failed -> Inactive)', async () => {
-  const g4 = fake.tables.br_registrations.find(r => r.id === 'g4');
+  const g4 = fake.tables.csbfp_registrations.find(r => r.id === 'g4');
   g4.expires_at = iso(Date.now() - 3 * DAY);
   const now = Math.floor(Date.now() / 1000);
-  fs.state.subscriptions.sub_4 = { id: 'sub_4', status: 'past_due', customer: 'cus_x', metadata: { app: 'broker-registry', registration_id: 'g4' }, cancel_at_period_end: false,
+  fs.state.subscriptions.sub_4 = { id: 'sub_4', status: 'past_due', customer: 'cus_x', metadata: { app: 'csbfp', registration_id: 'g4' }, cancel_at_period_end: false,
     items: { data: [{ current_period_start: now - 3 * 86400, current_period_end: now + 362 * 86400 }] }, latest_invoice: 'in_4' };
   fs.state.invoices.in_4 = { id: 'in_4', status: 'open', attempt_count: 1, billing_reason: 'subscription_cycle', amount_due: 9900, created: now,
     parent: { subscription_details: { subscription: 'sub_4' } }, lines: { data: [{ period: { start: now - 3 * 86400, end: now + 362 * 86400 } }] }, hosted_invoice_url: 'https://invoice.stripe.com/i/4' };
@@ -124,17 +124,17 @@ test('the daily job runs once per Pacific day, after 6 AM', async () => {
   assert.equal(await jobs.runIfDue(early), null);
   assert.ok(await jobs.runIfDue(later));
   assert.equal(await jobs.runIfDue(new Date('2026-12-01T20:00:00Z')), null, 'already ran today');
-  assert.equal(fake.tables.br_job_runs.filter(r => r.run_date === '2026-12-01').length, 1);
+  assert.equal(fake.tables.csbfp_job_runs.filter(r => r.run_date === '2026-12-01').length, 1);
 });
 
 test('renewal webhooks send the receipt, the failure notice and the cancellation notice', async () => {
   const { notify } = require('../lib/billing');
-  const g1 = fake.tables.br_registrations.find(r => r.id === 'g1');
+  const g1 = fake.tables.csbfp_registrations.find(r => r.id === 'g1');
   await notify(g1, 'renewal_succeeded', 'renewal_paid:in_test', { receipt_url: 'https://invoice.stripe.com/i/abc' });
   assert.match(mails('rita@example.com', 'renewal_succeeded')[0], /invoice\.stripe\.com\/i\/abc/);
   // Cancel through the billing page path: subscription upsert sees the change and emails once.
   const now = Math.floor(Date.now() / 1000);
-  fs.state.subscriptions.sub_1 = { id: 'sub_1', status: 'active', customer: 'cus_x', metadata: { app: 'broker-registry', registration_id: 'g1' }, cancel_at_period_end: false,
+  fs.state.subscriptions.sub_1 = { id: 'sub_1', status: 'active', customer: 'cus_x', metadata: { app: 'csbfp', registration_id: 'g1' }, cancel_at_period_end: false,
     items: { data: [{ current_period_start: now - 345 * 86400, current_period_end: now + 20 * 86400 }] } };
   const billing = require('../lib/billing');
   await billing.setAutoRenew('p1', false);
@@ -152,7 +152,7 @@ test('admin can reword an email; new emails use it; restoring brings the default
   let r = await boss.req('/admin/emails');
   assert.match(r.text, /Renewal reminder \(30 days\)/);
   r = await boss.req('/admin/emails/t/renewal_reminder/preview');
-  assert.match(r.text, /November 18, 2027/);
+  assert.match(r.text, /November 21, 2027/);
   assert.match(r.headers.get('content-security-policy'), /unsafe-inline/);
   r = await boss.req('/admin/emails/t/sign_in_code', { subject: 'Code', body_md: '# Hi\n\nNo code here' });
   assert.match(decodeURIComponent(r.location), /must keep the \{\{code\}\} line/);
@@ -164,14 +164,14 @@ test('admin can reword an email; new emails use it; restoring brings the default
   assert.equal(out.version, 1);
   await boss.req('/admin/emails/t/welcome/reset', {});
   out = await renderEmail('welcome', { first_name: 'Zoe' });
-  assert.equal(out.subject, 'Your Broker Registry account is ready');
+  assert.equal(out.subject, 'Your CSBFP account is ready');
   r = await boss.req('/admin/emails/t/welcome/test', {});
   assert.match(decodeURIComponent(r.location), /Test sent/);
-  assert.ok(fake.tables.br_admin_audit_log.some(a => a.action === 'email_template_updated'));
+  assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'email_template_updated'));
 });
 
 test('Postmark webhooks need the token and update delivery status', async () => {
-  fake.tables.br_email_messages.push({ id: 'm1', dedupe_key: 'x1', template_key: 'welcome', to_email: 'a@b.com', status: 'sent', postmark_message_id: 'pm-1' },
+  fake.tables.csbfp_email_messages.push({ id: 'm1', dedupe_key: 'x1', template_key: 'welcome', to_email: 'a@b.com', status: 'sent', postmark_message_id: 'pm-1' },
     { id: 'm2', dedupe_key: 'x2', template_key: 'welcome', to_email: 'c@d.com', status: 'sent', postmark_message_id: 'pm-2' });
   const post = (token, body) => fetch(`${base}/webhooks/postmark?token=${token}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
   assert.equal((await post('wrong', { RecordType: 'Delivery', MessageID: 'pm-1' })).status, 401);
@@ -182,8 +182,8 @@ test('Postmark webhooks need the token and update delivery status', async () => 
   assert.equal((await post('pm-token-123', { RecordType: 'Delivery', MessageID: 'pm-1' })).status, 200);
   await post('pm-token-123', { RecordType: 'Bounce', MessageID: 'pm-2', Type: 'HardBounce', Description: 'Mailbox does not exist' });
   await post('pm-token-123', { RecordType: 'Delivery', MessageID: 'pm-2' });
-  assert.equal(fake.tables.br_email_messages.find(m => m.id === 'm1').status, 'delivered');
-  const m2 = fake.tables.br_email_messages.find(m => m.id === 'm2');
+  assert.equal(fake.tables.csbfp_email_messages.find(m => m.id === 'm1').status, 'delivered');
+  const m2 = fake.tables.csbfp_email_messages.find(m => m.id === 'm2');
   assert.equal(m2.status, 'bounced', 'a later delivery report never hides a bounce');
   assert.match(m2.error, /HardBounce/);
   const r = await boss.req('/admin/emails/log?status=bounced');
@@ -205,7 +205,7 @@ test('changing email: code to the new address, old address notified, sign-in mov
   assert.equal(r.status, 401);
   r = await ann.req('/portal/account/email/verify', { code });
   assert.match(decodeURIComponent(r.location), /has been changed/);
-  assert.equal(fake.tables.br_registrants.find(x => x.id === 'p6').email, 'ann.new@example.com');
+  assert.equal(fake.tables.csbfp_registrants.find(x => x.id === 'p6').email, 'ann.new@example.com');
   await wait(50);
   assert.equal(mails('ann@example.com', 'email_changed').length, 1);
   assert.match(mails('ann@example.com', 'email_changed')[0], /ann\.new@example\.com/);
@@ -218,7 +218,7 @@ test('active registrants get an "information updated" email, at most once a day'
   require('../lib/config').previewEmails.push('rita@example.com');
   await rita.req('/portal', { email: 'rita@example.com' });
   await rita.req('/portal/verify', { code: await codeFor('rita@example.com', mark) });
-  fake.tables.br_financing_products = [{ id: 1, label: 'MCA', position: 1, active: true }];
+  fake.tables.csbfp_financing_products = [{ id: 1, label: 'MCA', position: 1, active: true }];
   await rita.req('/portal/products', { products: '1' });
   await rita.req('/portal/products', { products: '1', products_other: 'Equipment leases' });
   await wait(50);

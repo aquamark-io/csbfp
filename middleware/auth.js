@@ -8,7 +8,7 @@ async function requireRegistrant(req, res, next) {
   const session = readSession(req);
   if (!session) return res.redirect(303, '/portal');
   try {
-    const { data: r, error } = await db().from('br_registrants').select('*').eq('id', session.sub).maybeSingle();
+    const { data: r, error } = await db().from('csbfp_registrants').select('*').eq('id', session.sub).maybeSingle();
     if (error) throw new Error(error.message);
     if (!r || !['active', 'deletion_requested'].includes(r.account_status) || !r.email_verified_at || !config.previewAllowed(r.email)) {
       clearSession(res);

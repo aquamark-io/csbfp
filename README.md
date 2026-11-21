@@ -1,53 +1,54 @@
-# Broker Registry
+# CSBFP: Certified Small Business Finance Professional
 
-An independently administered registration program for individuals working in U.S. alternative commercial finance.
-Operated by Duncan Consulting LLC. <https://broker-registry.org>
+Certification program for individuals working in U.S. small business finance.
+Technology and administration: Duncan Consulting LLC. Working domain: <https://csbfp-certification.org> (later csbfp.org).
 
-Node 20+, Express 4, EJS. One Render web service serves everything on `broker-registry.org`:
+Node 20+, Express 4, EJS. One Render web service serves everything:
 
 | Path | What |
 |---|---|
-| `/`, `/about`, `/registration`, `/verify`, `/legal/*` | Public site |
-| `/portal` | Registrant sign-up, emailed-code sign-in, dashboard and registration information |
-| `/verify` | Public lookup by registration number (rate-limited) |
-| `/support` | Contact form (creates a support request) |
+| `/` | Logo, verify a certification, get certified |
+| `/faq`, `/legal/*`, `/support` | FAQ, Program Terms, Privacy Policy, contact (linked from the footer) |
+| `/verify` | Public lookup by exact certification number (rate-limited; no name search or directory) |
+| `/portal` | Applicant / certificant sign-up, emailed-code sign-in, application, training, assessment, payment, certificate |
 | `/webhooks/stripe`, `/webhooks/postmark` | Signed / token-checked webhooks |
-| `/admin` | Administrator area: registrants, reports, duplicates, support, training, payments, emails, announcements, lookups, lists, Stripe, legal documents, launch checklist, audit log |
-| `/health` | Render health check, returns `{"status":"ok"}` |
+| `/admin` | People, review queue (screening, approval, suspension, revocation, appeals), reports, training, payments, emails, legal, audit log |
+| `/health` | Render health check |
 
-`PRE_LAUNCH` (default on) shows a "Preview" strip, keeps search engines out, and lets only `PREVIEW_EMAILS`
-(default: `ADMIN_EMAILS`) sign up or sign in. Until the database, email and secret settings are present, the portal
-shows "temporarily unavailable" and the public site keeps working. See `.env.example`.
+## Certification lifecycle
+
+`lib/certification.js` and `lib/screening.js`. Status changes go through one database function that enforces the
+allowed transitions and writes history (reason, actor, evidence reference, effective date).
+
+Create account → application → professional standards → training → assessment → payment →
+background screening (when enabled) → eligibility approval → certification issued.
+
+- **Screening is not integrated.** `BACKGROUND_SCREENING_ENABLED=false` (default): payment issues a **DEMO** credential
+  (`DEMO-########`) that the dashboard, certificate and public lookup label "not screened, not valid".
+- With screening enabled, payment moves the application to Pending Screening; a reviewer records the screening outcome
+  and then approves or does not approve. Approval assigns the permanent `CSBFP-########` number and starts the first
+  annual term (the Stripe renewal date is moved to one year after approval). No decision is automatic.
+- Admins can suspend, reinstate and revoke (reason and evidence reference required; revocation stops renewal).
+  Public lookup shows only status, never reasons.
+- Provider adapters live in `lib/screening.js`. Only a `none` placeholder exists. Add a provider only after the agreement,
+  using its real documentation (authorization flow, signed webhooks, idempotency).
 
 ## Database
 
-Migrations in `supabase/migrations/`. Tables are prefixed `br_` (shared Aquamark project), have RLS on with no
+Migrations in `supabase/migrations/`. Tables are prefixed `csbfp_` (shared Aquamark project), have RLS on with no
 policies, and are reached only through the service role. DOB is AES-256-GCM encrypted with an HMAC match key.
+Training modules, assessment questions and legal documents live in the database, not in this repo.
 
 ## Tests
 
-`npm test` runs the portal end to end against an in-memory stand-in for Supabase (`test/fake-supabase.js`).
-
-## Local development
-
-```bash
-npm install
-cp .env.example .env
-npm run dev
-```
-
-## Plan
-
-See [`docs/phase1-plan.md`](docs/phase1-plan.md).
+`npm test` runs the app end to end against an in-memory stand-in for Supabase and Stripe.
 
 ## Daily job
 
-Runs inside the web service, once per Pacific day after 6 AM: 30-day renewal reminders, expiry of registrations that
-won't renew (with a Stripe re-check for overdue auto-renewals), payment-method reminders, housekeeping. Admin can run it
-from Emails > Daily job. `DISABLE_DAILY_JOB=true` turns it off.
+Runs inside the web service once per Pacific day after 6 AM: 30-day renewal reminders, expiry, payment-method reminders,
+admin daily summary, housekeeping. `DISABLE_DAILY_JOB=true` turns it off.
 
-## Launch
+## Open decisions (not built; do not assume)
 
-See Admin > Launch. In short: publish final legal documents and training, remove preview data, set the live
-`STRIPE_SECRET_KEY` and `PRE_LAUNCH=false` in Render, then run Admin > Stripe > Set Up Stripe again (live mode keeps
-its own product, price and webhook), and turn off Stripe's own customer emails.
+Screening provider contract and integration, disqualifying-offense definitions and review rules, notice / appeal
+procedures, final legal terms, SBFA–operator agreement and revenue share, launch timing and approval to enable screening.

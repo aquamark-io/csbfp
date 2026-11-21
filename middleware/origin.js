@@ -19,5 +19,5 @@ module.exports = function sameOrigin(req, res, next) {
     }
   }
   if (ok) return next();
-  return res.status(403).render('error', { pageTitle: 'Request blocked', message: 'This form must be submitted from the Broker Registry website.' });
+  return res.status(403).render('error', { pageTitle: 'Request blocked', message: 'This form must be submitted from the CSBFP website.' });
 };

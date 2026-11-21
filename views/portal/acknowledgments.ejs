@@ -1,6 +1,6 @@
 <%- include('../partials/head') %>
 <%- include('../partials/portal-nav') %>
-<h1>Acknowledgments</h1>
+<h1>Professional Standards</h1>
 <% if (!doc) { %>
 <p class="message">The acknowledgments are not available yet. Please check back soon.</p>
 <% } else if (current) { %>
@@ -11,7 +11,7 @@
 <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
 <form method="post" action="/portal/acknowledgments" novalidate>
   <fieldset class="field">
-    <legend class="visually-hidden">Acknowledgments</legend>
+    <legend class="visually-hidden">Professional Standards</legend>
     <% statements.forEach((s, i) => { %>
     <div class="check"><input id="ack-<%= i %>" type="checkbox" name="ack_<%= i %>" value="yes" <%= checked[i] ? 'checked' : '' %>><label for="ack-<%= i %>"><%= s %></label></div>
     <% }) %>

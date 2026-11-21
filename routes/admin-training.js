@@ -39,18 +39,18 @@ const slug = s => s.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-
 
 async function loadVersion(req) {
   if (!isUuid(req.params.vid)) return null;
-  return must(await db().from('br_curriculum_versions').select('*').eq('id', req.params.vid).maybeSingle(), 'Version');
+  return must(await db().from('csbfp_curriculum_versions').select('*').eq('id', req.params.vid).maybeSingle(), 'Version');
 }
 
 // ---------- versions ----------
 
 router.get('/training', async (req, res, next) => {
   try {
-    const versions = must(await db().from('br_curriculum_versions').select('*').order('created_at', { ascending: false }), 'Versions');
+    const versions = must(await db().from('csbfp_curriculum_versions').select('*').order('created_at', { ascending: false }), 'Versions');
     const counts = await Promise.all(versions.map(async v => {
       const [m, q] = await Promise.all([
-        db().from('br_modules').select('id', { count: 'exact', head: true }).eq('curriculum_version_id', v.id),
-        db().from('br_questions').select('id', { count: 'exact', head: true }).eq('curriculum_version_id', v.id).eq('active', true),
+        db().from('csbfp_modules').select('id', { count: 'exact', head: true }).eq('curriculum_version_id', v.id),
+        db().from('csbfp_questions').select('id', { count: 'exact', head: true }).eq('curriculum_version_id', v.id).eq('active', true),
       ]);
       return { modules: m.count || 0, questions: q.count || 0 };
     }));
@@ -64,7 +64,7 @@ router.get('/training/v/:vid', async (req, res, next) => {
     if (!v) return next();
     const [modules, settings, qcount] = await Promise.all([
       training.modulesOf(v.id), training.settingsOf(v.id),
-      db().from('br_questions').select('id', { count: 'exact', head: true }).eq('curriculum_version_id', v.id).eq('active', true),
+      db().from('csbfp_questions').select('id', { count: 'exact', head: true }).eq('curriculum_version_id', v.id).eq('active', true),
     ]);
     res.render('admin/training-version', { pageTitle: `Training ${v.label}`, v, modules, settings, questionCount: qcount.count || 0, ...msgOf(req) });
   } catch (err) { next(err); }
@@ -79,7 +79,7 @@ router.post('/training/v/:vid', async (req, res, next) => {
       const update = { overview_md: text(req.body.overview_md, 20000), completion_md: text(req.body.completion_md, 5000) };
       const label = line(req.body.label, 60);
       if (label) update.label = label;
-      const { error } = await db().from('br_curriculum_versions').update(update).eq('id', v.id);
+      const { error } = await db().from('csbfp_curriculum_versions').update(update).eq('id', v.id);
       if (error) return go(res, path, error.code === '23505' ? 'Another version already has that name.' : 'Could not save.', true);
       await logAdmin({ adminId: req.admin.id, action: 'training_text_updated', targetType: 'curriculum', targetId: v.id, detail: { label: update.label || v.label }, ip: req.ip });
       return go(res, path, 'Saved.');
@@ -93,9 +93,9 @@ router.post('/training/v/:vid', async (req, res, next) => {
       if (Object.entries(s).some(([k, x]) => x === null && !(k === 'max_attempts_total' && req.body.max_attempts_total === ''))) {
         return go(res, path, 'Check the settings: whole numbers only (questions 1-200, pass 1-100%).', true);
       }
-      const existing = must(await db().from('br_assessment_settings').select('curriculum_version_id').eq('curriculum_version_id', v.id).maybeSingle(), 'Settings');
-      if (existing) must(await db().from('br_assessment_settings').update(s).eq('curriculum_version_id', v.id), 'Save settings');
-      else must(await db().from('br_assessment_settings').insert({ ...s, curriculum_version_id: v.id }), 'Save settings');
+      const existing = must(await db().from('csbfp_assessment_settings').select('curriculum_version_id').eq('curriculum_version_id', v.id).maybeSingle(), 'Settings');
+      if (existing) must(await db().from('csbfp_assessment_settings').update(s).eq('curriculum_version_id', v.id), 'Save settings');
+      else must(await db().from('csbfp_assessment_settings').insert({ ...s, curriculum_version_id: v.id }), 'Save settings');
       await logAdmin({ adminId: req.admin.id, action: 'assessment_settings_updated', targetType: 'curriculum', targetId: v.id, detail: { label: v.label, ...s }, ip: req.ip });
       return go(res, path, 'Assessment settings saved.');
     }
@@ -109,21 +109,21 @@ router.post('/training/v/:vid/copy', async (req, res, next) => {
     if (!v) return next();
     const label = line(req.body.label, 60);
     if (!label) return go(res, `/admin/training/v/${v.id}`, 'Enter a name for the new version.', true);
-    const { data: nv, error } = await db().from('br_curriculum_versions')
+    const { data: nv, error } = await db().from('csbfp_curriculum_versions')
       .insert({ label, status: 'draft', is_required: false, overview_md: v.overview_md, completion_md: v.completion_md }).select('*').single();
     if (error) return go(res, `/admin/training/v/${v.id}`, error.code === '23505' ? 'That name is already used.' : 'Could not create it.', true);
     const [mods, settings, questions] = await Promise.all([training.modulesOf(v.id), training.settingsOf(v.id), training.questionsOf(v.id, { activeOnly: false })]);
     if (mods.length) {
-      must(await db().from('br_modules').insert(mods.map(m => ({ curriculum_version_id: nv.id, stable_key: m.stable_key, position: m.position,
+      must(await db().from('csbfp_modules').insert(mods.map(m => ({ curriculum_version_id: nv.id, stable_key: m.stable_key, position: m.position,
         title: m.title, body_md: m.body_md, video_url: m.video_url, estimated_minutes: m.estimated_minutes, summary: m.summary }))), 'Copy modules');
     }
-    must(await db().from('br_assessment_settings').insert({ curriculum_version_id: nv.id, question_count: settings.question_count,
+    must(await db().from('csbfp_assessment_settings').insert({ curriculum_version_id: nv.id, question_count: settings.question_count,
       pass_percent: settings.pass_percent, cooldown_minutes: settings.cooldown_minutes, max_attempts_total: settings.max_attempts_total }), 'Copy settings');
     for (const q of questions) {
-      const nq = must(await db().from('br_questions').insert({ curriculum_version_id: nv.id, module_stable_key: q.module_stable_key,
+      const nq = must(await db().from('csbfp_questions').insert({ curriculum_version_id: nv.id, module_stable_key: q.module_stable_key,
         position: q.position, prompt: q.prompt, explanation: q.explanation, active: q.active }).select('id').single(), 'Copy question');
       if (q.options.length) {
-        must(await db().from('br_question_options').insert(q.options.map(o => ({ question_id: nq.id, text: o.text, is_correct: o.is_correct, position: o.position }))), 'Copy options');
+        must(await db().from('csbfp_question_options').insert(q.options.map(o => ({ question_id: nq.id, text: o.text, is_correct: o.is_correct, position: o.position }))), 'Copy options');
       }
     }
     await logAdmin({ adminId: req.admin.id, action: 'training_version_created', targetType: 'curriculum', targetId: nv.id, detail: { label, from: v.label }, ip: req.ip });
@@ -143,9 +143,9 @@ router.post('/training/v/:vid/publish', async (req, res, next) => {
     if (!mods.length || qs.length < settings.question_count || qs.some(q => q.options.filter(o => o.is_correct).length !== 1)) {
       return go(res, `/admin/training/v/${v.id}`, `Can't publish yet: it needs at least one module and ${settings.question_count} active questions, each with exactly one correct answer.`, true);
     }
-    const current = must(await db().from('br_curriculum_versions').select('id, label').eq('is_required', true).maybeSingle(), 'Current');
-    if (current) must(await db().from('br_curriculum_versions').update({ is_required: false, status: 'retired' }).eq('id', current.id), 'Retire current');
-    must(await db().from('br_curriculum_versions').update({ is_required: true, status: 'published', published_at: new Date().toISOString() }).eq('id', v.id), 'Publish');
+    const current = must(await db().from('csbfp_curriculum_versions').select('id, label').eq('is_required', true).maybeSingle(), 'Current');
+    if (current) must(await db().from('csbfp_curriculum_versions').update({ is_required: false, status: 'retired' }).eq('id', current.id), 'Retire current');
+    must(await db().from('csbfp_curriculum_versions').update({ is_required: true, status: 'published', published_at: new Date().toISOString() }).eq('id', v.id), 'Publish');
     await logAdmin({ adminId: req.admin.id, action: 'training_version_published', targetType: 'curriculum', targetId: v.id,
       detail: { label: v.label, replaced: current ? current.label : null }, ip: req.ip });
     return go(res, `/admin/training/v/${v.id}`, `"${v.label}" is now the required training.`);
@@ -163,7 +163,7 @@ router.post('/training/v/:vid/modules', async (req, res, next) => {
     const mods = await training.modulesOf(v.id);
     let key = slug(title);
     while (mods.some(m => m.stable_key === key)) key = `${key}-2`;
-    const m = must(await db().from('br_modules').insert({ curriculum_version_id: v.id, stable_key: key, title,
+    const m = must(await db().from('csbfp_modules').insert({ curriculum_version_id: v.id, stable_key: key, title,
       position: Math.max(0, ...mods.map(x => x.position)) + 1, body_md: '' }).select('id').single(), 'Add module');
     await logAdmin({ adminId: req.admin.id, action: 'module_added', targetType: 'curriculum', targetId: v.id, detail: { label: title }, ip: req.ip });
     return go(res, `/admin/training/v/${v.id}/modules/${m.id}`, 'Module added. Write its content below.');
@@ -172,7 +172,7 @@ router.post('/training/v/:vid/modules', async (req, res, next) => {
 
 async function loadModule(req, v) {
   if (!isUuid(req.params.mid)) return null;
-  return must(await db().from('br_modules').select('*').eq('id', req.params.mid).eq('curriculum_version_id', v.id).maybeSingle(), 'Module');
+  return must(await db().from('csbfp_modules').select('*').eq('id', req.params.mid).eq('curriculum_version_id', v.id).maybeSingle(), 'Module');
 }
 
 router.get('/training/v/:vid/modules/:mid', async (req, res, next) => {
@@ -196,7 +196,7 @@ router.post('/training/v/:vid/modules/:mid', async (req, res, next) => {
     if (video && !/^https:\/\/(www\.)?(youtube\.com|youtu\.be|vimeo\.com)\//i.test(video)) return go(res, path, 'Videos must be YouTube or Vimeo links.', true);
     const update = { title, body_md: text(req.body.body_md, 60000), video_url: video || null,
       summary: line(req.body.summary, 160) || null };
-    must(await db().from('br_modules').update(update).eq('id', m.id), 'Save module');
+    must(await db().from('csbfp_modules').update(update).eq('id', m.id), 'Save module');
     await logAdmin({ adminId: req.admin.id, action: 'module_updated', targetType: 'curriculum', targetId: v.id, detail: { label: title }, ip: req.ip });
     return go(res, path, 'Module saved.');
   } catch (err) { next(err); }
@@ -213,9 +213,9 @@ router.post('/training/v/:vid/modules/:mid/move', async (req, res, next) => {
     if (j < 0 || j >= mods.length) return res.redirect(303, `/admin/training/v/${v.id}`);
     const other = mods[j];
     // Swap via a temporary position (positions are unique within a version).
-    must(await db().from('br_modules').update({ position: -1 }).eq('id', m.id), 'Move');
-    must(await db().from('br_modules').update({ position: m.position }).eq('id', other.id), 'Move');
-    must(await db().from('br_modules').update({ position: other.position }).eq('id', m.id), 'Move');
+    must(await db().from('csbfp_modules').update({ position: -1 }).eq('id', m.id), 'Move');
+    must(await db().from('csbfp_modules').update({ position: m.position }).eq('id', other.id), 'Move');
+    must(await db().from('csbfp_modules').update({ position: other.position }).eq('id', m.id), 'Move');
     await logAdmin({ adminId: req.admin.id, action: 'module_reordered', targetType: 'curriculum', targetId: v.id, detail: { label: m.title }, ip: req.ip });
     return res.redirect(303, `/admin/training/v/${v.id}`);
   } catch (err) { next(err); }
@@ -227,7 +227,7 @@ router.post('/training/v/:vid/modules/:mid/delete', async (req, res, next) => {
     const m = v && await loadModule(req, v);
     if (!m) return next();
     if (v.status !== 'draft') return go(res, `/admin/training/v/${v.id}`, 'Modules can only be removed from a draft version.', true);
-    must(await db().from('br_modules').delete().eq('id', m.id), 'Delete module');
+    must(await db().from('csbfp_modules').delete().eq('id', m.id), 'Delete module');
     await logAdmin({ adminId: req.admin.id, action: 'module_deleted', targetType: 'curriculum', targetId: v.id, detail: { label: m.title }, ip: req.ip });
     return go(res, `/admin/training/v/${v.id}`, 'Module removed.');
   } catch (err) { next(err); }
@@ -247,9 +247,9 @@ router.get('/training/v/:vid/questions', async (req, res, next) => {
 async function loadQuestion(req, v) {
   if (req.params.qid === 'new') return null;
   if (!isUuid(req.params.qid)) return undefined;
-  const q = must(await db().from('br_questions').select('*').eq('id', req.params.qid).eq('curriculum_version_id', v.id).maybeSingle(), 'Question');
+  const q = must(await db().from('csbfp_questions').select('*').eq('id', req.params.qid).eq('curriculum_version_id', v.id).maybeSingle(), 'Question');
   if (!q) return undefined;
-  q.options = must(await db().from('br_question_options').select('*').eq('question_id', q.id).order('position'), 'Options');
+  q.options = must(await db().from('csbfp_question_options').select('*').eq('question_id', q.id).order('position'), 'Options');
   return q;
 }
 
@@ -286,17 +286,17 @@ router.post('/training/v/:vid/questions/:qid', async (req, res, next) => {
     };
     let id;
     if (q) {
-      must(await db().from('br_questions').update(fields).eq('id', q.id), 'Save question');
-      must(await db().from('br_question_options').delete().eq('question_id', q.id), 'Replace options');
+      must(await db().from('csbfp_questions').update(fields).eq('id', q.id), 'Save question');
+      must(await db().from('csbfp_question_options').delete().eq('question_id', q.id), 'Replace options');
       id = q.id;
     } else {
       if (!req.body.position) {
-        const all = must(await db().from('br_questions').select('position').eq('curriculum_version_id', v.id), 'Positions');
+        const all = must(await db().from('csbfp_questions').select('position').eq('curriculum_version_id', v.id), 'Positions');
         fields.position = Math.max(0, ...all.map(x => x.position)) + 1;
       }
-      id = must(await db().from('br_questions').insert({ ...fields, curriculum_version_id: v.id }).select('id').single(), 'Add question').id;
+      id = must(await db().from('csbfp_questions').insert({ ...fields, curriculum_version_id: v.id }).select('id').single(), 'Add question').id;
     }
-    must(await db().from('br_question_options').insert(options.map((o, k) => ({ question_id: id, text: o.text, is_correct: o.i === correctIdx, position: k + 1 }))), 'Save options');
+    must(await db().from('csbfp_question_options').insert(options.map((o, k) => ({ question_id: id, text: o.text, is_correct: o.i === correctIdx, position: k + 1 }))), 'Save options');
     await logAdmin({ adminId: req.admin.id, action: q ? 'question_updated' : 'question_added', targetType: 'curriculum', targetId: v.id,
       detail: { label: prompt.slice(0, 80) }, ip: req.ip });
     return go(res, `/admin/training/v/${v.id}/questions/${id}`, 'Question saved.');
@@ -307,13 +307,13 @@ router.post('/training/v/:vid/questions/:qid', async (req, res, next) => {
 
 router.get('/training/results', async (req, res, next) => {
   try {
-    const attempts = must(await db().from('br_assessment_attempts').select('id, registrant_id, curriculum_version_id, started_at, submitted_at, correct_count, question_count, score_percent, passed')
+    const attempts = must(await db().from('csbfp_assessment_attempts').select('id, registrant_id, curriculum_version_id, started_at, submitted_at, correct_count, question_count, score_percent, passed')
       .order('started_at', { ascending: false }).limit(200), 'Attempts');
     const ids = [...new Set(attempts.map(a => a.registrant_id))];
     const vids = [...new Set(attempts.map(a => a.curriculum_version_id))];
     const [people, versions] = await Promise.all([
-      ids.length ? db().from('br_registrants').select('id, legal_first_name, middle_name, legal_last_name, email').in('id', ids) : { data: [] },
-      vids.length ? db().from('br_curriculum_versions').select('id, label').in('id', vids) : { data: [] },
+      ids.length ? db().from('csbfp_registrants').select('id, legal_first_name, middle_name, legal_last_name, email').in('id', ids) : { data: [] },
+      vids.length ? db().from('csbfp_curriculum_versions').select('id, label').in('id', vids) : { data: [] },
     ]);
     const by = new Map(must(people, 'People').map(p => [p.id, p]));
     const vby = new Map(must(versions, 'Versions').map(x => [x.id, x.label]));
@@ -327,7 +327,7 @@ router.post('/registrants/:id/reset-attempts', async (req, res, next) => {
     const reason = line(req.body.reason, 500);
     const path = `/admin/registrants/${req.params.id}`;
     if (!reason) return go(res, path, 'A reason is required.', true);
-    must(await db().from('br_assessment_resets').insert({ registrant_id: req.params.id, admin_id: req.admin.id, reason }), 'Reset attempts');
+    must(await db().from('csbfp_assessment_resets').insert({ registrant_id: req.params.id, admin_id: req.admin.id, reason }), 'Reset attempts');
     await logAdmin({ adminId: req.admin.id, action: 'assessment_attempts_reset', targetType: 'registrant', targetId: req.params.id, reason, ip: req.ip });
     await logEvent({ registrantId: req.params.id, event: 'assessment_attempts_reset', actor: 'admin' });
     return go(res, path, 'Attempt limit reset. They can take the assessment again.');

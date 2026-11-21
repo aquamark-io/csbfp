@@ -36,17 +36,17 @@ for (let n = 1; n <= 5; n++) {
 }
 
 const fake = createFake({
-  br_legal_documents: docs,
-  br_job_titles: [{ id: 1, label: 'Other', position: 1, active: true }],
-  br_financing_products: [{ id: 1, label: 'MCA', position: 1, active: true }],
-  br_curriculum_versions: [{ id: V1, label: 'Test 1', status: 'published', is_required: true, overview_md: '## Welcome\n\nIntro text.', completion_md: 'All done here.' }],
-  br_modules: [
+  csbfp_legal_documents: docs,
+  csbfp_job_titles: [{ id: 1, label: 'Other', position: 1, active: true }],
+  csbfp_financing_products: [{ id: 1, label: 'MCA', position: 1, active: true }],
+  csbfp_curriculum_versions: [{ id: V1, label: 'Test 1', status: 'published', is_required: true, overview_md: '## Welcome\n\nIntro text.', completion_md: 'All done here.' }],
+  csbfp_modules: [
     { id: 'aaaaaaaa-0000-4000-8000-000000000001', curriculum_version_id: V1, stable_key: 'intro', position: 1, title: 'Intro', body_md: 'Goal: Learn.\n\n### Remember\n\nBe accurate.', estimated_minutes: 5 },
     { id: 'aaaaaaaa-0000-4000-8000-000000000002', curriculum_version_id: V1, stable_key: 'conduct', position: 2, title: 'Conduct', body_md: '## Two\n\nText.', estimated_minutes: 8 },
   ],
-  br_assessment_settings: [{ curriculum_version_id: V1, question_count: 5, pass_percent: 80, cooldown_minutes: 60, max_attempts_total: 3 }],
-  br_questions: questions,
-  br_question_options: options,
+  csbfp_assessment_settings: [{ curriculum_version_id: V1, question_count: 5, pass_percent: 80, cooldown_minutes: 60, max_attempts_total: 3 }],
+  csbfp_questions: questions,
+  csbfp_question_options: options,
 });
 supa.db.set(fake);
 
@@ -113,13 +113,13 @@ function answersFor(html, rightCount) {
   return form;
 }
 const lastAttempt = email => {
-  const r = fake.tables.br_registrants.find(x => x.email === email);
-  return fake.tables.br_assessment_attempts.filter(a => a.registrant_id === r.id).sort((a, b) => (a.started_at < b.started_at ? 1 : -1))[0];
+  const r = fake.tables.csbfp_registrants.find(x => x.email === email);
+  return fake.tables.csbfp_assessment_attempts.filter(a => a.registrant_id === r.id).sort((a, b) => (a.started_at < b.started_at ? 1 : -1))[0];
 };
 // Pretend the cooldown has passed.
 const ageAttempts = email => {
-  const r = fake.tables.br_registrants.find(x => x.email === email);
-  for (const a of fake.tables.br_assessment_attempts.filter(x => x.registrant_id === r.id)) {
+  const r = fake.tables.csbfp_registrants.find(x => x.email === email);
+  for (const a of fake.tables.csbfp_assessment_attempts.filter(x => x.registrant_id === r.id)) {
     a.started_at = new Date(Date.parse(a.started_at) - 2 * 3600e3).toISOString();
     if (a.submitted_at) a.submitted_at = new Date(Date.parse(a.submitted_at) - 2 * 3600e3).toISOString();
   }
@@ -147,7 +147,7 @@ test('modules open in order; completing them leads to the completion page and on
   assert.match((await amy.req('/portal/training/complete')).text, /All done here/);
   await amy.req('/portal/training/conduct/complete', {}); // repeat: no second email
   await wait(60);
-  assert.equal(fake.tables.br_email_messages.filter(m => m.template_key === 'training_completed').length, 1);
+  assert.equal(fake.tables.csbfp_email_messages.filter(m => m.template_key === 'training_completed').length, 1);
   assert.match((await amy.req('/portal/dashboard')).text, /2 of 2 modules/);
 });
 
@@ -158,8 +158,8 @@ test('the conduct acknowledgment is required before the first attempt and is rec
   assert.equal(r.status, 422);
   r = await amy.req('/portal/assessment/start', { ack_0: 'yes', ack_1: 'yes' });
   assert.equal(r.location, '/portal/assessment/attempt');
-  const amyId = fake.tables.br_registrants.find(x => x.email === 'amy@example.com').id;
-  assert.ok(fake.tables.br_legal_acceptances.some(a => a.registrant_id === amyId && a.document_key === 'conduct_standards' && a.context === 'assessment'));
+  const amyId = fake.tables.csbfp_registrants.find(x => x.email === 'amy@example.com').id;
+  assert.ok(fake.tables.csbfp_legal_acceptances.some(a => a.registrant_id === amyId && a.document_key === 'conduct_standards' && a.context === 'assessment'));
 });
 
 test('questions appear in fixed order without the answer key; every question must be answered', async () => {
@@ -202,13 +202,13 @@ test('after the attempt limit, an admin reset allows another attempt', async () 
   assert.match(r.text, /used all of your attempts/);
 
   boss = await admin();
-  const amyId = fake.tables.br_registrants.find(x => x.email === 'amy@example.com').id;
+  const amyId = fake.tables.csbfp_registrants.find(x => x.email === 'amy@example.com').id;
   r = await boss.req(`/admin/registrants/${amyId}`);
   assert.match(r.text, /0 attempts left/);
   r = await boss.req(`/admin/registrants/${amyId}/reset-attempts`, { reason: '' });
   assert.match(decodeURIComponent(r.location), /reason is required/);
   await boss.req(`/admin/registrants/${amyId}/reset-attempts`, { reason: 'Asked for another try' });
-  assert.ok(fake.tables.br_admin_audit_log.some(a => a.action === 'assessment_attempts_reset' && a.reason === 'Asked for another try'));
+  assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'assessment_attempts_reset' && a.reason === 'Asked for another try'));
   r = await amy.req('/portal/assessment/start', {});
   assert.equal(r.location, '/portal/assessment/attempt');
 });
@@ -237,7 +237,7 @@ test('admin edits to a question never change past results', async () => {
   let r = await boss.req(`/admin/training/v/${V1}/questions/${qid}`);
   assert.match(r.text, /Question 1\?/);
   await boss.req(`/admin/training/v/${V1}/questions/${qid}`, { prompt: 'Edited question?', option_0: 'Yes', option_1: 'No', correct: '0', explanation: 'New', active: 'yes', position: '1' });
-  assert.equal(fake.tables.br_questions.find(q => q.id === qid).prompt, 'Edited question?');
+  assert.equal(fake.tables.csbfp_questions.find(q => q.id === qid).prompt, 'Edited question?');
   const snap = lastAttempt('amy@example.com').questions_snapshot;
   assert.ok(snap.some(q => q.prompt === 'Question 1?') && !snap.some(q => q.prompt === 'Edited question?'), 'saved attempt keeps the original question');
   r = await boss.req(`/admin/training/v/${V1}/questions/${qid}`, { prompt: 'X', option_0: 'Yes', option_1: '', correct: '0' });
@@ -253,24 +253,24 @@ test('admin: module editing, video links, reordering', async () => {
   assert.match(r.text, /Updated\./);
   assert.match(r.text, /youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/);
   await boss.req(`/admin/training/v/${V1}/modules/${mid}/move`, { dir: 'up' });
-  const order = fake.tables.br_modules.filter(m => m.curriculum_version_id === V1).sort((a, b) => a.position - b.position).map(m => m.stable_key);
+  const order = fake.tables.csbfp_modules.filter(m => m.curriculum_version_id === V1).sort((a, b) => a.position - b.position).map(m => m.stable_key);
   assert.deepEqual(order, ['conduct', 'intro']);
 });
 
 test('admin: copy to a draft, then publishing requires confirmation and replaces the current version', async () => {
   let r = await boss.req(`/admin/training/v/${V1}/copy`, { label: 'Test 2' });
-  const v2 = fake.tables.br_curriculum_versions.find(v => v.label === 'Test 2');
+  const v2 = fake.tables.csbfp_curriculum_versions.find(v => v.label === 'Test 2');
   assert.ok(v2);
   assert.equal(v2.status, 'draft');
-  assert.equal(fake.tables.br_modules.filter(m => m.curriculum_version_id === v2.id).length, 2);
-  assert.equal(fake.tables.br_questions.filter(q => q.curriculum_version_id === v2.id).length, 5);
+  assert.equal(fake.tables.csbfp_modules.filter(m => m.curriculum_version_id === v2.id).length, 2);
+  assert.equal(fake.tables.csbfp_questions.filter(q => q.curriculum_version_id === v2.id).length, 5);
   assert.match((await amy.req('/portal/training')).text, /Test|Intro/); // registrants still on Test 1
 
   r = await boss.req(`/admin/training/v/${v2.id}/publish`, {});
   assert.match(decodeURIComponent(r.location), /confirmation/);
   r = await boss.req(`/admin/training/v/${v2.id}/publish`, { confirm: 'yes' });
-  assert.equal(fake.tables.br_curriculum_versions.find(v => v.id === v2.id).is_required, true);
-  assert.equal(fake.tables.br_curriculum_versions.find(v => v.id === V1).is_required, false);
+  assert.equal(fake.tables.csbfp_curriculum_versions.find(v => v.id === v2.id).is_required, true);
+  assert.equal(fake.tables.csbfp_curriculum_versions.find(v => v.id === V1).is_required, false);
   // Ben (not yet passed) now sees the new version from the start.
   const ben = browser();
   const mark = sent.length;

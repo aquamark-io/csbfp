@@ -1,17 +1,22 @@
 <%- include('../partials/head') %>
 <%- include('../partials/portal-nav') %>
 <% if (activated) { %>
-  <h1>Your Registration Is Active</h1>
+  <h1><%= registration.is_demo ? 'Demo Credential Issued' : 'You Are Certified' %></h1>
+  <% if (registration.is_demo) { %><p class="demo-banner">DEMO / NOT SCREENED: background screening is not active yet, so this preview credential is not a valid CSBFP certification.</p><% } %>
   <dl class="summary">
-    <div><dt>Registration number</dt><dd><%= registration.registration_number %></dd></div>
-    <div><dt>Status</dt><dd><span class="status status-active">Active</span></dd></div>
+    <div><dt>Certification number</dt><dd><%= registration.registration_number %></dd></div>
+    <div><dt>Status</dt><dd><%- statusPill(registration.status, false, registration.is_demo) %></dd></div>
     <div><dt>Valid through</dt><dd><%= new Date(registration.expires_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) %></dd></div>
   </dl>
   <p>A confirmation email is on its way.</p>
-  <div class="actions"><a class="button" href="/portal/confirmation">View Registration Confirmation</a><a class="button secondary" href="/portal/dashboard">Dashboard</a></div>
+  <div class="actions"><a class="button" href="/portal/confirmation">View Certificate</a><a class="button secondary" href="/portal/dashboard">Dashboard</a></div>
+<% } else if (held) { %>
+  <h1>Application Complete</h1>
+  <p class="message">Your payment was received. The next step is the one-time background screening, followed by an eligibility review. We will email you with instructions.</p>
+  <div class="actions"><a class="button" href="/portal/dashboard">Go to My Dashboard</a></div>
 <% } else { %>
   <h1>Payment Received</h1>
-  <p class="message">We're finishing your registration. This usually takes a few seconds.</p>
+  <p class="message">We're finishing your certification. This usually takes a few seconds.</p>
   <div class="actions"><a class="button" href="/portal/dashboard">Check My Dashboard</a></div>
 <% } %>
 <%- include('../partials/foot') %>

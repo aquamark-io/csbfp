@@ -2,7 +2,7 @@
 <%- include('../partials/portal-nav') %>
 <h1>Cancel Automatic Renewal</h1>
 <% const d = x => x ? new Date(x).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—'; %>
-<p>If you cancel automatic renewal, you won't be charged again. Your registration stays <strong>Active through <%= d(live.current_period_end) %></strong> and then expires. You can turn automatic renewal back on any time before then, or renew later and keep the same registration number.</p>
+<p>If you cancel automatic renewal, you won't be charged again. Your certification stays <strong>Active through <%= d(live.current_period_end) %></strong> and then expires. You can turn automatic renewal back on any time before then, or renew later and keep the same certification number.</p>
 <form method="post" action="/portal/billing/cancel">
   <div class="actions">
     <button class="button" type="submit">Cancel Automatic Renewal</button>

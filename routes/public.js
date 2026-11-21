@@ -9,7 +9,7 @@ const legal = require('../lib/legal');
 const router = express.Router();
 
 router.get('/', (req, res) => res.render('home', { pageTitle: null }));
-router.get('/about', (req, res) => res.render('about', { pageTitle: 'About' }));
+router.get('/about', (req, res) => res.redirect(301, '/faq'));
 router.get('/faq', (req, res) => res.render('faq', { pageTitle: 'FAQ' }));
 router.get('/registration', (req, res) => res.redirect(301, '/faq'));
 

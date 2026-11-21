@@ -14,7 +14,7 @@ function createFakeStripe() {
   function makeInvoice(sub, { reason, paid, start, end }) {
     const inv = {
       id: id('in'), object: 'invoice', customer: sub.customer, billing_reason: reason, status: paid ? 'paid' : 'open',
-      amount_paid: paid ? 9900 : 0, amount_due: 9900, currency: 'usd', attempt_count: paid ? 1 : 1, created: now(),
+      amount_paid: paid ? 14900 : 0, amount_due: 14900, currency: 'usd', attempt_count: paid ? 1 : 1, created: now(),
       parent: { type: 'subscription_details', subscription_details: { subscription: sub.id } },
       lines: { data: [{ period: { start, end } }] },
       status_transitions: { paid_at: paid ? now() : null },
@@ -45,7 +45,13 @@ function createFakeStripe() {
     },
     subscriptions: {
       retrieve: async (sid, opts = {}) => expandSub(s.subscriptions[sid], opts.expand || []),
-      update: async (sid, p) => { Object.assign(s.subscriptions[sid], p); return { ...s.subscriptions[sid] }; },
+      update: async (sid, p) => {
+        const sub = s.subscriptions[sid];
+        const { trial_end: trialEnd, proration_behavior: _pb, ...rest } = p;
+        Object.assign(sub, rest);
+        if (trialEnd) { sub.status = 'trialing'; sub.trial_end = trialEnd; sub.items.data[0].current_period_end = trialEnd; }
+        return { ...sub };
+      },
       cancel: async sid => { Object.assign(s.subscriptions[sid], { status: 'canceled', canceled_at: now(), ended_at: now() }); return { ...s.subscriptions[sid] }; },
     },
     invoices: { retrieve: async iid => ({ ...s.invoices[iid] }) },
@@ -98,7 +104,7 @@ function createFakeStripe() {
     },
     payInvoice(invId) {
       const inv = s.invoices[invId];
-      Object.assign(inv, { status: 'paid', amount_paid: 9900, status_transitions: { paid_at: now() } });
+      Object.assign(inv, { status: 'paid', amount_paid: 14900, status_transitions: { paid_at: now() } });
       const sub = s.subscriptions[inv.parent.subscription_details.subscription];
       const item = sub.items.data[0];
       item.current_period_start = inv.lines.data[0].period.start;

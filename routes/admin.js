@@ -16,7 +16,7 @@
  *   POST     /admin/lists/:kind, /admin/lists/:kind/:id
  *   GET      /admin/audit                             audit log
  *
- * Every change is written to br_admin_audit_log with the admin, a reason and the field names changed.
+ * Every change is written to csbfp_admin_audit_log with the admin, a reason and the field names changed.
  */
 const crypto = require('crypto');
 const express = require('express');
@@ -32,6 +32,7 @@ const adminSession = require('../lib/admin-session');
 const { requireAdmin } = require('../middleware/admin');
 const v = require('../lib/validate');
 const training = require('../lib/training');
+const screening = require('../lib/screening');
 
 const router = express.Router();
 
@@ -60,7 +61,7 @@ const verifyLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 15, standardH
   handler: limited('admin/verify', 'Too many attempts. Please wait 15 minutes and try again.') });
 
 async function adminByEmail(email) {
-  return must(await db().from('br_admin_users').select('*').eq('email', email).maybeSingle(), 'Admin lookup');
+  return must(await db().from('csbfp_admin_users').select('*').eq('email', email).maybeSingle(), 'Admin lookup');
 }
 
 // Runs after the response; nothing is sent for addresses that aren't on the allowlist.
@@ -69,19 +70,19 @@ async function issueAdminCode(email, ip) {
     if (!config.adminEmails.includes(email)) return;
     let admin = await adminByEmail(email);
     if (!admin) {
-      admin = must(await db().from('br_admin_users').insert({ email }).select('*').single(), 'Create admin user');
+      admin = must(await db().from('csbfp_admin_users').insert({ email }).select('*').single(), 'Create admin user');
     }
     if (!admin.active) return;
 
     const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
-    const { count } = await db().from('br_admin_login_codes').select('id', { count: 'exact', head: true })
+    const { count } = await db().from('csbfp_admin_login_codes').select('id', { count: 'exact', head: true })
       .eq('admin_id', admin.id).gte('created_at', since);
     if ((count || 0) >= 3) return;
 
-    must(await db().from('br_admin_login_codes').update({ used_at: new Date().toISOString() })
+    must(await db().from('csbfp_admin_login_codes').update({ used_at: new Date().toISOString() })
       .eq('admin_id', admin.id).is('used_at', null), 'Cancel old admin codes');
     const code = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
-    const row = must(await db().from('br_admin_login_codes').insert({
+    const row = must(await db().from('csbfp_admin_login_codes').insert({
       admin_id: admin.id, code_hash: codeHash(`admin:${admin.id}`, code),
       expires_at: new Date(Date.now() + CODE_TTL_MS).toISOString(), ip,
     }).select('id').single(), 'Admin code insert');
@@ -121,7 +122,7 @@ router.post('/login/verify', verifyLimiter, async (req, res, next) => {
     const admin = await adminByEmail(email);
     if (!admin || !admin.active) return fail(GENERIC);
 
-    const row = must(await db().from('br_admin_login_codes').select('id, code_hash, attempts')
+    const row = must(await db().from('csbfp_admin_login_codes').select('id, code_hash, attempts')
       .eq('admin_id', admin.id).is('used_at', null).gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false }).limit(1).maybeSingle(), 'Admin code lookup');
     if (!row) return fail(GENERIC);
@@ -131,16 +132,16 @@ router.post('/login/verify', verifyLimiter, async (req, res, next) => {
     const want = Buffer.from(row.code_hash, 'hex');
     if (given.length !== want.length || !crypto.timingSafeEqual(given, want)) {
       const attempts = row.attempts + 1;
-      await db().from('br_admin_login_codes').update({ attempts, ...(attempts >= MAX_ATTEMPTS ? { used_at: new Date().toISOString() } : {}) })
+      await db().from('csbfp_admin_login_codes').update({ attempts, ...(attempts >= MAX_ATTEMPTS ? { used_at: new Date().toISOString() } : {}) })
         .eq('id', row.id).eq('attempts', row.attempts);
       await logAdmin({ adminId: admin.id, action: 'admin_login_failed', ip: req.ip });
       return fail(attempts >= MAX_ATTEMPTS ? 'Too many incorrect attempts. Please request a new code.' : GENERIC);
     }
-    const used = must(await db().from('br_admin_login_codes').update({ used_at: new Date().toISOString() })
+    const used = must(await db().from('csbfp_admin_login_codes').update({ used_at: new Date().toISOString() })
       .eq('id', row.id).is('used_at', null).select('id').maybeSingle(), 'Admin code use');
     if (!used) return fail(GENERIC);
 
-    must(await db().from('br_admin_users').update({ last_login_at: new Date().toISOString() }).eq('id', admin.id), 'Admin login time');
+    must(await db().from('csbfp_admin_users').update({ last_login_at: new Date().toISOString() }).eq('id', admin.id), 'Admin login time');
     await logAdmin({ adminId: admin.id, action: 'admin_login', ip: req.ip });
     adminSession.clearLoginEmail(res);
     adminSession.setSession(res, admin);
@@ -169,30 +170,32 @@ router.get('/registrants', async (req, res, next) => {
   try {
     const q = clean(req.query.q);
     let rows;
-    const numberMatch = /^(?:br-?)?\s*(\d{8})$/i.exec(q.replace(/\s/g, ''));
+    const numberMatch = /^([a-z]{2,10})?-?(\d{8})$/i.exec(q.replace(/\s/g, ''));
     if (numberMatch) {
-      const reg = must(await db().from('br_registrations').select('registrant_id').eq('registration_number', `BR-${numberMatch[1]}`).maybeSingle(), 'Number search');
-      rows = reg ? must(await db().from('br_registrants').select('*').eq('id', reg.registrant_id), 'Registrant') : [];
+      const prefixes = numberMatch[1] ? [numberMatch[1].toUpperCase()] : [config.program.numberPrefix, config.program.demoNumberPrefix];
+      const regs = must(await db().from('csbfp_registrations').select('registrant_id')
+        .in('registration_number', prefixes.map(p => `${p}-${numberMatch[2]}`)), 'Number search');
+      rows = regs.length ? must(await db().from('csbfp_registrants').select('*').in('id', regs.map(x => x.registrant_id)), 'Registrant') : [];
     } else {
-      let query = db().from('br_registrants').select('*').neq('account_status', 'deleted');
+      let query = db().from('csbfp_registrants').select('*').neq('account_status', 'deleted');
       if (q.includes('@')) query = query.ilike('email', `%${q.toLowerCase()}%`);
       else for (const word of q.split(' ').filter(Boolean)) query = query.or(`legal_first_name.ilike.%${word}%,legal_last_name.ilike.%${word}%,email.ilike.%${word}%`);
       rows = must(await query.order('created_at', { ascending: false }).limit(100), 'Registrant search');
     }
     const ids = rows.map(r => r.id);
     const [regs, flags] = ids.length ? await Promise.all([
-      db().from('br_registrations').select('registrant_id, status, registration_number, admin_hold').in('registrant_id', ids),
-      db().from('br_duplicate_flags').select('registrant_id').in('registrant_id', ids).eq('status', 'open'),
+      db().from('csbfp_registrations').select('registrant_id, status, registration_number, admin_hold').in('registrant_id', ids),
+      db().from('csbfp_duplicate_flags').select('registrant_id').in('registrant_id', ids).eq('status', 'open'),
     ]) : [{ data: [] }, { data: [] }];
     const regBy = new Map(must(regs, 'Registrations').map(r => [r.registrant_id, r]));
     const flagged = new Set(must(flags, 'Flags').map(f => f.registrant_id));
-    res.render('admin/registrants', { pageTitle: 'Registrants', q, rows: rows.map(r => ({ ...r, reg: regBy.get(r.id) || {}, flagged: flagged.has(r.id) })) });
+    res.render('admin/registrants', { pageTitle: 'People', q, rows: rows.map(r => ({ ...r, reg: regBy.get(r.id) || {}, flagged: flagged.has(r.id) })) });
   } catch (err) { next(err); }
 });
 
 async function loadRegistrant(id) {
   if (!isUuid(id)) return null;
-  return must(await db().from('br_registrants').select('*').eq('id', id).maybeSingle(), 'Registrant');
+  return must(await db().from('csbfp_registrants').select('*').eq('id', id).maybeSingle(), 'Registrant');
 }
 
 router.get('/registrants/:id', async (req, res, next) => {
@@ -206,19 +209,19 @@ router.get('/registrants/:id', async (req, res, next) => {
 async function renderDetail(req, res, r, extra) {
     const id = r.id;
     const [reg, rels, prods, acc, flags, emails, events, titles, products, audit] = await Promise.all([
-      db().from('br_registrations').select('*').eq('registrant_id', id).maybeSingle(),
-      db().from('br_employment_relationships').select('*').eq('registrant_id', id).order('is_current', { ascending: false }).order('start_month', { ascending: false }),
-      db().from('br_registrant_products').select('product_id').eq('registrant_id', id),
-      db().from('br_legal_acceptances').select('*').eq('registrant_id', id).order('accepted_at', { ascending: false }),
-      db().from('br_duplicate_flags').select('*').or(`registrant_id.eq.${id},matched_registrant_id.eq.${id}`).order('created_at', { ascending: false }),
-      db().from('br_email_messages').select('template_key, status, to_email, created_at, sent_at, error').eq('registrant_id', id).order('created_at', { ascending: false }).limit(50),
-      db().from('br_events').select('event, actor, detail, created_at').eq('registrant_id', id).order('created_at', { ascending: false }).limit(50),
-      db().from('br_job_titles').select('id, label'),
-      db().from('br_financing_products').select('id, label'),
-      db().from('br_admin_audit_log').select('*').eq('target_type', 'registrant').eq('target_id', id).order('created_at', { ascending: false }).limit(50),
+      db().from('csbfp_registrations').select('*').eq('registrant_id', id).maybeSingle(),
+      db().from('csbfp_employment_relationships').select('*').eq('registrant_id', id).order('is_current', { ascending: false }).order('start_month', { ascending: false }),
+      db().from('csbfp_registrant_products').select('product_id').eq('registrant_id', id),
+      db().from('csbfp_legal_acceptances').select('*').eq('registrant_id', id).order('accepted_at', { ascending: false }),
+      db().from('csbfp_duplicate_flags').select('*').or(`registrant_id.eq.${id},matched_registrant_id.eq.${id}`).order('created_at', { ascending: false }),
+      db().from('csbfp_email_messages').select('template_key, status, to_email, created_at, sent_at, error').eq('registrant_id', id).order('created_at', { ascending: false }).limit(50),
+      db().from('csbfp_events').select('event, actor, detail, created_at').eq('registrant_id', id).order('created_at', { ascending: false }).limit(50),
+      db().from('csbfp_job_titles').select('id, label'),
+      db().from('csbfp_financing_products').select('id, label'),
+      db().from('csbfp_admin_audit_log').select('*').eq('target_type', 'registrant').eq('target_id', id).order('created_at', { ascending: false }).limit(50),
     ]);
     const registration = must(reg, 'Registration');
-    const history = registration ? must(await db().from('br_registration_status_history').select('*')
+    const history = registration ? must(await db().from('csbfp_registration_status_history').select('*')
       .eq('registration_id', registration.id).order('created_at', { ascending: false }), 'Status history') : [];
     const titleBy = new Map(must(titles, 'Titles').map(t => [t.id, t.label]));
     const productBy = new Map(must(products, 'Products').map(p => [p.id, p.label]));
@@ -226,15 +229,18 @@ async function renderDetail(req, res, r, extra) {
     // Names of the other accounts in any duplicate flags.
     const flagRows = must(flags, 'Flags');
     const otherIds = [...new Set(flagRows.map(f => (f.registrant_id === id ? f.matched_registrant_id : f.registrant_id)))];
-    const others = otherIds.length ? must(await db().from('br_registrants').select('id, legal_first_name, legal_last_name, email').in('id', otherIds), 'Other accounts') : [];
+    const others = otherIds.length ? must(await db().from('csbfp_registrants').select('id, legal_first_name, legal_last_name, email').in('id', otherIds), 'Other accounts') : [];
     const otherBy = new Map(others.map(o => [o.id, o]));
 
+    const sc = registration ? await screening.forRegistration(registration.id) : null;
+    const screeningEvents = sc ? await screening.events(sc.id) : [];
+    const appeals = must(await db().from('csbfp_appeals').select('*').eq('registrant_id', id).order('created_at', { ascending: false }), 'Appeals');
     const train = await training.stateFor(id);
-    const attempts = must(await db().from('br_assessment_attempts').select('id, started_at, submitted_at, correct_count, question_count, passed')
+    const attempts = must(await db().from('csbfp_assessment_attempts').select('id, started_at, submitted_at, correct_count, question_count, passed')
       .eq('registrant_id', id).order('started_at', { ascending: false }), 'Attempts');
     const [subs, payments] = await Promise.all([
-      db().from('br_subscriptions').select('*').eq('registrant_id', id).order('created_at', { ascending: false }),
-      db().from('br_payments').select('*').eq('registrant_id', id).order('created_at', { ascending: false }),
+      db().from('csbfp_subscriptions').select('*').eq('registrant_id', id).order('created_at', { ascending: false }),
+      db().from('csbfp_payments').select('*').eq('registrant_id', id).order('created_at', { ascending: false }),
     ]);
     let age = null;
     try { if (r.dob_enc) age = v.ageOn(decrypt(r.dob_enc)); } catch { age = null; }
@@ -242,11 +248,12 @@ async function renderDetail(req, res, r, extra) {
     res.render('admin/registrant', {
       pageTitle: [r.legal_first_name, r.legal_last_name].filter(Boolean).join(' ') || r.email || 'Registrant',
       r, age, registration, history, train, attempts, subs: must(subs, 'Subscriptions'), payments: must(payments, 'Payments'),
-      rels: must(rels, 'Employment').map(x => ({ ...x, title: x.job_title_other || titleBy.get(x.job_title_id) || '' })),
+      rels: must(rels, 'Employment').map(x => ({ ...x, title: [x.job_title_other || titleBy.get(x.job_title_id) || '', x.primary_role === 'other' ? x.primary_role_other : v.PRIMARY_ROLES[x.primary_role]].filter(Boolean).join(', ') })),
       products: must(prods, 'Products').map(p => productBy.get(p.product_id)).filter(Boolean),
       acceptances: must(acc, 'Acceptances'),
       flags: flagRows.map(f => ({ ...f, other: otherBy.get(f.registrant_id === id ? f.matched_registrant_id : f.registrant_id) || null })),
       emails: must(emails, 'Emails'), events: must(events, 'Events'), audit: must(audit, 'Audit'),
+      screening: sc, screeningEvents, screeningLabels: screening.LABELS, appeals,
       revealedDob: null,
       msg: typeof req.query.msg === 'string' ? req.query.msg.slice(0, 200) : null,
       err: typeof req.query.err === 'string' ? req.query.err.slice(0, 200) : null,
@@ -295,7 +302,7 @@ router.post('/registrants/:id/edit', async (req, res, next) => {
     const email = v.normEmail(req.body.email);
     if (email && email !== r.email) {
       if (!v.validEmail(email)) errors.email = 'Invalid email address.';
-      else if (await db().from('br_registrants').select('id').eq('email', email).maybeSingle().then(x => x.data)) errors.email = 'Another account already uses that email.';
+      else if (await db().from('csbfp_registrants').select('id').eq('email', email).maybeSingle().then(x => x.data)) errors.email = 'Another account already uses that email.';
       else update.email = email;
     }
     const dob = str(req.body.dob);
@@ -310,11 +317,11 @@ router.post('/registrants/:id/edit', async (req, res, next) => {
     if (Object.keys(errors).length) return backErr(res, r.id, Object.values(errors).join(' '));
     if (!Object.keys(update).length) return backErr(res, r.id, 'Nothing changed.');
 
-    must(await db().from('br_registrants').update(update).eq('id', r.id), 'Admin edit');
+    must(await db().from('csbfp_registrants').update(update).eq('id', r.id), 'Admin edit');
     const fields = Object.keys(update).filter(k => k !== 'dob_enc').map(k => (k === 'dob_hash' ? 'dob' : k));
     await logAdmin({ adminId: req.admin.id, action: 'registrant_edited', targetType: 'registrant', targetId: r.id, reason, detail: { fields }, ip: req.ip });
     await logEvent({ registrantId: r.id, event: 'edited_by_admin', actor: 'admin', detail: { fields } });
-    const fresh = must(await db().from('br_registrants').select('*').eq('id', r.id).single(), 'Reload');
+    const fresh = must(await db().from('csbfp_registrants').select('*').eq('id', r.id).single(), 'Reload');
     await checkDuplicates(fresh);
     return back(res, r.id, `Saved: ${fields.join(', ')}.`);
   } catch (err) { next(err); }
@@ -327,11 +334,11 @@ router.post('/registrants/:id/hold', async (req, res, next) => {
     if (!r) return next();
     const reason = reasonOf(req.body);
     if (!reason) return backErr(res, r.id, 'A reason is required.');
-    const reg = must(await db().from('br_registrations').select('*').eq('registrant_id', r.id).single(), 'Registration');
+    const reg = must(await db().from('csbfp_registrations').select('*').eq('registrant_id', r.id).single(), 'Registration');
     const place = req.body.action === 'place';
     if (place === reg.admin_hold) return backErr(res, r.id, place ? 'Already on hold.' : 'Not on hold.');
-    must(await db().from('br_registrations').update({ admin_hold: place, admin_hold_reason: place ? reason : null }).eq('id', reg.id), 'Hold');
-    must(await db().from('br_registration_status_history').insert({
+    must(await db().from('csbfp_registrations').update({ admin_hold: place, admin_hold_reason: place ? reason : null }).eq('id', reg.id), 'Hold');
+    must(await db().from('csbfp_registration_status_history').insert({
       registration_id: reg.id, from_status: reg.status, to_status: reg.status, hold_change: place ? 'placed' : 'released',
       reason, actor_type: 'admin', actor_id: req.admin.id,
     }), 'Hold history');
@@ -350,7 +357,7 @@ router.post('/registrants/:id/lock', async (req, res, next) => {
     const lock = req.body.action === 'lock';
     if (r.account_status === 'deleted') return backErr(res, r.id, 'This account has been deleted.');
     if (lock === (r.account_status === 'locked')) return backErr(res, r.id, lock ? 'Already locked.' : 'Not locked.');
-    must(await db().from('br_registrants').update({ account_status: lock ? 'locked' : 'active' }).eq('id', r.id), 'Lock');
+    must(await db().from('csbfp_registrants').update({ account_status: lock ? 'locked' : 'active' }).eq('id', r.id), 'Lock');
     await logAdmin({ adminId: req.admin.id, action: lock ? 'account_locked' : 'account_unlocked', targetType: 'registrant', targetId: r.id, reason, ip: req.ip });
     await logEvent({ registrantId: r.id, event: lock ? 'locked_by_admin' : 'unlocked_by_admin', actor: 'admin' });
     return back(res, r.id, lock ? 'Account locked. They can no longer sign in.' : 'Account unlocked.');
@@ -370,9 +377,9 @@ const MATCH_LABEL = {
 router.get('/duplicates', async (req, res, next) => {
   try {
     const status = ['open', 'dismissed', 'merged'].includes(req.query.status) ? req.query.status : 'open';
-    const flags = must(await db().from('br_duplicate_flags').select('*').eq('status', status).order('created_at', { ascending: false }).limit(200), 'Flags');
+    const flags = must(await db().from('csbfp_duplicate_flags').select('*').eq('status', status).order('created_at', { ascending: false }).limit(200), 'Flags');
     const ids = [...new Set(flags.flatMap(f => [f.registrant_id, f.matched_registrant_id]))];
-    const people = ids.length ? must(await db().from('br_registrants').select('id, legal_first_name, legal_last_name, email, created_at').in('id', ids), 'People') : [];
+    const people = ids.length ? must(await db().from('csbfp_registrants').select('id, legal_first_name, legal_last_name, email, created_at').in('id', ids), 'People') : [];
     const by = new Map(people.map(p => [p.id, p]));
     res.render('admin/duplicates', { pageTitle: 'Possible Duplicates', status, MATCH_LABEL,
       flags: flags.map(f => ({ ...f, a: by.get(f.registrant_id), b: by.get(f.matched_registrant_id) })),
@@ -383,12 +390,12 @@ router.get('/duplicates', async (req, res, next) => {
 router.post('/duplicates/:id', async (req, res, next) => {
   try {
     if (!isUuid(req.params.id)) return next();
-    const flag = must(await db().from('br_duplicate_flags').select('*').eq('id', req.params.id).maybeSingle(), 'Flag');
+    const flag = must(await db().from('csbfp_duplicate_flags').select('*').eq('id', req.params.id).maybeSingle(), 'Flag');
     if (!flag) return next();
     const note = reasonOf({ reason: req.body.note });
     const outcome = req.body.outcome === 'same_person' ? 'merged' : req.body.outcome === 'different_people' ? 'dismissed' : null;
     if (!outcome || !note) return res.redirect(303, `/admin/duplicates?msg=${encodeURIComponent('Choose an outcome and add a note.')}`);
-    must(await db().from('br_duplicate_flags').update({ status: outcome, note, reviewed_by: req.admin.id, reviewed_at: new Date().toISOString() })
+    must(await db().from('csbfp_duplicate_flags').update({ status: outcome, note, reviewed_by: req.admin.id, reviewed_at: new Date().toISOString() })
       .eq('id', flag.id).eq('status', 'open'), 'Resolve flag');
     await logAdmin({ adminId: req.admin.id, action: 'duplicate_resolved', targetType: 'registrant', targetId: flag.registrant_id, reason: note,
       detail: { outcome, flag_id: flag.id, matched_registrant_id: flag.matched_registrant_id }, ip: req.ip });
@@ -401,13 +408,13 @@ router.post('/duplicates/:id', async (req, res, next) => {
 // Configurable lists
 // ======================================================================
 
-const LISTS = { titles: { table: 'br_job_titles', label: 'Job titles' }, products: { table: 'br_financing_products', label: 'Financing products' } };
+const LISTS = { titles: { table: 'csbfp_job_titles', label: 'Job titles' }, products: { table: 'csbfp_financing_products', label: 'Financing products' } };
 
 router.get('/lists', async (req, res, next) => {
   try {
     const [titles, products] = await Promise.all([
-      db().from('br_job_titles').select('*').order('position'),
-      db().from('br_financing_products').select('*').order('position'),
+      db().from('csbfp_job_titles').select('*').order('position'),
+      db().from('csbfp_financing_products').select('*').order('position'),
     ]);
     res.render('admin/lists', { pageTitle: 'Lists', titles: must(titles, 'Titles'), products: must(products, 'Products'),
       msg: typeof req.query.msg === 'string' ? req.query.msg.slice(0, 200) : null });
@@ -459,8 +466,8 @@ router.post('/lists/:kind/:id', async (req, res, next) => {
 router.get('/audit', async (req, res, next) => {
   try {
     const [rows, admins] = await Promise.all([
-      db().from('br_admin_audit_log').select('*').order('created_at', { ascending: false }).limit(200),
-      db().from('br_admin_users').select('id, email'),
+      db().from('csbfp_admin_audit_log').select('*').order('created_at', { ascending: false }).limit(200),
+      db().from('csbfp_admin_users').select('id, email'),
     ]);
     const by = new Map(must(admins, 'Admins').map(a => [a.id, a.email]));
     res.render('admin/audit', { pageTitle: 'Audit Log', rows: must(rows, 'Audit').map(r => ({ ...r, who: by.get(r.admin_id) || '' })) });

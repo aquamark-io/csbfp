@@ -34,7 +34,7 @@ Secure Funder integration, any government-licensing language.
   Registry gets its own Stripe product and price, its own Postmark server and sending domain, and its own statement
   descriptor.
 - **Shared Supabase project (decided, changes brief §11).** Broker Registry lives in the Aquamark Supabase project
-  next to FinDex. Its tables are prefixed `br_`, have RLS enabled with no policies, and are reached only through the
+  next to FinDex. Its tables are prefixed `csbfp_`, have RLS enabled with no policies, and are reached only through the
   service role, the same way `fx_` tables are. Isolation comes from the prefix and the server code, not from a
   separate database.
 - **Admin sign-in (decided, changes brief §11 MFA line).** Admins sign in with emailed codes, as in FinDex, with no TOTP.
@@ -65,7 +65,7 @@ Same shape as FinDex Portal, which is already proven in production:
          │ service role only     │ REST API             │ REST API
          ▼                       ▼                      ▼
   Supabase (Aquamark      Stripe (Checkout,       Postmark (dedicated server,
-  project, br_ tables):   Billing, Customer       sending domain
+  project, csbfp_ tables):   Billing, Customer       sending domain
   Storage for training    Portal, webhooks)       broker-registry.org)
   images; RLS on, no
   anon/authenticated access
@@ -77,7 +77,7 @@ Same shape as FinDex Portal, which is already proven in production:
 |---|---|---|
 | Runtime | Node 20, Express 4, EJS, plain CSS/JS. No SPA, no build step. | Same as FinDex. Simple, fast on mobile, easy to restyle later. |
 | Hosting | One Render web service (plus Render's free TLS and custom domain). | Cheapest, simplest. Can split admin later if needed. |
-| Database | The shared Aquamark Supabase project, with tables prefixed `br_`. RLS **enabled on every table with no policies**, and no grants to `anon`/`authenticated`. The server uses the service role. | The database itself refuses all client access. Per-user access is enforced in one place, the server, by always scoping queries to `req.registrant.id`. Same model as FinDex. |
+| Database | The shared Aquamark Supabase project, with tables prefixed `csbfp_`. RLS **enabled on every table with no policies**, and no grants to `anon`/`authenticated`. The server uses the service role. | The database itself refuses all client access. Per-user access is enforced in one place, the server, by always scoping queries to `req.registrant.id`. Same model as FinDex. |
 | Registrant auth | Passwordless 6-digit email codes, signed httpOnly JWT cookie (FinDex pattern). Account status is re-checked on every request. | The code email also verifies the email address. No passwords to store or reset. |
 | Admin auth | Individual admin accounts on an allowlist, signed in with emailed codes (FinDex flow). Separate cookie scoped to `/admin`, `SameSite=Strict`, 12-hour session. | Matches FinDex. Separate accounts give a per-person audit trail. |
 | Phone | Mobile number collected and format-checked only. **No SMS of any kind** in Phase 1. | Decided. |
@@ -115,7 +115,7 @@ the counters move to Postgres. No change is needed for launch.
 | D5 | Name on lookup | First + last name only, laid out like the approved mock-up: number, Full Name, Registration Status (✓ Active), Valid Through date. |
 | D22 | Hosting | **Everything on one Render service at `broker-registry.org`** (no GitHub Pages, no subdomain). Public pages at `/`, `/about`, `/registration`, `/verify`, `/legal/*`; registrant portal under `/portal`; admin under `/admin`. |
 | D15 | Admin roles and auth | Individual admin accounts on an allowlist, emailed-code sign-in, no MFA, one role. |
-| D19 | Supabase | Shared Aquamark project, `br_` table prefix. |
+| D19 | Supabase | Shared Aquamark project, `csbfp_` table prefix. |
 | D20 | Retention / deletion | Data is kept in Supabase while the account exists. The registrant can request full deletion from the portal at any time (see §5, "Deletion requests"). |
 
 | D11 | Assessment retakes | 10 attempts, then the registrant contacts support and an admin resets the counter (logged). 1 hour between attempts. Both are admin settings. |
@@ -138,7 +138,7 @@ the counters move to Postgres. No change is needed for launch.
 
 ## 4. Database schema and relationships
 
-Tables live in `public` in the shared Aquamark project. Every table is prefixed `br_` (names below omit the prefix for readability). Every table has RLS enabled with no policies. Timestamps are
+Tables live in `public` in the shared Aquamark project. Every table is prefixed `csbfp_` (names below omit the prefix for readability). Every table has RLS enabled with no policies. Timestamps are
 `timestamptz`. `updated_at` is set by trigger. No SSNs are stored anywhere. DOB is encrypted with AES-256-GCM
 plus an HMAC "blind index" for duplicate matching (FinDex `lib/crypto.js` pattern).
 
@@ -457,7 +457,7 @@ All emails are plain, administrative and untracked (no open or click tracking, l
 
 Each step ends in something deployable and testable on Render (staging), using Stripe **test mode** until step 11.
 
-0. **Setup.** `br_` migrations in the Aquamark Supabase project, Render service and custom domain, Postmark server and sending domain
+0. **Setup.** `csbfp_` migrations in the Aquamark Supabase project, Render service and custom domain, Postmark server and sending domain
    (DKIM, Return-Path), Stripe account and test-mode Price, Cloudflare Turnstile keys, `.env.example`, health check.
 1. **Skeleton + public site.** Express app, layout, CSS (white, understated, mobile first), home, about, registration
    info, legal placeholder pages, disclaimer footer. Public copy lives in `content/`. Initial migration with all tables.

@@ -28,20 +28,20 @@ docs.push({ key: 'acknowledgments', version: 1, status: 'published', body_md: '-
 const JANE = '11111111-1111-4111-8111-111111111111';
 const JAKE = '22222222-2222-4222-8222-222222222222';
 const fake = createFake({
-  br_legal_documents: docs,
-  br_job_titles: [{ id: 1, label: 'Sales Representative', position: 1, active: true }, { id: 2, label: 'Other', position: 2, active: true }],
-  br_financing_products: [{ id: 1, label: 'MCA', position: 1, active: true }],
-  br_registrants: [
+  csbfp_legal_documents: docs,
+  csbfp_job_titles: [{ id: 1, label: 'Sales Representative', position: 1, active: true }, { id: 2, label: 'Other', position: 2, active: true }],
+  csbfp_financing_products: [{ id: 1, label: 'MCA', position: 1, active: true }],
+  csbfp_registrants: [
     { id: JANE, email: 'jane@example.com', email_verified_at: '2026-11-01T00:00:00Z', account_status: 'active', legal_first_name: 'Jane', legal_last_name: 'Smith',
       dob_enc: encrypt('1990-05-17'), dob_hash: blindIndex('dob:1990-05-17'), zip5: '94105', phone_e164: '+14155551212', created_at: '2026-11-01T00:00:00Z' },
     { id: JAKE, email: 'jake@example.com', email_verified_at: '2026-11-02T00:00:00Z', account_status: 'active', legal_first_name: 'Jake', legal_last_name: 'Jones',
       zip5: '10001', phone_e164: '+12125550000', created_at: '2026-11-02T00:00:00Z' },
   ],
-  br_registrations: [
-    { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', registrant_id: JANE, status: 'active', registration_number: 'BR-48213907', admin_hold: false },
+  csbfp_registrations: [
+    { id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', registrant_id: JANE, status: 'active', registration_number: 'CSBFP-48213907', admin_hold: false },
     { id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', registrant_id: JAKE, status: 'pending', admin_hold: false },
   ],
-  br_duplicate_flags: [{ id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', registrant_id: JAKE, matched_registrant_id: JANE, match_reason: 'phone', status: 'open' }],
+  csbfp_duplicate_flags: [{ id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc', registrant_id: JAKE, matched_registrant_id: JANE, match_reason: 'phone', status: 'open' }],
 });
 supa.db.set(fake);
 
@@ -113,7 +113,7 @@ test('emails not on ADMIN_EMAILS never get a code, and the screen is the same', 
   assert.equal(r.location, '/admin/login/verify');
   await wait(80);
   assert.equal(sent.slice(mark).length, 0);
-  assert.equal((fake.tables.br_admin_users || []).length, 0);
+  assert.equal((fake.tables.csbfp_admin_users || []).length, 0);
 });
 
 test('a registrant session does not open the admin area', async () => {
@@ -132,7 +132,7 @@ test('admin signs in with an emailed code; the sign-in is audited', async () => 
   assert.equal(page.status, 200);
   assert.match(page.text, /Jane Smith/);
   assert.match(page.text, /Jake Jones/);
-  assert.ok(fake.tables.br_admin_audit_log.some(a => a.action === 'admin_login'));
+  assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'admin_login'));
 });
 
 test('search by name, email and registration number', async () => {
@@ -142,7 +142,7 @@ test('search by name, email and registration number', async () => {
   r = await boss.req('/admin/registrants?q=jake%40example');
   assert.match(r.text, /Jake Jones/);
   assert.doesNotMatch(r.text, /Jane Smith/);
-  r = await boss.req('/admin/registrants?q=BR-48213907');
+  r = await boss.req('/admin/registrants?q=CSBFP-48213907');
   assert.match(r.text, /Jane Smith/);
   r = await boss.req('/admin/registrants?q=48213907');
   assert.match(r.text, /Jane Smith/);
@@ -157,31 +157,31 @@ test('registrant page shows details with DOB masked; revealing it is logged and 
   assert.equal(r.status, 200);
   assert.match(r.text, /On file \(age \d+\)/);
   assert.doesNotMatch(r.text, /1990/);
-  assert.match(r.text, /BR-48213907/);
+  assert.match(r.text, /CSBFP-48213907/);
   assert.match(r.text, /This account is not blocked/, 'the matched (older) account is not the blocked one');
   assert.doesNotMatch(r.text, /this account's payment is blocked/);
   assert.match((await boss.req(`/admin/registrants/${JAKE}`)).text, /this account's payment is blocked/);
   r = await boss.req(`/admin/registrants/${JANE}/reveal-dob`, {});
   assert.equal(r.status, 200, 'rendered directly, not redirected');
   assert.match(r.text, /05\/17\/1990/);
-  assert.ok(fake.tables.br_admin_audit_log.some(a => a.action === 'dob_viewed' && a.target_id === JANE));
+  assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'dob_viewed' && a.target_id === JANE));
 });
 
 test('corrections need a reason, are applied, and are audited by field name only', async () => {
   let r = await boss.req(`/admin/registrants/${JANE}/edit`, { legal_first_name: 'Janet', legal_last_name: 'Smith', zip5: '94105', reason: '' });
   assert.match(decodeURIComponent(r.location), /reason is required/);
-  assert.equal(fake.tables.br_registrants.find(x => x.id === JANE).legal_first_name, 'Jane');
+  assert.equal(fake.tables.csbfp_registrants.find(x => x.id === JANE).legal_first_name, 'Jane');
 
   r = await boss.req(`/admin/registrants/${JANE}/edit`, { legal_first_name: 'Janet', middle_name: '', legal_last_name: 'Smith', zip5: '94105', phone: '(415) 555-1212',
     email: 'jane@example.com', dob: '1990-05-18', reason: 'Registrant emailed a correction' });
   assert.match(decodeURIComponent(r.location), /Saved: legal_first_name, dob/);
-  const jane = fake.tables.br_registrants.find(x => x.id === JANE);
+  const jane = fake.tables.csbfp_registrants.find(x => x.id === JANE);
   assert.equal(jane.legal_first_name, 'Janet');
   assert.equal(jane.dob_hash, blindIndex('dob:1990-05-18'));
-  const entry = fake.tables.br_admin_audit_log.find(a => a.action === 'registrant_edited');
+  const entry = fake.tables.csbfp_admin_audit_log.find(a => a.action === 'registrant_edited');
   assert.deepEqual(entry.detail.fields, ['legal_first_name', 'dob']);
   assert.equal(entry.reason, 'Registrant emailed a correction');
-  assert.doesNotMatch(JSON.stringify(fake.tables.br_admin_audit_log), /1990/);
+  assert.doesNotMatch(JSON.stringify(fake.tables.csbfp_admin_audit_log), /1990/);
 
   r = await boss.req(`/admin/registrants/${JANE}/edit`, { email: 'jake@example.com', legal_first_name: 'Janet', legal_last_name: 'Smith', reason: 'test' });
   assert.match(decodeURIComponent(r.location), /already uses that email/);
@@ -191,13 +191,13 @@ test('hold: placed and released with reasons, recorded in status history', async
   let r = await boss.req(`/admin/registrants/${JANE}/hold`, { action: 'place', reason: '' });
   assert.match(decodeURIComponent(r.location), /reason is required/);
   r = await boss.req(`/admin/registrants/${JANE}/hold`, { action: 'place', reason: 'Checking identity' });
-  const reg = fake.tables.br_registrations.find(x => x.registrant_id === JANE);
+  const reg = fake.tables.csbfp_registrations.find(x => x.registrant_id === JANE);
   assert.equal(reg.admin_hold, true);
   assert.equal(reg.status, 'active', 'status itself unchanged');
   assert.match((await boss.req(`/admin/registrants/${JANE}`)).text, /On hold/);
   await boss.req(`/admin/registrants/${JANE}/hold`, { action: 'release', reason: 'Confirmed' });
-  assert.equal(fake.tables.br_registrations.find(x => x.registrant_id === JANE).admin_hold, false);
-  const hist = fake.tables.br_registration_status_history.filter(h => h.registration_id === reg.id).map(h => h.hold_change);
+  assert.equal(fake.tables.csbfp_registrations.find(x => x.registrant_id === JANE).admin_hold, false);
+  const hist = fake.tables.csbfp_registration_status_history.filter(h => h.registration_id === reg.id).map(h => h.hold_change);
   assert.deepEqual(hist, ['placed', 'released']);
 });
 
@@ -209,11 +209,11 @@ test('locking an account ends the registrant\'s access at once', async () => {
   assert.equal((await jake.req('/portal/dashboard')).status, 200);
 
   await boss.req(`/admin/registrants/${JAKE}/lock`, { action: 'lock', reason: 'Suspicious sign-ups' });
-  assert.equal(fake.tables.br_registrants.find(x => x.id === JAKE).account_status, 'locked');
+  assert.equal(fake.tables.csbfp_registrants.find(x => x.id === JAKE).account_status, 'locked');
   assert.equal((await jake.req('/portal/dashboard')).location, '/portal');
 
   await boss.req(`/admin/registrants/${JAKE}/lock`, { action: 'unlock', reason: 'Cleared' });
-  assert.equal(fake.tables.br_registrants.find(x => x.id === JAKE).account_status, 'active');
+  assert.equal(fake.tables.csbfp_registrants.find(x => x.id === JAKE).account_status, 'active');
 });
 
 test('duplicate flags: listed, need an outcome and a note, then leave the open list', async () => {
@@ -222,34 +222,34 @@ test('duplicate flags: listed, need an outcome and a note, then leave the open l
   assert.match(r.text, /Jake Jones/);
   const flagId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
   r = await boss.req(`/admin/duplicates/${flagId}`, { outcome: 'different_people', note: '' });
-  assert.equal(fake.tables.br_duplicate_flags.find(f => f.id === flagId).status, 'open');
+  assert.equal(fake.tables.csbfp_duplicate_flags.find(f => f.id === flagId).status, 'open');
   await boss.req(`/admin/duplicates/${flagId}`, { outcome: 'different_people', note: 'Shared family phone; different people' });
-  const flag = fake.tables.br_duplicate_flags.find(f => f.id === flagId);
+  const flag = fake.tables.csbfp_duplicate_flags.find(f => f.id === flagId);
   assert.equal(flag.status, 'dismissed');
   assert.ok(flag.reviewed_by);
   assert.match((await boss.req('/admin/duplicates')).text, /Nothing here/);
 });
 
-test('lists: add, rename, hide; hidden items leave the registration form', async () => {
-  await boss.req('/admin/lists/titles', { label: 'Underwriter' });
-  const added = fake.tables.br_job_titles.find(t => t.label === 'Underwriter');
+test('lists: add, rename, hide; hidden items leave the products form', async () => {
+  await boss.req('/admin/lists/products', { label: 'SBA Loans' });
+  const added = fake.tables.csbfp_financing_products.find(t => t.label === 'SBA Loans');
   assert.ok(added);
-  assert.equal(added.position, 3);
-  let r = await boss.req('/admin/lists/titles', { label: 'Underwriter' });
+  let r = await boss.req('/admin/lists/products', { label: 'SBA Loans' });
   assert.match(decodeURIComponent(r.location), /already exists/);
-  await boss.req('/admin/lists/titles/1', { label: 'Sales Rep', position: '1', active: 'yes' });
-  assert.equal(fake.tables.br_job_titles.find(t => t.id === 1).label, 'Sales Rep');
-  await boss.req(`/admin/lists/titles/${added.id}`, { label: 'Underwriter', position: '3' }); // unchecked = hidden
-  assert.equal(fake.tables.br_job_titles.find(t => t.id === added.id).active, false);
+  await boss.req('/admin/lists/products/1', { label: 'Merchant Cash Advances', position: '1', active: 'yes' });
+  assert.equal(fake.tables.csbfp_financing_products.find(t => t.id === 1).label, 'Merchant Cash Advances');
+  await boss.req(`/admin/lists/products/${added.id}`, { label: 'SBA Loans', position: '3' }); // unchecked = hidden
+  assert.equal(fake.tables.csbfp_financing_products.find(t => t.id === added.id).active, false);
 
   const jake = browser();
   const mark = sent.length;
   await jake.req('/portal', { email: 'jake@example.com' });
   await jake.req('/portal/verify', { code: await codeFor('jake@example.com', mark) });
-  r = await jake.req('/portal/employment/new');
-  assert.match(r.text, /Sales Rep/);
-  assert.doesNotMatch(r.text, /Underwriter/);
+  r = await jake.req('/portal/products');
+  assert.match(r.text, /Merchant Cash Advances/);
+  assert.doesNotMatch(r.text, /SBA Loans/);
 });
+
 
 test('audit log lists admin actions with reasons', async () => {
   const r = await boss.req('/admin/audit');

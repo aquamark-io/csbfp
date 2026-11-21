@@ -16,12 +16,12 @@ const FORM_CATEGORIES = ['account_recovery', 'data_correction', 'billing', 'dupl
 
 const limiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: 'draft-7', legacyHeaders: false,
   handler: (req, res) => res.status(429).render('support', { pageTitle: 'Contact Us', values: req.body || {}, errors: {}, sent: null,
-    error: 'Too many messages from this network. Please try again later or email support@broker-registry.org.', categories: FORM_CATEGORIES, labels: CATEGORIES, turnstileKey: turnstile.siteKey() }) });
+    error: `Too many messages from this network. Please try again later or email ${config.program.supportEmail}.`, categories: FORM_CATEGORIES, labels: CATEGORIES, turnstileKey: turnstile.siteKey() }) });
 
 async function signedIn(req) {
   const s = readSession(req);
   if (!s || !config.portalReady()) return null;
-  const { data } = await db().from('br_registrants').select('id, email, legal_first_name, legal_last_name').eq('id', s.sub).maybeSingle();
+  const { data } = await db().from('csbfp_registrants').select('id, email, legal_first_name, legal_last_name').eq('id', s.sub).maybeSingle();
   return data || null;
 }
 
@@ -43,7 +43,7 @@ router.post('/support', limiter, async (req, res, next) => {
     const values = { name: String(req.body.name || '').trim().slice(0, 100), email: String(req.body.email || '').slice(0, 254),
       category: req.body.category, message: String(req.body.message || '').trim().slice(0, 5000) };
     if (req.body.website) return view(res, { sent: { reference: 'received' } }); // honeypot
-    if (!config.portalReady()) return view(res, { status: 503, values, error: 'The contact form is temporarily unavailable. Please email support@broker-registry.org.' });
+    if (!config.portalReady()) return view(res, { status: 503, values, error: `The contact form is temporarily unavailable. Please email ${config.program.supportEmail}.` });
     if (!(await turnstile.verify(req.body['cf-turnstile-response'], req.ip))) return view(res, { status: 422, values, error: 'Please complete the verification check and try again.' });
     const errors = {};
     const email = normEmail(values.email);
@@ -55,7 +55,7 @@ router.post('/support', limiter, async (req, res, next) => {
     const me = await signedIn(req).catch(() => null);
     let registrantId = me ? me.id : null;
     if (!registrantId) {
-      const { data } = await db().from('br_registrants').select('id').eq('email', email).maybeSingle();
+      const { data } = await db().from('csbfp_registrants').select('id').eq('email', email).maybeSingle();
       registrantId = data ? data.id : null; // linked for the admin; the sender is not told whether an account exists
     }
     const sent = await createRequest({ registrantId, contactEmail: email, name: values.name, category: values.category, message: values.message,

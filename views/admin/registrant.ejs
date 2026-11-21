@@ -1,5 +1,5 @@
 <%- include('../partials/head') %>
-<p class="muted"><a href="/admin/registrants">← Registrants</a></p>
+<p class="muted"><a href="/admin/registrants">← People</a> · <a href="/admin/review">Review queue</a></p>
 <h1><%= fullName(r) %></h1>
 <p class="muted meta"><%= r.email %> · Signed up <%= fmtDate(r.created_at) %><% if (r.last_login_at) { %> · Last sign-in <%= fmtTime(r.last_login_at) %><% } %></p>
 
@@ -16,12 +16,14 @@
 
 <div class="admin-grid">
 <section class="panel">
-  <h2>Registration</h2>
+  <h2>Certification</h2>
   <dl class="kv">
-    <dt>Status</dt><dd><%- statusPill(registration && registration.status, registration && registration.admin_hold) %></dd>
+    <dt>Status</dt><dd><%- statusPill(registration && registration.status, registration && registration.admin_hold, registration && registration.is_demo) %></dd>
     <dt>Number</dt><dd><%= (registration && registration.registration_number) || '—' %></dd>
-    <dt>Registration date</dt><dd><%= fmtDate(registration && registration.first_activated_at) %></dd>
+    <dt>Certified since</dt><dd><%= fmtDate(registration && registration.first_activated_at) %></dd>
     <dt>Valid through</dt><dd><%= fmtDate(registration && registration.expires_at) %></dd>
+    <dt>Paid</dt><dd><%= fmtDate(registration && registration.paid_at) %></dd>
+    <dt>Approved</dt><dd><%= fmtDate(registration && registration.approved_at) %></dd>
     <% if (registration && registration.admin_hold) { %><dt>Hold reason</dt><dd><%= registration.admin_hold_reason %></dd><% } %>
   </dl>
 </section>
@@ -128,6 +130,87 @@
   </form>
 </section>
 
+<% if (registration) { const st = registration.status; %>
+<div class="admin-grid" id="certification">
+<section class="panel">
+  <h2>Background screening</h2>
+  <% if (!screening) { %>
+  <p class="muted"><%= screeningEnabled ? 'No screening record yet (created when the fee is paid).' : 'Screening is not enabled. Nothing has been screened.' %></p>
+  <% } else { %>
+  <dl class="kv">
+    <dt>Status</dt><dd><%= screeningLabel(screening.status) %></dd>
+    <dt>Provider</dt><dd><code><%= screening.provider %></code></dd>
+    <dt>Requirement version</dt><dd><%= screening.requirement_version %></dd>
+    <% if (screening.decision) { %><dt>Reviewer decision</dt><dd><%= screening.decision.replace('_', ' ') %> on <%= fmtDate(screening.decided_at) %></dd><% } %>
+  </dl>
+  <form method="post" action="/admin/registrants/<%= r.id %>/screening" class="stack">
+    <select name="status" required>
+      <option value="">Set screening status</option>
+      <% Object.entries(screeningLabels).forEach(([k, l]) => { %><option value="<%= k %>"><%= l %></option><% }) %>
+    </select>
+    <input name="reason" type="text" maxlength="500" placeholder="Note (required). Do not enter report contents." required>
+    <button class="button secondary small" type="submit">Record</button>
+  </form>
+  <% if (screeningEvents.length) { %>
+  <ul class="plain-list small"><% screeningEvents.forEach(e => { %><li><%= fmtTime(e.created_at) %>: <%= screeningLabel(e.to_status) %> (<%= e.actor_type %>)<%= e.note ? ` – ${e.note}` : '' %></li><% }) %></ul>
+  <% } %>
+  <% } %>
+</section>
+<section class="panel">
+  <h2>Certification actions</h2>
+  <form method="post" action="/admin/registrants/<%= r.id %>/decision" class="stack">
+    <select name="action" required>
+      <option value="">Choose an action</option>
+      <% if (st === 'under_review') { %><option value="approve">Approve and issue certification</option><% } %>
+      <% if (['pending_screening', 'under_review'].includes(st)) { %><option value="not_approve">Mark not approved</option><% } %>
+      <% if (st === 'not_approved') { %><option value="send_to_review">Reopen for review (reconsideration)</option><% } %>
+      <% if (['active', 'inactive', 'expired'].includes(st)) { %><option value="suspend">Suspend</option><% } %>
+      <% if (['suspended', 'revoked'].includes(st)) { %><option value="reinstate">Reinstate</option><% } %>
+      <% if (['active', 'inactive', 'expired', 'suspended'].includes(st)) { %><option value="revoke">Revoke (final)</option><% } %>
+    </select>
+    <input name="reason" type="text" maxlength="500" placeholder="Reason (required, internal; never shown publicly)" required>
+    <input name="evidence_ref" type="text" maxlength="200" placeholder="Evidence / case reference (required to suspend or revoke)">
+    <label class="muted-inline" for="effective_date">Effective date (optional)</label>
+    <input id="effective_date" name="effective_date" type="date">
+    <input name="confirm" type="text" placeholder="Type REVOKE to confirm a revocation" autocomplete="off">
+    <button class="button secondary small" type="submit">Apply</button>
+  </form>
+  <p class="muted">Approval requires screening enabled and a reviewer-approved screening. Revocation stops automatic renewal. Public verification shows only the status, never the reason.</p>
+</section>
+</div>
+
+<div class="admin-grid" id="appeals">
+<section class="panel">
+  <h2>Appeals, disputes, reconsideration</h2>
+  <% if (!appeals.length) { %><p class="muted">None recorded.</p><% } %>
+  <% appeals.forEach(a => { %>
+  <div class="card-row">
+    <div>
+      <strong><%= a.kind %>: <%= a.subject.replace('_', ' ') %></strong> <span class="tag"><%= a.status.replace('_', ' ') %></span><br>
+      <span class="muted-inline">Received <%= fmtDate(a.created_at) %></span>
+      <p><%= a.statement %></p>
+      <% if (a.decision_note) { %><p class="muted-inline">Note: <%= a.decision_note %></p><% } %>
+      <form method="post" action="/admin/appeals/<%= a.id %>" class="stack">
+        <select name="status"><% ['open', 'under_review', 'upheld', 'reversed', 'withdrawn'].forEach(s2 => { %><option value="<%= s2 %>" <%= a.status === s2 ? 'selected' : '' %>><%= s2.replace('_', ' ') %></option><% }) %></select>
+        <input name="decision_note" type="text" maxlength="2000" placeholder="Note (required)" required>
+        <button class="button secondary small" type="submit">Update</button>
+      </form>
+    </div>
+  </div>
+  <% }) %>
+</section>
+<section class="panel">
+  <h2>Record a request</h2>
+  <form method="post" action="/admin/registrants/<%= r.id %>/appeals" class="stack">
+    <select name="kind" required><option value="">Type</option><option value="appeal">Appeal</option><option value="dispute">Dispute</option><option value="reconsideration">Reconsideration</option></select>
+    <select name="subject" required><option value="">About</option><option value="not_approved">Not approved</option><option value="suspension">Suspension</option><option value="revocation">Revocation</option><option value="screening">Screening result</option><option value="other">Other</option></select>
+    <textarea name="statement" rows="3" maxlength="4000" placeholder="Statement received (required)" required></textarea>
+    <button class="button secondary small" type="submit">Record</button>
+  </form>
+</section>
+</div>
+<% } %>
+
 <div class="admin-grid">
 <section class="panel">
   <h2>Administrative hold</h2>
@@ -200,7 +283,7 @@
 </section>
 <section class="panel danger-panel">
   <h2>Delete registrant data</h2>
-  <p class="muted">Deletes their personal information, cancels any subscription immediately, and retires the registration number (verification will show "not found"). Payment and consent records are kept without a name. This can't be undone.</p>
+  <p class="muted">Deletes their personal information, cancels any subscription immediately, and retires the certification number (verification will show "not found"). Payment and consent records are kept without a name. This can't be undone.</p>
   <form method="post" action="/admin/registrants/<%= r.id %>/delete-data" class="stack">
     <input name="reason" type="text" maxlength="500" placeholder="Reason (required), e.g. Deletion requested SR-1A2B3C">
     <input name="confirm" type="text" placeholder="Type DELETE to confirm" autocomplete="off">

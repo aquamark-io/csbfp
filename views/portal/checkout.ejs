@@ -1,12 +1,12 @@
 <%- include('../partials/head') %>
 <%- include('../partials/portal-nav') %>
-<h1>Annual Registration Fee</h1>
+<h1>Annual Certification Fee</h1>
 <% if (canceled) { %><p class="message">Payment was not completed. You can try again below.</p><% } %>
 <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
 <% if (pay.action === 'pay_invoice') { %>
-  <p class="message">Your renewal payment didn't go through. <a href="/portal/billing">Go to Billing</a> to pay and reactivate your registration.</p>
+  <p class="message">Your renewal payment didn't go through. <a href="/portal/billing">Go to Billing</a> to pay and reactivate your certification.</p>
 <% } else if (pay.registration.status === 'active') { %>
-  <p class="notice-ok">Your registration is active. <a href="/portal/billing">View billing</a>.</p>
+  <p class="notice-ok">Your certification is active. <a href="/portal/billing">View billing</a>.</p>
 <% } else if (pay.action !== 'checkout') { %>
   <p class="lead">Payment becomes available once these steps are complete:</p>
   <ul class="plain-list"><% pay.reasons.forEach(r => { %><li><%= r %></li><% }) %></ul>
@@ -15,19 +15,21 @@
   <p class="message">Payments are not available right now. Please check back soon.</p>
 <% } else { %>
   <dl class="summary">
-    <div><dt>Annual registration fee</dt><dd><%= fee %> per year</dd></div>
+    <div><dt>Annual certification fee</dt><dd><%= fee %> per year</dd></div>
     <div><dt>Renews</dt><dd>Automatically every 12 months at <%= fee %>, until you cancel</dd></div>
-    <div><dt>Registration number</dt><dd><%= pay.registration.registration_number || '—' %></dd></div>
+    <div><dt>Certification number</dt><dd><%= pay.registration.registration_number || '—' %></dd></div>
   </dl>
+  <p class="notice-strong"><strong>No refunds.</strong> The certification fee is non-refundable, including if you do not complete the remaining steps<% if (screeningEnabled) { %> or are not approved after screening and review<% } %>, except where a refund is required by law.</p>
+  <% if (!screeningEnabled) { %><p class="demo-banner">Preview: background screening is not active yet. Completing payment issues a DEMO record only. It is not a valid certification.</p><% } %>
   <h2>Automatic renewal</h2>
-  <p>Your registration renews automatically every year on <strong><%= renewsOn.replace(/, \d{4}$/, '') %></strong>, and <strong><%= fee %></strong> is charged to your card each time until you cancel. We email you 30 days before each renewal. Cancel online any time from your Billing page; you stay registered through the period you've paid for. See <a href="/legal/terms#6-fees-and-automatic-renewal" target="_blank" rel="noopener">Program Terms, section 6</a>.</p>
+  <p><% if (screeningEnabled && !pay.registration.first_activated_at) { %>Your certification term starts when it is approved and renews automatically one year later,<% } else { %>Your certification renews automatically every year on <strong><%= renewsOn.replace(/, \d{4}$/, '') %></strong>,<% } %> and <strong><%= fee %></strong> is charged to your card each time until you cancel. We email you 30 days before each renewal. Cancel online any time from your Billing page; you stay certified through the period you've paid for. See <a href="/legal/terms#6-fees-and-automatic-renewal" target="_blank" rel="noopener">Program Terms, section 6</a>.</p>
   <form method="post" action="/portal/checkout" novalidate>
     <div class="field check">
       <input id="agree_renewal" type="checkbox" name="agree_renewal" value="yes">
-      <label for="agree_renewal">I authorize Broker Registry to charge <%= fee %> today and to automatically charge <%= fee %> every year on my renewal date (next: <%= renewsOn %>) until I cancel. I can cancel online before my next renewal. Fees are nonrefundable except as required by law. I will receive an email reminder 30 days before each renewal.</label>
+      <label for="agree_renewal">I authorize <%= program.operator %>, administrator of CSBFP, to charge <%= fee %> today and to automatically charge <%= fee %> every year on my renewal date until I cancel. I can cancel online before my next renewal. Fees are non-refundable except where required by law. I will receive an email reminder 30 days before each renewal.</label>
     </div>
     <button class="button" type="submit">Continue to Secure Payment</button>
   </form>
-  <p class="muted">Payment is processed by Stripe. Broker Registry never sees or stores your card details.</p>
+  <p class="muted">Payment is processed by Stripe and appears on your statement as <%= program.statementDescriptor %>. CSBFP never sees or stores your card details.</p>
 <% } %>
 <%- include('../partials/foot') %>

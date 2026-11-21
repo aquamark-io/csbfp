@@ -3,49 +3,61 @@
 
 <div class="faq">
   <details name="faq">
-    <summary>Who can register?</summary>
-    <p>Individuals 18 or older who broker or sell commercial financing in the United States, whether as an employee, an independent contractor or self-employed.</p>
+    <summary>What is CSBFP?</summary>
+    <p>Certified Small Business Finance Professional (CSBFP) is a professional certification for individuals working in U.S. small business finance. It shows that you completed industry training, passed an assessment and agreed to professional standards.</p>
   </details>
   <details name="faq">
-    <summary>Why should I register?</summary>
-    <p>Recognized by industry trade associations, funders and lenders, registration provides a unique number verifying your completion of commercial finance training and assessment, demonstrating your commitment to professionalism and industry standards.</p>
+    <summary>Who can get certified?</summary>
+    <p>Individuals 18 or older who work in, or want to enter, U.S. small business finance. That includes brokers, funders, lenders, underwriters, operations and servicing staff, compliance and risk professionals, and managers. You do not need a current employer to apply.</p>
+  </details>
+  <details name="faq">
+    <summary>What are the steps?</summary>
+    <p>Create an account, complete your application, the professional standards and four short training modules, pass the assessment, and pay the annual fee. <% if (screeningEnabled) { %>A one-time background screening and an eligibility review follow before your certification number is issued.<% } else { %>When it is activated, a one-time background screening and eligibility review will follow payment before a certification number is issued.<% } %></p>
   </details>
   <details name="faq">
     <summary>What information do I need?</summary>
-    <p>Your legal name, date of birth, ZIP code, email and mobile number, when you started in the industry, current employer and job title, and the products you represent. We never ask for your Social Security number or home address.</p>
+    <p>Your legal name, date of birth, ZIP code, email and mobile number, when you entered the industry, your current employer and role (if you have one), and the financing products you work with.</p>
   </details>
   <details name="faq">
     <summary>What does the training involve?</summary>
-    <p>Four short modules followed by a 20-question multiple-choice assessment, about 30 minutes in total. You need 80% to pass, and you can save your progress and come back.</p>
+    <p>Four short modules (Industry Fundamentals, Products &amp; Terminology, Federal &amp; State Regulation, and Professional Conduct) followed by a 20-question multiple-choice assessment. You need 80% (16 of 20) to pass, and you can save your progress and come back. You have up to 10 attempts, with a 60-minute wait between them.</p>
+  </details>
+  <details name="faq">
+    <summary>Is there a background check?</summary>
+    <p>The program includes a one-time background screening at initial certification, focused on financial crimes and fraud. It is not repeated at renewal. <% if (!screeningEnabled) { %>Screening is not active yet. Until it is, no certification is represented as screened.<% } %> We never ask for your Social Security number on this website.</p>
   </details>
   <details name="faq">
     <summary>How much does it cost?</summary>
-    <p>$99 a year, paid by card after you pass the assessment. Your registration becomes active as soon as payment is complete.</p>
+    <p><%= program.annualFee %> a year, paid by card after you pass the assessment.</p>
+  </details>
+  <details name="faq">
+    <summary>Can I get a refund?</summary>
+    <p>No. Fees are non-refundable once you sign up to get certified, except where a refund is required by law.</p>
   </details>
   <details name="faq">
     <summary>Does it renew automatically?</summary>
-    <p>Yes, every 12 months at $99. We email you 30 days before each renewal, and you can cancel online at any time. You stay registered through the period you've paid for.</p>
+    <p>Yes, every 12 months at <%= program.annualFee %>. We email you 30 days before each renewal, and you can cancel online at any time. Renewal does not repeat the background screening or the assessment.</p>
   </details>
   <details name="faq">
     <summary>What if I change jobs?</summary>
-    <p>Your registration belongs to you, not your employer, and your number stays the same for your whole career. Update your employer from your account at any time, at no cost.</p>
+    <p>Your certification belongs to you, not your employer, and your number stays the same for your whole career. Update your employer from your account at any time.</p>
   </details>
   <details name="faq">
-    <summary>How do I keep my information current?</summary>
-    <p>Update it from your account whenever something changes. We also ask you to review it once a year, before your renewal.</p>
+    <summary>How is a certification verified?</summary>
+    <p>Anyone can enter a certification number on <a href="/verify">Verify Certification</a> to see the name, status and valid-through date. There is no directory or name search.</p>
   </details>
   <details name="faq">
-    <summary>How is a registration verified?</summary>
-    <p>Anyone can enter a registration number on <a href="/verify">Verify a Registration</a> to see the name, status and valid-through date. There is no directory or name search to protect privacy and prevent solicitation.</p>
+    <summary>Can a certification be suspended or revoked?</summary>
+    <p>Yes. Under the program rules, a certification can be suspended or revoked, for example for material misrepresentation or misconduct. You will be notified and can respond. Public verification shows only the status, never the reason.</p>
   </details>
   <details name="faq">
-    <summary>Does registration replace a license?</summary>
-    <p>No. Broker Registry is a private and independent registry for individuals working in commercial finance. It does not replace any license or registration required by law and does not authorize anyone to perform activities that require a state license.</p>
+    <summary>Is this a license?</summary>
+    <p>No. CSBFP is a private industry certification. It is not a government license or regulatory approval, does not replace any license or registration required by law, and does not authorize anyone to perform activities that require one.</p>
   </details>
 </div>
 
 <div class="actions">
-  <a class="button" href="/portal/signup">Register</a>
+  <a class="button" href="/portal/signup">Get Certified</a>
   <a class="button secondary" href="/support">Ask a Question</a>
 </div>
 <%- include('partials/foot') %>

@@ -1,12 +1,12 @@
 <%- include('partials/head') %>
-<h1>Verify Registration</h1>
-<p class="lead">Enter a registration number to check whether a registration is current.</p>
+<h1>Verify Certification</h1>
+<p class="lead">Enter a certification number to check whether a certification is current.</p>
 
 <form class="lookup" method="get" action="/verify">
-  <label for="number">Registration number</label>
+  <label for="number">Certification number</label>
   <div class="lookup-row">
     <input id="number" name="number" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false"
-           placeholder="BR-12345678" maxlength="20" value="<%= number %>" required>
+           placeholder="<%= program.numberPrefix %>-12345678" maxlength="20" value="<%= number %>" required>
     <button class="button" type="submit">Verify</button>
   </div>
   <% if (turnstileKey) { %>
@@ -18,31 +18,37 @@
 <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
 
 <% if (result) { %>
-<% const d = x => x ? new Date(x).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—'; %>
+<% const d = x => x ? new Date(x).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—';
+   const label = { active: 'Certified', inactive: 'Inactive', expired: 'Expired', suspended: 'Suspended', revoked: 'Revoked' }[result.status]; %>
 <section class="verify-card" aria-live="polite">
+  <% if (result.demo) { %><p class="demo-banner">DEMO RECORD: NOT SCREENED. This is a preview record and is not a valid CSBFP certification.</p><% } %>
   <div class="verify-head">
-    <div><p class="verify-org">Broker Registry</p><p class="verify-title">Registration Verification</p></div>
+    <div><p class="verify-org">Certified Small Business Finance Professional</p><p class="verify-title">Certification Verification</p></div>
     <svg class="verify-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m8.5 12 2.5 2.5 4.5-5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
   </div>
-  <p class="verify-label">Registration number</p>
+  <p class="verify-label">Certification number</p>
   <p class="verify-number"><%= result.number %></p>
   <dl class="verify-rows">
     <div><dt>Full Name</dt><dd><%= result.name %></dd></div>
-    <div><dt>Registration Status</dt><dd>
-      <% if (result.status === 'active') { %><span class="verify-status ok"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="m8 12 3 3 5-6" fill="none" stroke="currentColor" stroke-width="2"/></svg>Active</span>
-      <% } else { %><span class="verify-status off"><%= result.status === 'inactive' ? 'Inactive' : 'Expired' %></span><% } %>
+    <div><dt>Status</dt><dd>
+      <% if (result.status === 'active' && !result.demo) { %><span class="verify-status ok"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="m8 12 3 3 5-6" fill="none" stroke="currentColor" stroke-width="2"/></svg>Certified</span>
+      <% } else if (result.demo) { %><span class="verify-status off">Demo only: not valid</span>
+      <% } else { %><span class="verify-status off"><%= label %></span><% } %>
     </dd></div>
-    <div><dt><%= result.status === 'expired' ? 'Expired On' : 'Valid Through' %></dt><dd><%= d(result.date) %></dd></div>
+    <% if (result.status === 'expired') { %><div><dt>Expired On</dt><dd><%= d(result.date) %></dd></div>
+    <% } else if (result.status === 'active' || result.status === 'inactive') { %><div><dt>Valid Through</dt><dd><%= d(result.date) %></dd></div><% } %>
   </dl>
+  <% if (result.status === 'suspended') { %><p class="muted">This certification is suspended pending review and is not currently valid.</p>
+  <% } else if (result.status === 'revoked') { %><p class="muted">This certification has been revoked and is not valid.</p>
+  <% } else if (result.status === 'inactive') { %><p class="muted">This certification is inactive because the annual renewal has not been paid.</p><% } %>
 </section>
 <p class="muted">Checked <%= new Date().toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Los_Angeles' }) %> Pacific time.</p>
 <% } else if (typeof notFound !== 'undefined' && notFound) { %>
-<p class="message" role="status">No registration was found for <strong><%= number %></strong>. Check the number and try again.</p>
+<p class="message" role="status">No certification was found for <strong><%= number %></strong>. Check the number and try again.</p>
 <% } %>
 
 <p class="muted">
-  Verification shows only the registrant's name, registration number, registration status and the date the
-  registration is valid through. Broker Registry does not provide a directory or search by name to protect privacy
-  and prevent solicitation.
+  Verification shows only the certificant's name, certification number, current status and valid-through date.
+  There is no directory or search by name.
 </p>
 <%- include('partials/foot') %>

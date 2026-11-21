@@ -33,10 +33,10 @@ const sampleVars = def => ({ first_name: 'Jane', ...def.sample });
 router.get('/emails', async (req, res, next) => {
   try {
     const [rows, token, lastEvent, failed] = await Promise.all([
-      db().from('br_email_templates').select('key, version, updated_at'),
-      db().from('br_settings').select('updated_at').eq('key', 'postmark_webhook_token').maybeSingle(),
-      db().from('br_postmark_events').select('record_type, received_at').order('received_at', { ascending: false }).limit(1).maybeSingle(),
-      db().from('br_email_messages').select('id', { count: 'exact', head: true }).in('status', ['failed', 'bounced']),
+      db().from('csbfp_email_templates').select('key, version, updated_at'),
+      db().from('csbfp_settings').select('updated_at').eq('key', 'postmark_webhook_token').maybeSingle(),
+      db().from('csbfp_postmark_events').select('record_type, received_at').order('received_at', { ascending: false }).limit(1).maybeSingle(),
+      db().from('csbfp_email_messages').select('id', { count: 'exact', head: true }).in('status', ['failed', 'bounced']),
     ]);
     const custom = new Map(must(rows, 'Templates').map(r => [r.key, r]));
     const groups = {};
@@ -49,7 +49,7 @@ router.get('/emails', async (req, res, next) => {
 router.get('/emails/log', async (req, res, next) => {
   try {
     const status = ['failed', 'bounced', 'queued'].includes(req.query.status) ? req.query.status : null;
-    let q = db().from('br_email_messages').select('id, registrant_id, template_key, to_email, status, error, created_at, sent_at');
+    let q = db().from('csbfp_email_messages').select('id, registrant_id, template_key, to_email, status, error, created_at, sent_at');
     if (status) q = q.eq('status', status);
     const rows = must(await q.order('created_at', { ascending: false }).limit(200), 'Email log');
     res.render('admin/email-log', { pageTitle: 'Email Log', rows, status, names: Object.fromEntries(Object.entries(T).map(([k, d]) => [k, d.name])) });
@@ -87,9 +87,9 @@ router.post('/emails/t/:key', async (req, res, next) => {
     const body = String(req.body.body_md || '').replace(/\r\n/g, '\n').trim().slice(0, 10000);
     if (!subject || !body) return back(res, path, 'Subject and body are both required.', true);
     if (T[key].body.includes('{{code}}') && !/^\{\{\s*code\s*\}\}$/m.test(body)) return back(res, path, 'This email must keep the {{code}} line, on a line of its own.', true);
-    const existing = must(await db().from('br_email_templates').select('version').eq('key', key).maybeSingle(), 'Template');
-    if (existing) must(await db().from('br_email_templates').update({ subject, body_md: body, version: existing.version + 1, updated_by: req.admin.id, updated_at: new Date().toISOString() }).eq('key', key), 'Save template');
-    else must(await db().from('br_email_templates').insert({ key, subject, body_md: body, version: 1, updated_by: req.admin.id }), 'Save template');
+    const existing = must(await db().from('csbfp_email_templates').select('version').eq('key', key).maybeSingle(), 'Template');
+    if (existing) must(await db().from('csbfp_email_templates').update({ subject, body_md: body, version: existing.version + 1, updated_by: req.admin.id, updated_at: new Date().toISOString() }).eq('key', key), 'Save template');
+    else must(await db().from('csbfp_email_templates').insert({ key, subject, body_md: body, version: 1, updated_by: req.admin.id }), 'Save template');
     email.clearCache();
     await logAdmin({ adminId: req.admin.id, action: 'email_template_updated', targetType: 'email', targetId: key, detail: { label: T[key].name }, ip: req.ip });
     return back(res, path, 'Saved. New emails use this wording now.');
@@ -100,7 +100,7 @@ router.post('/emails/t/:key/reset', async (req, res, next) => {
   try {
     const key = req.params.key;
     if (!keyOk(key)) return next();
-    must(await db().from('br_email_templates').delete().eq('key', key), 'Reset template');
+    must(await db().from('csbfp_email_templates').delete().eq('key', key), 'Reset template');
     email.clearCache();
     await logAdmin({ adminId: req.admin.id, action: 'email_template_reset', targetType: 'email', targetId: key, detail: { label: T[key].name }, ip: req.ip });
     return back(res, `/admin/emails/t/${key}`, 'Restored the default wording.');
@@ -136,9 +136,9 @@ router.post('/emails/postmark', async (req, res, next) => {
     // checks the token against this saved value.
     const token = crypto.randomBytes(24).toString('hex');
     const value = encrypt(token);
-    const row = must(await db().from('br_settings').select('key').eq('key', 'postmark_webhook_token').maybeSingle(), 'Setting');
-    if (row) must(await db().from('br_settings').update({ value, updated_by: req.admin.id, updated_at: new Date().toISOString() }).eq('key', 'postmark_webhook_token'), 'Save token');
-    else must(await db().from('br_settings').insert({ key: 'postmark_webhook_token', value, updated_by: req.admin.id }), 'Save token');
+    const row = must(await db().from('csbfp_settings').select('key').eq('key', 'postmark_webhook_token').maybeSingle(), 'Setting');
+    if (row) must(await db().from('csbfp_settings').update({ value, updated_by: req.admin.id, updated_at: new Date().toISOString() }).eq('key', 'postmark_webhook_token'), 'Save token');
+    else must(await db().from('csbfp_settings').insert({ key: 'postmark_webhook_token', value, updated_by: req.admin.id }), 'Save token');
     const existing = await pm('GET', '/webhooks?MessageStream=outbound');
     for (const w of existing.Webhooks || []) if (String(w.Url || '').startsWith(base)) await pm('DELETE', `/webhooks/${w.ID}`);
     await pm('POST', '/webhooks', {
@@ -157,7 +157,7 @@ router.post('/emails/postmark', async (req, res, next) => {
 
 router.get('/jobs', async (req, res, next) => {
   try {
-    const runs = must(await db().from('br_job_runs').select('*').order('started_at', { ascending: false }).limit(14), 'Job runs');
+    const runs = must(await db().from('csbfp_job_runs').select('*').order('started_at', { ascending: false }).limit(14), 'Job runs');
     res.render('admin/jobs', { pageTitle: 'Daily Job', runs, ...msgOf(req), result: null });
   } catch (err) { next(err); }
 });
@@ -166,7 +166,7 @@ router.post('/jobs/run', async (req, res, next) => {
   try {
     const result = await jobs.runTasks(new Date());
     await logAdmin({ adminId: req.admin.id, action: 'daily_job_run_manually', detail: result, ip: req.ip });
-    const runs = must(await db().from('br_job_runs').select('*').order('started_at', { ascending: false }).limit(14), 'Job runs');
+    const runs = must(await db().from('csbfp_job_runs').select('*').order('started_at', { ascending: false }).limit(14), 'Job runs');
     res.render('admin/jobs', { pageTitle: 'Daily Job', runs, msg: 'Ran the daily tasks now.', err: null, result });
   } catch (err) { next(err); }
 });

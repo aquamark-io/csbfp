@@ -1,7 +1,7 @@
 /**
  * Stripe webhooks: POST /webhooks/stripe
  * The signature is checked against the signing secret saved by the admin "Set up Stripe" action. Each event is
- * processed once (br_stripe_events). A 500 makes Stripe retry later.
+ * processed once (csbfp_stripe_events). A 500 makes Stripe retry later.
  */
 const express = require('express');
 const { stripe, stripeConfig, blockedReason } = require('../lib/stripe');
@@ -30,14 +30,14 @@ router.post('/webhooks/stripe', express.raw({ type: '*/*', limit: '1mb' }), asyn
 
 /**
  * Postmark delivery / bounce / spam-complaint webhooks: POST /webhooks/postmark?token=...
- * The token is created by the admin "Connect Postmark" action and stored encrypted in br_settings.
+ * The token is created by the admin "Connect Postmark" action and stored encrypted in csbfp_settings.
  */
 const crypto = require('crypto');
 const { db } = require('../lib/supabase');
 const { decrypt } = require('../lib/crypto');
 
 async function postmarkToken() {
-  const { data } = await db().from('br_settings').select('value').eq('key', 'postmark_webhook_token').maybeSingle();
+  const { data } = await db().from('csbfp_settings').select('value').eq('key', 'postmark_webhook_token').maybeSingle();
   try { return data && data.value ? decrypt(data.value) : null; } catch { return null; }
 }
 
@@ -61,13 +61,13 @@ router.post('/webhooks/postmark', express.json({ limit: '200kb', type: () => tru
     // Keep the outcome, not message content.
     const payload = { RecordType: e.RecordType, Type: e.Type, TypeCode: e.TypeCode, Description: e.Description, Details: e.Details,
       DeliveredAt: e.DeliveredAt, BouncedAt: e.BouncedAt, Tag: e.Tag, Recipient: e.Recipient || e.Email };
-    await db().from('br_postmark_events').insert({ message_id: id, record_type: e.RecordType || 'unknown', payload });
+    await db().from('csbfp_postmark_events').insert({ message_id: id, record_type: e.RecordType || 'unknown', payload });
     if (id) {
       const update = e.RecordType === 'Delivery' ? { status: 'delivered' }
         : e.RecordType === 'Bounce' ? { status: 'bounced', error: `${e.Type || 'Bounce'}: ${(e.Description || '').slice(0, 300)}` }
           : e.RecordType === 'SpamComplaint' ? { status: 'bounced', error: 'Marked as spam by the recipient' } : null;
       if (update) {
-        let q = db().from('br_email_messages').update(update).eq('postmark_message_id', id);
+        let q = db().from('csbfp_email_messages').update(update).eq('postmark_message_id', id);
         if (update.status === 'delivered') q = q.eq('status', 'sent'); // never overwrite a bounce with "delivered"
         await q;
       }

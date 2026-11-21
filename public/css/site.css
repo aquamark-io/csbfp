@@ -1,11 +1,12 @@
-/* Broker Registry: institutional and minimal. Navy + slate, one typeface, thin rules. No animations. */
+/* CSBFP: institutional and minimal. Logo blue + gold accent, one typeface, thin rules. No animations. */
 @font-face {
   font-family: "Inter"; font-style: normal; font-weight: 100 900; font-display: swap;
   src: url("/fonts/inter-latin-var.woff2") format("woff2");
 }
 :root {
-  --navy: #13156b;
-  --navy-dark: #0d0f4f;
+  --navy: #1f4796;
+  --navy-dark: #173670;
+  --gold: #f4b11b;
   --slate: #cbd3dd;
   --ink: #141a33;
   --body: #3a4152;
@@ -552,9 +553,33 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .assessment .step-chip .arrow { color: var(--muted); margin: 0 2px; }
 .assessment .option.seq { font-size: 0.9rem; letter-spacing: -0.005em; align-items: center; }
 .assessment .option.seq .arrow { margin: 0; }
-/* Dashboard: registered seal download (Active only) */
-.seal-card { display: flex; gap: 18px; align-items: flex-start; margin-top: 28px; padding: 20px 22px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
-.seal-card img { flex: none; }
-.seal-card-title { font-weight: 600; color: var(--ink); margin: 0 0 6px; }
-.seal-card .muted { margin: 0 0 14px; font-size: 0.92rem; }
-@media (max-width: 520px) { .seal-card { flex-direction: column; } }
+
+/* Logo in the header */
+.logo { display: block; width: 104px; height: auto; }
+@media (max-width: 520px) { .logo { width: 88px; } }
+.header.menu-open .logo { background: #fff; border-radius: 4px; padding: 3px; }
+
+/* Home: logo, verify and get certified */
+.home { text-align: center; max-width: 520px; margin: 8px auto 0; }
+.home-logo { display: block; width: 252px; max-width: 70%; height: auto; margin: 0 auto 22px; }
+.home .subtitle { margin: 0 auto 32px; }
+.home-lookup { text-align: left; margin: 0 auto; }
+.home-or { display: flex; align-items: center; gap: 14px; margin: 26px 0 22px; color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.home-or::before, .home-or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+.button.large { padding: 14px 34px; font-size: 1.05rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Footer */
+.footer-links { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-bottom: 18px; }
+.footer-links a { color: var(--body); text-decoration: none; font-weight: 500; }
+.footer-links a:hover { color: var(--navy); text-decoration: underline; }
+.footer .disclaimer { max-width: 680px; }
+
+/* Demo / preview labels */
+.demo-banner { margin: 0 0 18px; padding: 12px 14px; border: 1.5px solid #b45309; background: #fff7ed; color: #7c2d12; border-radius: 8px; font-weight: 600; font-size: 0.93rem; }
+.status-demo { background: #fff7ed; color: #9a3412; }
+.status-pending_screening, .status-under_review { background: #eef2ff; color: #3730a3; }
+.status-suspended, .status-not_approved { background: #fef3c7; color: #92400e; }
+.status-revoked { background: #fee2e2; color: #991b1b; }
+.notice-strong { margin: 20px 0; padding: 12px 14px; border-left: 3px solid var(--gold); background: #fffbeb; color: var(--ink); font-size: 0.93rem; }
+.conf-logo { display: block; width: 126px; height: auto; margin-bottom: 10px; }

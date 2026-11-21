@@ -1,48 +1,55 @@
 <%- include('../partials/head') %>
-<h1>Registration Dashboard</h1>
+<h1>My Certification</h1>
 <%
   const reg = progress.registration || {};
-  const statusLabel = { pending: 'Pending', active: 'Active', inactive: 'Inactive', expired: 'Expired' }[reg.status] || 'Pending';
   const fmt = d => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—';
+  const certified = ['active', 'inactive', 'expired', 'suspended', 'revoked'].includes(reg.status);
+  const paid = Boolean(reg.paid_at) || certified || ['pending_screening', 'under_review', 'not_approved'].includes(reg.status);
+  const passed = Boolean(train.assessment && train.assessment.passed);
 %>
+<% if (reg.is_demo) { %><p class="demo-banner">DEMO / NOT SCREENED: background screening is not active yet, so this preview credential is not a valid CSBFP certification.</p><% } %>
 <dl class="summary">
-  <div><dt>Status</dt><dd><span class="status status-<%= reg.status || 'pending' %>"><%= statusLabel %></span></dd></div>
-  <div><dt>Registration number</dt><dd><%= reg.registration_number || '—' %></dd></div>
-  <% if (reg.first_activated_at) { %><div><dt>Registration date</dt><dd><%= fmt(reg.first_activated_at) %></dd></div><% } %>
-  <% if (reg.expires_at) { %><div><dt>Valid through</dt><dd><%= fmt(reg.expires_at) %></dd></div><% } %>
+  <div><dt>Status</dt><dd><%- statusPill(reg.status, false, reg.is_demo) %></dd></div>
+  <div><dt>Certification number</dt><dd><%= reg.registration_number || '—' %></dd></div>
+  <% if (reg.first_activated_at) { %><div><dt>Certified since</dt><dd><%= fmt(reg.first_activated_at) %></dd></div><% } %>
+  <% if (reg.expires_at && certified) { %><div><dt>Valid through</dt><dd><%= fmt(reg.expires_at) %></dd></div><% } %>
 </dl>
 
 <% const renewSoon = reg.status === 'active' && reg.expires_at && Date.parse(reg.expires_at) - Date.now() < 30 * 864e5;
    const confirmedRecently = registrant.info_confirmed_at && Date.now() - Date.parse(registrant.info_confirmed_at) < 300 * 864e5; %>
 <% if (renewSoon && !confirmedRecently) { %>
 <div class="message review-box">
-  <p><strong>Annual review:</strong> your registration renews soon. Please check that your <a href="/portal/personal">contact details</a>, <a href="/portal/employment">employment</a> and <a href="/portal/products">products</a> are current.</p>
+  <p><strong>Annual review:</strong> your certification renews soon. Please check that your <a href="/portal/personal">contact details</a>, <a href="/portal/employment">employment</a> and <a href="/portal/products">products</a> are current.</p>
   <form method="post" action="/portal/confirm-info"><button class="button small" type="submit">My Information Is Current</button></form>
 </div>
 <% } %>
 <% if (flagged) { %>
-<p class="alert">We need to confirm a few details before your registration can be completed. Please contact <a href="mailto:support@broker-registry.org">support@broker-registry.org</a>.</p>
+<p class="alert">We need to confirm a few details before your application can be completed. Please contact <a href="mailto:<%= program.supportEmail %>"><%= program.supportEmail %></a>.</p>
 <% } %>
 
 <div class="list-card">
 <h2 class="list-card-head">Steps to complete</h2>
 <%
+  const screeningState = !screeningEnabled ? 'Not active yet'
+    : !paid ? '' : screening ? screeningLabel(screening.status) : 'Pending';
   const steps = [
     { done: progress.personal, label: 'Personal information', href: '/portal/personal' },
     { done: progress.employment, label: 'Employment', href: '/portal/employment' },
     { done: progress.products, label: 'Financing products', href: '/portal/products' },
-    { done: progress.acknowledgments, label: 'Acknowledgments', href: '/portal/acknowledgments' },
+    { done: progress.acknowledgments, label: 'Professional standards', href: '/portal/acknowledgments' },
     { done: train.allComplete, label: `Training (${train.modules.filter(m => m.completed).length} of ${train.modules.length} modules)`, href: '/portal/training',
       state: train.allComplete ? 'Complete' : train.modules.some(m => m.started) ? 'In progress' : 'Start' },
-    { done: Boolean(train.assessment && train.assessment.passed), label: 'Assessment', href: train.allComplete ? '/portal/assessment' : null, divider: true,
-      locked: !train.allComplete,
-      state: train.assessment && train.assessment.passed ? 'Passed' : !train.allComplete ? '' : 'Start' },
-    { done: ['active'].includes(reg.status) || Boolean(reg.first_activated_at && reg.status !== 'pending'), label: 'Annual registration fee ($99)',
-      href: train.assessment && train.assessment.passed ? '/portal/checkout' : null, divider: true,
-      locked: !(train.assessment && train.assessment.passed) && !reg.first_activated_at,
-      state: reg.status === 'active' ? 'Paid' : reg.status === 'inactive' ? 'Payment due' : reg.status === 'expired' ? 'Renew' : !(train.assessment && train.assessment.passed) ? '' : 'Start' },
+    { done: passed, label: 'Assessment', href: train.allComplete ? '/portal/assessment' : null, divider: true,
+      locked: !train.allComplete, state: passed ? 'Passed' : !train.allComplete ? '' : 'Start' },
+    { done: paid, label: `Annual certification fee (${program.annualFee})`,
+      href: passed ? '/portal/checkout' : null, divider: true, locked: !passed && !paid,
+      state: reg.status === 'inactive' ? 'Payment due' : reg.status === 'expired' ? 'Renew' : !passed ? '' : 'Start' },
+    { done: screeningEnabled && screening && screening.status === 'approved', label: 'Background screening (one time)', href: null, divider: true,
+      locked: !paid || !screeningEnabled, state: screeningState },
+    { done: certified, label: 'Certification issued', href: certified ? '/portal/confirmation' : null,
+      locked: !certified, state: reg.status === 'under_review' ? 'Under review' : reg.status === 'not_approved' ? 'Not approved' : '' },
   ];
-  const next = steps.find(s => !s.done && !s.later && s.href);
+  const next = steps.find(s => !s.done && s.href);
 %>
 <ol class="checklist">
   <% steps.forEach(s => { %>
@@ -54,22 +61,28 @@
   <% }) %>
 </ol>
 </div>
+<% if (!screeningEnabled && !certified) { %>
+<p class="notice-strong">Background screening is not active yet. While the program is in preview, completing these steps produces a demo record only. It is not a valid certification and is never shown publicly as one.</p>
+<% } %>
+
 <% if (reg.status === 'inactive') { %>
-<p class="alert">Your renewal payment didn't go through, so your registration is Inactive. <a href="/portal/billing">Pay now to reactivate it.</a></p>
+<p class="alert">Your renewal payment didn't go through, so your certification is Inactive. <a href="/portal/billing">Pay now to reactivate it.</a></p>
 <% } else if (reg.status === 'expired') { %>
-<p class="message">Your registration has expired. <a href="/portal/checkout">Renew it</a> to make it active again with the same number.</p>
+<p class="message">Your certification has expired. <a href="/portal/checkout">Renew it</a> to make it active again with the same number.</p>
+<% } else if (reg.status === 'pending_screening') { %>
+<p class="message">Your application is complete. The next step is the one-time background screening. We will email you with instructions.</p>
+<% } else if (reg.status === 'under_review') { %>
+<p class="message">Your application is under review. We will email you when a decision is made.</p>
+<% } else if (reg.status === 'not_approved') { %>
+<p class="message">Your application was not approved. To ask about reconsideration, contact <a href="mailto:<%= program.supportEmail %>"><%= program.supportEmail %></a>.</p>
+<% } else if (reg.status === 'suspended') { %>
+<p class="alert">Your certification is suspended pending review. To respond or ask about the process, contact <a href="mailto:<%= program.supportEmail %>"><%= program.supportEmail %></a>.</p>
+<% } else if (reg.status === 'revoked') { %>
+<p class="alert">Your certification has been revoked. To ask about the appeal process, contact <a href="mailto:<%= program.supportEmail %>"><%= program.supportEmail %></a>.</p>
 <% } else if (reg.status === 'active') { %>
-<div class="actions"><a class="button" href="/portal/confirmation">View Registration Confirmation</a><a class="button secondary" href="/portal/billing">Billing</a></div>
-<div class="seal-card">
-  <img src="/img/seal.png?v=<%= assetV %>" alt="" width="72" height="72">
-  <div>
-    <p class="seal-card-title">Your registered seal</p>
-    <p class="muted">Show it with your registration number, <strong><%= reg.registration_number %></strong>, or link it to your <a href="/verify?number=<%= encodeURIComponent(reg.registration_number) %>">verification page</a>. Remove it if your registration is no longer Active. <a href="/legal/terms#5-using-your-registration-accurately">Seal rules</a></p>
-    <a class="button secondary small" href="/portal/seal">Download Seal</a>
-  </div>
-</div>
+<div class="actions"><a class="button" href="/portal/confirmation">View Certificate</a><a class="button secondary" href="/portal/billing">Billing</a></div>
 <% } else if (next) { %>
 <div class="actions"><a class="button" href="<%= next.href %>">Continue: <%= next.label.replace(/ \(.*\)$/, '') %></a></div>
 <% } %>
-<p class="muted portal-links"><a href="/portal/account">Account settings</a><% if (reg.status === 'expired') { %> · <a href="/portal/billing">Billing history</a><% } %></p>
+<p class="muted portal-links"><a href="/portal/account">Account settings</a><% if (paid) { %> · <a href="/portal/billing">Billing</a><% } %> · <a href="/support">Support and appeals</a></p>
 <%- include('../partials/foot') %>

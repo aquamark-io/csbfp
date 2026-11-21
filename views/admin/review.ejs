@@ -1,0 +1,52 @@
+<%- include('../partials/head') %>
+<h1>Review</h1>
+
+<div class="message">
+  <p><strong>Background screening:</strong> <%= screeningConfig.enabled ? 'Enabled' : 'Not enabled' %>
+    · Provider: <code><%= screeningConfig.provider %></code><%= screeningConfig.integrated ? '' : ' (not integrated)' %>
+    · Policy version: <code><%= screeningConfig.policyVersion %></code></p>
+  <% if (!screeningConfig.enabled) { %>
+  <p class="muted">While screening is off, each paid application receives a DEMO credential (DEMO- number) that the public lookup labels as not screened and not valid. Genuine certifications can only be issued with screening enabled. Set <code>BACKGROUND_SCREENING_ENABLED=true</code> in Render only after the provider agreement, integration and legal review are complete.</p>
+  <% } else if (!screeningConfig.integrated) { %>
+  <p class="muted">No provider is integrated, so screening statuses are recorded here by hand. A provider result is never a decision: an authorized reviewer records every outcome.</p>
+  <% } %>
+</div>
+
+<h2>Applications and certifications needing action</h2>
+<% if (!rows.length) { %><p class="muted">Nothing waiting.</p><% } else { %>
+<table class="table">
+  <thead><tr><th>Since</th><th>Name</th><th>Status</th><th>Screening</th><th></th></tr></thead>
+  <tbody>
+  <% rows.forEach(x => { %>
+    <tr>
+      <td><%= fmtDate(x.updated_at) %></td>
+      <td><%= fullName(x.person) %><br><span class="muted-inline"><%= x.person && x.person.email %></span></td>
+      <td><%- statusPill(x.status, x.admin_hold, x.is_demo) %></td>
+      <td><%= x.screening ? screeningLabel(x.screening.status) : '—' %></td>
+      <td><a href="/admin/registrants/<%= x.registrant_id %>#certification">Open</a></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<% } %>
+
+<h2>Open appeals, disputes and reconsideration requests</h2>
+<% if (!appeals.length) { %><p class="muted">None open.</p><% } else { %>
+<table class="table">
+  <thead><tr><th>Received</th><th>Name</th><th>Type</th><th>Subject</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  <% appeals.forEach(a => { %>
+    <tr>
+      <td><%= fmtDate(a.created_at) %></td>
+      <td><%= fullName(a.person) %></td>
+      <td><%= a.kind %></td>
+      <td><%= a.subject.replace('_', ' ') %></td>
+      <td><%= a.status.replace('_', ' ') %></td>
+      <td><a href="/admin/registrants/<%= a.registrant_id %>#appeals">Open</a></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<% } %>
+<p class="muted">Procedures for notice, response, appeal and reconsideration are pending program-owner approval. These tools record each step; they do not decide anything automatically.</p>
+<%- include('../partials/foot') %>

@@ -2,7 +2,7 @@
 <h1>Registrants</h1>
 <form method="get" action="/admin/registrants" class="search-row">
   <label for="q" class="visually-hidden">Search</label>
-  <input id="q" name="q" type="search" placeholder="Name, email or registration number" value="<%= q %>">
+  <input id="q" name="q" type="search" placeholder="Name, email or certification number" value="<%= q %>">
   <button class="button" type="submit">Search</button>
   <% if (q) { %><a class="button secondary" href="/admin/registrants">Clear</a><% } %>
 </form>

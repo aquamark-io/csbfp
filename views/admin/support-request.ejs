@@ -2,7 +2,7 @@
 <p class="muted"><a href="/admin/support">← Support</a></p>
 <h1><%= reference %>: <%= CATEGORIES[sr.category] || sr.category %></h1>
 <% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
-<p class="muted">Received <%= fmtTime(sr.created_at) %> from <a href="mailto:<%= sr.contact_email %>?subject=<%= encodeURIComponent(`Re: your Broker Registry request ${reference}`) %>"><%= sr.contact_email %></a></p>
+<p class="muted">Received <%= fmtTime(sr.created_at) %> from <a href="mailto:<%= sr.contact_email %>?subject=<%= encodeURIComponent(`Re: your CSBFP request ${reference}`) %>"><%= sr.contact_email %></a></p>
 <% if (registrant) { %>
 <p>Account: <a href="/admin/registrants/<%= registrant.id %>"><%= fullName(registrant) %></a> (<%= registrant.email || 'deleted' %>)<% if (sr.registrant_id && registrant.email && registrant.email !== sr.contact_email) { %>. <strong>Note:</strong> the request came from a different address than the account's.<% } %></p>
 <% } else { %>

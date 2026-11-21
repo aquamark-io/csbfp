@@ -1,35 +1,21 @@
 </main>
 <footer class="footer">
   <div class="footer-inner">
-    <div class="footer-main">
-      <div class="footer-about">
-        <div class="footer-brand"><span class="brand-name">Broker Registry</span></div>
-        <p class="disclaimer">Broker Registry is privately operated. It is not a government agency or licensing authority, and registration does not authorize anyone to perform activities that require a state license.</p>
-      </div>
-      <nav class="footer-cols" aria-label="Footer">
-        <div>
-          <p class="footer-head">Registry</p>
-          <a href="/about">About</a>
-          <a href="/faq">FAQ</a>
-          <a href="/verify">Verify a Registration</a>
-          <a href="/portal">Sign In</a>
-        </div>
-        <div>
-          <p class="footer-head">Legal</p>
-          <a href="/legal/terms">Program Terms</a>
-          <a href="/legal/privacy">Privacy Policy</a>
-          <a href="/support">Contact</a>
-        </div>
-      </nav>
-    </div>
+    <nav class="footer-links" aria-label="Footer">
+      <a href="/faq">FAQ</a>
+      <a href="/legal/terms">Program Terms</a>
+      <a href="/legal/privacy">Privacy Policy</a>
+      <a href="/support">Contact</a>
+    </nav>
+    <p class="disclaimer">The Certified Small Business Finance Professional (CSBFP) credential is a private industry certification. It is not a government license or regulatory approval, and it does not authorize anyone to perform activities that require a license.</p>
     <div class="recognized">
-      <p class="recognized-label">Recognized by industry trade associations</p>
+      <p class="recognized-label">In collaboration with</p>
       <div class="recognized-logos">
         <a href="https://sbfassociation.org/" target="_blank" rel="noopener noreferrer"><img src="/img/sbfa.png" alt="Small Business Finance Association" height="30"></a>
         <a href="https://mainstreetcapital.org/" target="_blank" rel="noopener noreferrer"><img src="/img/main-street-capital.png" alt="Main Street Capital Partnership" height="30"></a>
       </div>
     </div>
-    <p class="operator">&copy; <%= new Date().getFullYear() %> Broker Registry</p>
+    <p class="operator">&copy; <%= new Date().getFullYear() %> CSBFP. Technology and administration by <%= program.operator %>.</p>
   </div>
 </footer>
 </body>

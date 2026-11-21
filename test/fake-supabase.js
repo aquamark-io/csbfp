@@ -7,45 +7,48 @@
 const crypto = require('crypto');
 
 const UNIQUE = {
-  br_registrants: [['email']],
-  br_registrations: [['registrant_id'], ['registration_number']],
-  br_admin_users: [['email']],
-  br_training_progress: [['registrant_id', 'module_id']],
-  br_subscriptions: [['stripe_subscription_id']],
-  br_payments: [['stripe_invoice_id']],
-  br_stripe_events: [['id']],
-  br_settings: [['key']],
-  br_job_runs: [['job', 'run_date']],
-  br_email_templates: [['key']],
-  br_curriculum_versions: [['label']],
-  br_job_titles: [['label']],
-  br_financing_products: [['label']],
-  br_email_messages: [['dedupe_key']],
-  br_duplicate_flags: [['registrant_id', 'matched_registrant_id', 'match_reason']],
-  br_registrant_products: [['registrant_id', 'product_id']],
-  br_registrant_states: [['registrant_id', 'state']],
+  csbfp_registrants: [['email']],
+  csbfp_registrations: [['registrant_id'], ['registration_number']],
+  csbfp_admin_users: [['email']],
+  csbfp_training_progress: [['registrant_id', 'module_id']],
+  csbfp_subscriptions: [['stripe_subscription_id']],
+  csbfp_payments: [['stripe_invoice_id']],
+  csbfp_stripe_events: [['id']],
+  csbfp_settings: [['key']],
+  csbfp_job_runs: [['job', 'run_date']],
+  csbfp_email_templates: [['key']],
+  csbfp_curriculum_versions: [['label']],
+  csbfp_job_titles: [['label']],
+  csbfp_financing_products: [['label']],
+  csbfp_email_messages: [['dedupe_key']],
+  csbfp_duplicate_flags: [['registrant_id', 'matched_registrant_id', 'match_reason']],
+  csbfp_registrant_products: [['registrant_id', 'product_id']],
+  csbfp_registrant_states: [['registrant_id', 'state']],
+  csbfp_screenings: [['registration_id'], ['idempotency_key']],
 };
 
 const DEFAULTS = {
-  br_registrants: { account_status: 'active', is_test: false },
-  br_registrations: { status: 'pending', admin_hold: false },
-  br_login_codes: { attempts: 0, used_at: null, purpose: 'sign_in' },
-  br_email_messages: { status: 'queued', attempts: 0 },
-  br_duplicate_flags: { status: 'open' },
-  br_employment_relationships: { is_current: true },
-  br_admin_users: { active: true },
-  br_support_requests: { status: 'open' },
-  br_curriculum_versions: { status: 'draft', is_required: false, overview_md: '', completion_md: '' },
-  br_questions: { active: true, position: 0 },
-  br_modules: { body_md: '' },
-  br_admin_login_codes: { attempts: 0, used_at: null },
-  br_job_titles: { active: true, position: 0 },
-  br_financing_products: { active: true, position: 0 },
+  csbfp_registrants: { account_status: 'active', is_test: false },
+  csbfp_registrations: { status: 'pending', admin_hold: false, is_demo: false },
+  csbfp_screenings: { status: 'not_started' },
+  csbfp_appeals: { status: 'open' },
+  csbfp_login_codes: { attempts: 0, used_at: null, purpose: 'sign_in' },
+  csbfp_email_messages: { status: 'queued', attempts: 0 },
+  csbfp_duplicate_flags: { status: 'open' },
+  csbfp_employment_relationships: { is_current: true },
+  csbfp_admin_users: { active: true },
+  csbfp_support_requests: { status: 'open' },
+  csbfp_curriculum_versions: { status: 'draft', is_required: false, overview_md: '', completion_md: '' },
+  csbfp_questions: { active: true, position: 0 },
+  csbfp_modules: { body_md: '' },
+  csbfp_admin_login_codes: { attempts: 0, used_at: null },
+  csbfp_job_titles: { active: true, position: 0 },
+  csbfp_financing_products: { active: true, position: 0 },
 };
 
 // Tables whose ids are integers (identity columns) in the real schema.
-const INT_IDS = new Set(['br_events', 'br_legal_acceptances', 'br_admin_audit_log', 'br_registration_status_history',
-  'br_job_titles', 'br_financing_products', 'br_postmark_events', 'br_verify_lookups', 'br_job_runs', 'br_assessment_resets']);
+const INT_IDS = new Set(['csbfp_events', 'csbfp_legal_acceptances', 'csbfp_admin_audit_log', 'csbfp_registration_status_history',
+  'csbfp_job_titles', 'csbfp_financing_products', 'csbfp_postmark_events', 'csbfp_verify_lookups', 'csbfp_job_runs', 'csbfp_assessment_resets']);
 
 function likeMatch(value, pattern) {
   if (value == null) return false;
@@ -64,9 +67,9 @@ function createFake(seed = {}) {
     id: INT_IDS.has(table) ? Math.max(serial++, ...t(table).map(r => (typeof r.id === 'number' ? r.id + 1 : 0))) : crypto.randomUUID(),
     created_at: now(), updated_at: now(),
     // Timestamp columns the real schema fills with now().
-    ...(['br_assessment_attempts', 'br_training_progress'].includes(table) ? { started_at: now() } : {}),
-    ...(table === 'br_legal_acceptances' ? { accepted_at: now() } : {}),
-    ...(table === 'br_stripe_events' || table === 'br_postmark_events' ? { received_at: now() } : {}),
+    ...(['csbfp_assessment_attempts', 'csbfp_training_progress'].includes(table) ? { started_at: now() } : {}),
+    ...(table === 'csbfp_legal_acceptances' ? { accepted_at: now() } : {}),
+    ...(table === 'csbfp_stripe_events' || table === 'csbfp_postmark_events' ? { received_at: now() } : {}),
     ...(DEFAULTS[table] || {}), ...row,
   });
 
@@ -167,21 +170,25 @@ function createFake(seed = {}) {
 
   // The two database functions the app calls, mirroring the SQL versions.
   async function rpc(name, p) {
-    const reg = t('br_registrations').find(r => r.id === p.p_registration_id);
+    const reg = t('csbfp_registrations').find(r => r.id === p.p_registration_id);
     if (!reg) return { data: null, error: { message: 'Registration not found' } };
-    if (name === 'br_assign_registration_number') {
+    if (name === 'csbfp_assign_registration_number') {
       if (!reg.registration_number) {
         let n;
-        do { n = `BR-${String(Math.floor(Math.random() * 1e8)).padStart(8, '0')}`; } while (t('br_registrations').some(r => r.registration_number === n));
+        do { n = `${p.p_prefix || 'CSBFP'}-${String(Math.floor(Math.random() * 1e8)).padStart(8, '0')}`; } while (t('csbfp_registrations').some(r => r.registration_number === n));
         reg.registration_number = n;
       }
       return { data: reg.registration_number, error: null };
     }
-    if (name === 'br_set_registration_status') {
+    if (name === 'csbfp_set_registration_status') {
       if (reg.status === p.p_to_status) return { data: null, error: null };
-      if (p.p_to_status !== 'pending' && !reg.registration_number) return { data: null, error: { message: 'number required' } };
-      t('br_registration_status_history').push({ id: serial++, registration_id: reg.id, from_status: reg.status, to_status: p.p_to_status,
-        reason: p.p_reason, actor_type: p.p_actor_type, actor_id: p.p_actor_id, source_ref: p.p_source_ref, created_at: now() });
+      if (!transitionAllowed(reg.status, p.p_to_status, p.p_actor_type)) {
+        return { data: null, error: { message: `Status change ${reg.status} -> ${p.p_to_status} is not allowed for ${p.p_actor_type}` } };
+      }
+      if (!['pending', 'pending_screening', 'under_review', 'not_approved'].includes(p.p_to_status) && !reg.registration_number) return { data: null, error: { message: 'number required' } };
+      t('csbfp_registration_status_history').push({ id: serial++, registration_id: reg.id, from_status: reg.status, to_status: p.p_to_status,
+        reason: p.p_reason, actor_type: p.p_actor_type, actor_id: p.p_actor_id, source_ref: p.p_source_ref,
+        effective_at: p.p_effective_at || now(), evidence_ref: p.p_evidence_ref || null, created_at: now() });
       reg.status = p.p_to_status;
       return { data: null, error: null };
     }
@@ -191,4 +198,23 @@ function createFake(seed = {}) {
   return { from: query, tables, rpc };
 }
 
-module.exports = { createFake };
+// Mirrors csbfp_status_transition_allowed in the migration.
+const ALLOWED = new Set([
+  'pending>pending_screening', 'pending>under_review', 'pending>active',
+  'pending_screening>under_review', 'pending_screening>not_approved',
+  'under_review>active', 'under_review>not_approved', 'under_review>pending_screening',
+  'not_approved>under_review',
+  'active>inactive', 'active>expired', 'active>suspended', 'active>revoked',
+  'inactive>active', 'inactive>expired', 'inactive>suspended', 'inactive>revoked',
+  'expired>active', 'expired>suspended', 'expired>revoked',
+  'suspended>active', 'suspended>inactive', 'suspended>expired', 'suspended>revoked',
+  'revoked>active',
+]);
+function transitionAllowed(from, to, actor) {
+  if (['suspended', 'revoked', 'not_approved'].includes(to) && actor !== 'admin') return false;
+  if (['revoked', 'not_approved'].includes(from) && actor !== 'admin') return false;
+  if (from === 'suspended' && to !== 'expired' && actor !== 'admin') return false;
+  return ALLOWED.has(`${from}>${to}`);
+}
+
+module.exports = { createFake, transitionAllowed };

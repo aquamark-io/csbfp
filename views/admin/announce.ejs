@@ -1,6 +1,6 @@
 <%- include('../partials/head') %>
 <h1>Announce</h1>
-<p class="muted">Send a program update (for example, required training changes) by email. It goes out from no-reply@broker-registry.org using the "Program update" layout. Send a test to yourself first.</p>
+<p class="muted">Send a program update (for example, required training changes) by email. It goes out from no-reply@<%= program.domain %> using the "Program update" layout. Send a test to yourself first.</p>
 <% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
 <% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
 <form method="post" action="/admin/announce/send" class="panel">

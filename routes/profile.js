@@ -17,6 +17,7 @@ const express = require('express');
 const { db, must } = require('../lib/supabase');
 const { encrypt, decrypt, blindIndex } = require('../lib/crypto');
 const { logEvent } = require('../lib/events');
+const screening = require('../lib/screening');
 const { progressFor, markProfileComplete } = require('../lib/progress');
 const { checkDuplicates, hasOpenFlag } = require('../lib/duplicates');
 const legal = require('../lib/legal');
@@ -26,7 +27,7 @@ const { sendQuietly, registrantVars } = require('../lib/email');
 
 // Once a registration is no longer pending, changes to it are confirmed by email (at most once a day).
 async function infoUpdated(registrant) {
-  const reg = must(await db().from('br_registrations').select('id, status').eq('registrant_id', registrant.id).maybeSingle(), 'Registration');
+  const reg = must(await db().from('csbfp_registrations').select('id, status').eq('registrant_id', registrant.id).maybeSingle(), 'Registration');
   if (!reg || reg.status === 'pending') return;
   sendQuietly({ dedupeKey: `info_updated:${reg.id}:${new Date().toISOString().slice(0, 10)}`, registrantId: registrant.id,
     templateKey: 'registration_info_updated', to: registrant.email, vars: registrantVars(registrant) });
@@ -38,18 +39,18 @@ router.use(requireRegistrant);
 
 const isUuid = s => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || '');
 const saved = (res, path) => res.redirect(303, `${path}?saved=1`);
-const refresh = async id => must(await db().from('br_registrants').select('*').eq('id', id).single(), 'Reload registrant');
+const refresh = async id => must(await db().from('csbfp_registrants').select('*').eq('id', id).single(), 'Reload registrant');
 
 // Name and date of birth appear on (or identify) the public registration, so they lock once it's no longer pending.
 async function identityLocked(registrantId) {
-  const reg = must(await db().from('br_registrations').select('status').eq('registrant_id', registrantId).maybeSingle(), 'Registration');
+  const reg = must(await db().from('csbfp_registrations').select('status').eq('registrant_id', registrantId).maybeSingle(), 'Registration');
   return Boolean(reg && reg.status !== 'pending');
 }
 
 async function lists() {
   const [titles, products] = await Promise.all([
-    db().from('br_job_titles').select('id, label').eq('active', true).order('position'),
-    db().from('br_financing_products').select('id, label').eq('active', true).order('position'),
+    db().from('csbfp_job_titles').select('id, label').eq('active', true).order('position'),
+    db().from('csbfp_financing_products').select('id, label').eq('active', true).order('position'),
   ]);
   return { titles: must(titles, 'Job titles'), products: must(products, 'Products') };
 }
@@ -59,18 +60,8 @@ async function lists() {
 router.get('/dashboard', async (req, res, next) => {
   try {
     const [progress, flagged, train] = await Promise.all([progressFor(req.registrant), hasOpenFlag(req.registrant.id), training.stateFor(req.registrant.id)]);
-    res.render('portal/dashboard', { pageTitle: 'Dashboard', progress, flagged, train });
-  } catch (err) { next(err); }
-});
-
-// ---------- registered seal (Active registrants only; see Program Terms §5) ----------
-
-router.get('/seal', async (req, res, next) => {
-  try {
-    const reg = must(await db().from('br_registrations').select('status').eq('registrant_id', req.registrant.id).maybeSingle(), 'Registration');
-    if (!reg || reg.status !== 'active') return res.redirect('/portal/dashboard');
-    await logEvent({ registrantId: req.registrant.id, event: 'seal_downloaded', actor: 'registrant', ip: req.ip });
-    return res.download(require('path').join(__dirname, '..', 'public', 'img', 'seal-full.png'), 'broker-registry-seal.png');
+    const sc = progress.registration && progress.registration.id ? await screening.forRegistration(progress.registration.id) : null;
+    res.render('portal/dashboard', { pageTitle: 'My Certification', progress, flagged, train, screening: sc });
   } catch (err) { next(err); }
 });
 
@@ -114,7 +105,7 @@ router.post('/personal', async (req, res, next) => {
         dob_enc: encrypt(data.dob), dob_hash: blindIndex(`dob:${data.dob}`),
       });
     }
-    must(await db().from('br_registrants').update(update).eq('id', r.id), 'Save personal information');
+    must(await db().from('csbfp_registrants').update(update).eq('id', r.id), 'Save personal information');
     await logEvent({ registrantId: r.id, event: 'personal_updated', actor: 'registrant', detail: { fields: Object.keys(update).filter(k => k !== 'dob_enc') }, ip: req.ip });
 
     const fresh = await refresh(r.id);
@@ -131,10 +122,11 @@ router.get('/employment', async (req, res, next) => {
   try {
     const { titles } = await lists();
     const titleLabel = new Map(titles.map(t => [t.id, t.label]));
-    const rels = must(await db().from('br_employment_relationships')
+    const rels = must(await db().from('csbfp_employment_relationships')
       .select('*').eq('registrant_id', req.registrant.id).eq('is_current', true)
       .order('start_month', { ascending: false }), 'Relationships')
-      .map(r => ({ ...r, title: r.job_title_other || titleLabel.get(r.job_title_id) || '' }));
+      .map(r => ({ ...r, title: r.job_title_other || titleLabel.get(r.job_title_id) || '',
+        role: r.primary_role === 'other' ? r.primary_role_other : v.PRIMARY_ROLES[r.primary_role] }));
     res.render('portal/employment', { pageTitle: 'Employment', rels, saved: req.query.saved === '1', error: null });
   } catch (err) { next(err); }
 });
@@ -143,11 +135,11 @@ router.post('/employment/status', async (req, res, next) => {
   try {
     const status = req.body.employment_status;
     if (!['working', 'not_currently_employed'].includes(status)) return res.redirect(303, '/portal/employment');
-    must(await db().from('br_registrants').update({ employment_status: status }).eq('id', req.registrant.id), 'Employment status');
+    must(await db().from('csbfp_registrants').update({ employment_status: status }).eq('id', req.registrant.id), 'Employment status');
     await logEvent({ registrantId: req.registrant.id, event: 'employment_status_updated', actor: 'registrant', detail: { status }, ip: req.ip });
     await markProfileComplete(await refresh(req.registrant.id));
     if (status === 'working') {
-      const { count } = await db().from('br_employment_relationships').select('id', { count: 'exact', head: true })
+      const { count } = await db().from('csbfp_employment_relationships').select('id', { count: 'exact', head: true })
         .eq('registrant_id', req.registrant.id).eq('is_current', true);
       if (!count) return res.redirect(303, '/portal/employment');
     }
@@ -161,33 +153,32 @@ function relValues(rel) {
   return {
     relationship_type: rel.relationship_type, company_name: rel.company_name, company_website: rel.company_website || '',
     start_year: sy || '', start_month: sm ? String(Number(sm)) : '',
-    work_arrangement: rel.work_arrangement, job_title_id: String(rel.job_title_id || ''), job_title_other: rel.job_title_other || '',
+    work_arrangement: rel.work_arrangement, job_title_other: rel.job_title_other || '',
+    primary_role: rel.primary_role || '', primary_role_other: rel.primary_role_other || '',
   };
 }
 
 async function loadRel(req) {
   if (!isUuid(req.params.id)) return null;
-  return must(await db().from('br_employment_relationships').select('*')
+  return must(await db().from('csbfp_employment_relationships').select('*')
     .eq('id', req.params.id).eq('registrant_id', req.registrant.id).maybeSingle(), 'Relationship');
 }
 
 async function relForm(req, res, rel) {
-  const { titles } = await lists();
-  res.render('portal/relationship', { pageTitle: rel ? 'Edit Employer' : 'Add Employer', rel, titles, values: relValues(rel), errors: {} });
+  res.render('portal/relationship', { pageTitle: rel ? 'Edit Employer' : 'Add Employer', rel, roles: v.PRIMARY_ROLES, values: relValues(rel), errors: {} });
 }
 
 async function relSave(req, res, rel) {
-  const { titles } = await lists();
-  const { errors, data } = v.validateRelationship(req.body, new Map(titles.map(t => [t.id, t.label])));
+  const { errors, data } = v.validateRelationship(req.body);
   if (Object.keys(errors).length) {
-    return res.status(422).render('portal/relationship', { pageTitle: rel ? 'Edit Employer' : 'Add Employer', rel, titles, values: req.body, errors });
+    return res.status(422).render('portal/relationship', { pageTitle: rel ? 'Edit Employer' : 'Add Employer', rel, roles: v.PRIMARY_ROLES, values: req.body, errors });
   }
   if (rel) {
-    must(await db().from('br_employment_relationships').update(data).eq('id', rel.id).eq('registrant_id', req.registrant.id), 'Update relationship');
+    must(await db().from('csbfp_employment_relationships').update(data).eq('id', rel.id).eq('registrant_id', req.registrant.id), 'Update relationship');
   } else {
-    must(await db().from('br_employment_relationships').insert({ ...data, registrant_id: req.registrant.id }), 'Add relationship');
+    must(await db().from('csbfp_employment_relationships').insert({ ...data, registrant_id: req.registrant.id }), 'Add relationship');
     if (req.registrant.employment_status !== 'working') {
-      must(await db().from('br_registrants').update({ employment_status: 'working' }).eq('id', req.registrant.id), 'Employment status');
+      must(await db().from('csbfp_registrants').update({ employment_status: 'working' }).eq('id', req.registrant.id), 'Employment status');
     }
   }
   await logEvent({ registrantId: req.registrant.id, event: rel ? 'employer_updated' : 'employer_added', actor: 'registrant', ip: req.ip });
@@ -219,7 +210,7 @@ router.post('/employment/:id/delete', async (req, res, next) => {
   try {
     const rel = await loadRel(req);
     if (!rel) return next();
-    must(await db().from('br_employment_relationships').delete().eq('id', rel.id).eq('registrant_id', req.registrant.id), 'Remove relationship');
+    must(await db().from('csbfp_employment_relationships').delete().eq('id', rel.id).eq('registrant_id', req.registrant.id), 'Remove relationship');
     await logEvent({ registrantId: req.registrant.id, event: 'employer_removed', actor: 'registrant', ip: req.ip });
     return saved(res, '/portal/employment');
   } catch (err) { next(err); }
@@ -230,7 +221,7 @@ router.post('/employment/:id/delete', async (req, res, next) => {
 router.get('/products', async (req, res, next) => {
   try {
     const { products } = await lists();
-    const mine = await db().from('br_registrant_products').select('product_id').eq('registrant_id', req.registrant.id);
+    const mine = await db().from('csbfp_registrant_products').select('product_id').eq('registrant_id', req.registrant.id);
     const values = {
       products: must(mine, 'My products').map(p => String(p.product_id)),
       products_other: req.registrant.products_other || '',
@@ -242,15 +233,15 @@ router.get('/products', async (req, res, next) => {
 router.post('/products', async (req, res, next) => {
   try {
     const { products } = await lists();
-    const { errors, data } = v.validateProducts(req.body, new Set(products.map(p => p.id)));
+    const { errors, data } = v.validateProducts(req.body, new Map(products.map(p => [p.id, p.label])));
     if (Object.keys(errors).length) {
       const asArr = x => (Array.isArray(x) ? x : x ? [x] : []);
       return res.status(422).render('portal/products', { pageTitle: 'Financing Products', products, errors, saved: false,
         values: { products: asArr(req.body.products) } });
     }
     const id = req.registrant.id;
-    must(await db().from('br_registrant_products').delete().eq('registrant_id', id), 'Clear products');
-    must(await db().from('br_registrant_products').insert(data.products.map(p => ({ registrant_id: id, product_id: p }))), 'Save products');
+    must(await db().from('csbfp_registrant_products').delete().eq('registrant_id', id), 'Clear products');
+    must(await db().from('csbfp_registrant_products').insert(data.products.map(p => ({ registrant_id: id, product_id: p }))), 'Save products');
     await logEvent({ registrantId: id, event: 'products_updated', actor: 'registrant', ip: req.ip });
     await markProfileComplete(await refresh(id));
     await infoUpdated(req.registrant);
@@ -263,10 +254,10 @@ router.post('/products', async (req, res, next) => {
 router.get('/acknowledgments', async (req, res, next) => {
   try {
     const doc = await legal.currentDoc('acknowledgments');
-    const accepted = must(await db().from('br_legal_acceptances').select('document_version, accepted_at')
+    const accepted = must(await db().from('csbfp_legal_acceptances').select('document_version, accepted_at')
       .eq('registrant_id', req.registrant.id).eq('document_key', 'acknowledgments')
       .order('accepted_at', { ascending: false }).limit(1).maybeSingle(), 'Acknowledgments');
-    res.render('portal/acknowledgments', { pageTitle: 'Acknowledgments', doc, statements: legal.statements(doc), accepted,
+    res.render('portal/acknowledgments', { pageTitle: 'Professional Standards', doc, statements: legal.statements(doc), accepted,
       current: Boolean(accepted && doc && accepted.document_version === doc.version), error: null, checked: [] });
   } catch (err) { next(err); }
 });
@@ -277,7 +268,7 @@ router.post('/acknowledgments', async (req, res, next) => {
     const statements = legal.statements(doc);
     const checked = statements.map((_, i) => req.body[`ack_${i}`] === 'yes');
     if (!statements.length || checked.includes(false)) {
-      return res.status(422).render('portal/acknowledgments', { pageTitle: 'Acknowledgments', doc, statements, accepted: null, current: false,
+      return res.status(422).render('portal/acknowledgments', { pageTitle: 'Professional Standards', doc, statements, accepted: null, current: false,
         error: 'Please confirm each statement to continue.', checked });
     }
     await legal.recordAcceptance({ registrantId: req.registrant.id, keys: ['acknowledgments'], context: 'acknowledgments', ip: req.ip, userAgent: req.get('user-agent') });

@@ -4,21 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <% if (preLaunch) { %><meta name="robots" content="noindex, nofollow"><% } %>
-  <title><%= pageTitle ? pageTitle + ' | ' : '' %>Broker Registry</title>
-  <% const shareTitle = (pageTitle ? pageTitle + ' | ' : '') + 'Broker Registry';
-     const shareDesc = 'A national registry of commercial finance brokers.'; %>
+  <title><%= pageTitle ? pageTitle + ' | ' : '' %>CSBFP</title>
+  <% const shareTitle = (pageTitle ? pageTitle + ' | ' : '') + 'Certified Small Business Finance Professional';
+     const shareDesc = 'A professional certification program for individuals working in the small business finance industry.'; %>
   <meta name="description" content="<%= shareDesc %>">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Broker Registry">
+  <meta property="og:site_name" content="CSBFP">
   <meta property="og:title" content="<%= shareTitle %>">
   <meta property="og:description" content="<%= shareDesc %>">
-  <meta property="og:url" content="https://broker-registry.org<%= currentPath %>">
-  <meta property="og:image" content="https://broker-registry.org/img/share.jpg">
+  <meta property="og:url" content="<%= siteUrl %><%= currentPath %>">
+  <meta property="og:image" content="<%= siteUrl %>/img/share.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Broker Registry seal and name">
+  <meta property="og:image:alt" content="Certified SBFP logo">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="apple-touch-icon" href="/img/seal.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
   <link rel="icon" href="/favicon.svg?v=<%= assetV %>" type="image/svg+xml">
   <link rel="preload" href="/fonts/inter-latin-var.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/css/site.css?v=<%= assetV %>">
@@ -26,9 +26,8 @@
 <body>
 <header class="header<%= signedIn && !(typeof adminArea !== 'undefined' && adminArea) ? ' burger' : '' %>">
   <div class="header-inner">
-    <a class="brand" href="<%= typeof adminArea !== 'undefined' && adminArea ? '/admin' : '/' %>" aria-label="Broker Registry home">
-      <img class="seal" src="/img/seal.png?v=<%= assetV %>" alt="" width="70" height="70">
-      <span class="brand-text"><span class="brand-name">Broker Registry</span><span class="brand-tag"><span>Commercial Finance</span><span>Broker Registration</span></span></span>
+    <a class="brand" href="<%= typeof adminArea !== 'undefined' && adminArea ? '/admin' : '/' %>" aria-label="CSBFP home">
+      <img class="logo" src="/img/csbfp-logo.png?v=<%= assetV %>" alt="Certified SBFP" width="104" height="54">
       <% if (typeof adminArea !== 'undefined' && adminArea) { %><span class="admin-badge">Admin</span><% } %>
     </a>
     <% const nav = (href, label) => {
@@ -42,7 +41,8 @@
     <% if (typeof adminArea !== 'undefined' && adminArea) { %>
     <nav class="nav" id="site-nav" aria-label="Admin">
       <% if (typeof admin !== 'undefined' && admin) { %>
-      <%- nav('/admin/registrants', 'Registrants') %>
+      <%- nav('/admin/registrants', 'People') %>
+      <%- nav('/admin/review', 'Review') %>
       <%- nav('/admin/reports', 'Reports') %>
       <%- nav('/admin/duplicates', 'Duplicates') %>
       <%- nav('/admin/support', 'Support') %>
@@ -61,11 +61,9 @@
     </nav>
     <% } else { %>
     <nav class="nav" id="site-nav" aria-label="Main">
-      <% if (signedIn && currentPath !== '/portal/dashboard') { %><%- nav('/portal/dashboard', 'Dashboard') %><% } %>
-      <%- nav('/about', 'About') %>
+      <% if (signedIn) { %><%- nav('/portal/dashboard', 'My Account') %><% } else { %><%- nav('/portal/signup', 'Get Certified') %><% } %>
+      <%- nav('/verify', 'Verify Certification') %>
       <%- nav('/faq', 'FAQ') %>
-      <%- nav('/verify', 'Verify Registration') %>
-      <%- nav('/support', 'Contact') %>
       <% if (signedIn) { %><form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form><% } else { %><%- nav('/portal', 'Sign In') %><% } %>
     </nav>
     <% } %>

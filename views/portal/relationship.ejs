@@ -15,17 +15,22 @@
     <%- include('../partials/err', { field: 'company_website' }) %>
   </div>
   <div class="field">
-    <label for="job_title_id">Job title</label>
-    <select id="job_title_id" name="job_title_id">
-      <option value="">Choose</option>
-      <% titles.forEach(t => { %><option value="<%= t.id %>" <%= t.label === 'Other' ? 'data-other' : '' %> <%= String(values.job_title_id) === String(t.id) ? 'selected' : '' %>><%= t.label %></option><% }) %>
-    </select>
-    <%- include('../partials/err', { field: 'job_title_id' }) %>
-  </div>
-  <div class="field title-other">
-    <label for="job_title_other">Your job title</label>
+    <label for="job_title_other">Job title</label>
     <input id="job_title_other" name="job_title_other" type="text" maxlength="80" value="<%= values.job_title_other || '' %>">
     <%- include('../partials/err', { field: 'job_title_other' }) %>
+  </div>
+  <div class="field">
+    <label for="primary_role">Primary role</label>
+    <select id="primary_role" name="primary_role">
+      <option value="">Choose</option>
+      <% Object.entries(roles).forEach(([val, lab]) => { %><option value="<%= val %>" <%= val === 'other' ? 'data-other' : '' %> <%= values.primary_role === val ? 'selected' : '' %>><%= lab %></option><% }) %>
+    </select>
+    <%- include('../partials/err', { field: 'primary_role' }) %>
+  </div>
+  <div class="field title-other">
+    <label for="primary_role_other">Your role</label>
+    <input id="primary_role_other" name="primary_role_other" type="text" maxlength="80" value="<%= values.primary_role_other || '' %>">
+    <%- include('../partials/err', { field: 'primary_role_other' }) %>
   </div>
   <fieldset class="field">
     <legend>How do you work with this company?</legend>

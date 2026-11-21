@@ -1,5 +1,5 @@
 /**
- * Registration fee, Stripe Checkout and billing for signed-in registrants.
+ * Certification fee, Stripe Checkout and billing for signed-in applicants and certificants.
  *
  *   GET/POST /portal/checkout              fee + automatic-renewal terms + consent -> Stripe Checkout
  *   GET      /portal/checkout/return       back from Stripe; activates if paid (the webhook does the same)
@@ -8,10 +8,11 @@
  *   GET/POST /portal/billing/cancel        cancel automatic renewal (confirm page)
  *   POST     /portal/billing/resume        turn automatic renewal back on
  *   GET      /portal/billing/pay           pay the open renewal invoice (inactive registrations)
- *   GET      /portal/confirmation          printable registration confirmation
+ *   GET      /portal/confirmation          printable certificate
  */
 const crypto = require('crypto');
 const express = require('express');
+const config = require('../lib/config');
 const { db, must } = require('../lib/supabase');
 const { paymentsReady } = require('../lib/stripe');
 const billing = require('../lib/billing');
@@ -25,7 +26,7 @@ const { requireRegistrant } = require('../middleware/auth');
 const router = express.Router();
 router.use(['/checkout', '/billing', '/confirmation'], requireRegistrant);
 
-const FEE = '$99';
+const FEE = config.program.annualFee;
 
 async function statusFor(registrant) {
   const [progress, train, flagged] = await Promise.all([progressFor(registrant), training.stateFor(registrant.id), hasOpenFlag(registrant.id)]);
@@ -40,7 +41,7 @@ async function checkoutView(req, res, { status = 200, error = null } = {}) {
   const renewsOn = new Date();
   renewsOn.setFullYear(renewsOn.getFullYear() + 1);
   res.status(status).render('portal/checkout', {
-    pageTitle: 'Registration Fee', pay, doc, fee: FEE, error,
+    pageTitle: 'Certification Fee', pay, doc, fee: FEE, error,
     renewsOn: renewsOn.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Los_Angeles' }),
     ready: await paymentsReady(), canceled: req.query.canceled === '1',
   });
@@ -63,7 +64,7 @@ router.post('/checkout', async (req, res, next) => {
     await legal.recordAcceptance({ registrantId: req.registrant.id, keys: ['terms'], context: 'checkout',
       ref, ip: req.ip, userAgent: req.get('user-agent') });
     const session = await billing.createCheckout(req.registrant, pay.registration, { acceptanceRef: ref });
-    await db().from('br_legal_acceptances').update({ ref: session.id }).eq('registrant_id', req.registrant.id).eq('ref', ref);
+    await db().from('csbfp_legal_acceptances').update({ ref: session.id }).eq('registrant_id', req.registrant.id).eq('ref', ref);
     await logEvent({ registrantId: req.registrant.id, event: 'checkout_started', actor: 'registrant', ip: req.ip });
     return res.redirect(303, session.url);
   } catch (err) { next(err); }
@@ -84,7 +85,7 @@ router.get('/checkout/return', async (req, res, next) => {
       }
     }
     const registration = await billing.registrationOf(req.registrant.id);
-    res.render('portal/checkout-return', { pageTitle: 'Payment Received', registration, activated: registration.status === 'active' });
+    res.render('portal/checkout-return', { pageTitle: 'Payment Received', registration, activated: registration.status === 'active', held: ['pending_screening', 'under_review'].includes(registration.status) });
   } catch (err) { next(err); }
 });
 
@@ -95,7 +96,7 @@ router.get('/billing', async (req, res, next) => {
     const registration = await billing.registrationOf(req.registrant.id);
     const [live, payments] = await Promise.all([
       billing.liveSubscriptionOf(req.registrant.id),
-      db().from('br_payments').select('*').eq('registrant_id', req.registrant.id).order('created_at', { ascending: false }),
+      db().from('csbfp_payments').select('*').eq('registrant_id', req.registrant.id).order('created_at', { ascending: false }),
     ]);
     res.render('portal/billing', { pageTitle: 'Billing', registration, live, payments: must(payments, 'Payments'), fee: FEE,
       msg: typeof req.query.msg === 'string' ? req.query.msg.slice(0, 200) : null, ready: await paymentsReady() });
@@ -150,7 +151,7 @@ router.get('/confirmation', async (req, res, next) => {
   try {
     const registration = await billing.registrationOf(req.registrant.id);
     if (!registration.registration_number) return res.redirect('/portal/dashboard');
-    res.render('portal/confirmation', { pageTitle: 'Registration Confirmation', registration, r: req.registrant });
+    res.render('portal/confirmation', { pageTitle: 'Certificate', registration, r: req.registrant });
   } catch (err) { next(err); }
 });
 

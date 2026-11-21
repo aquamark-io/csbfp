@@ -2,7 +2,7 @@
 -- The five legal documents are PLACEHOLDERS: reviewed text will be published as version 2 before launch.
 -- The acknowledgments are the six statements from the project brief; each "- " line is one checkbox.
 
-insert into public.br_legal_documents (key, version, title, body_md, status, effective_at, published_at) values
+insert into public.csbfp_legal_documents (key, version, title, body_md, status, effective_at, published_at) values
   ('terms', 1, 'Terms of Service',
    'Placeholder. The Terms of Service are being prepared and will be published here before registration opens.',
    'published', now(), now()),

@@ -27,9 +27,9 @@ LEGAL.push({ id: 'ack', key: 'acknowledgments', version: 1, title: 'Acknowledgme
   body_md: 'By confirming:\n\n- One.\n- Two.\n- Three.\n- Four.\n- Five.\n- Six.' });
 
 const fake = createFake({
-  br_legal_documents: LEGAL,
-  br_job_titles: ['Sales Representative', 'Account Executive', 'Other'].map((label, i) => ({ id: i + 1, label, position: i + 1, active: true })),
-  br_financing_products: ['MCA', 'Equipment', 'Other'].map((label, i) => ({ id: i + 1, label, position: i + 1, active: true })),
+  csbfp_legal_documents: LEGAL,
+  csbfp_job_titles: ['Sales Representative', 'Account Executive', 'Other'].map((label, i) => ({ id: i + 1, label, position: i + 1, active: true })),
+  csbfp_financing_products: ['MCA', 'Equipment', 'Not directly involved with financing products'].map((label, i) => ({ id: i + 1, label, position: i + 1, active: true })),
 });
 supa.db.set(fake);
 
@@ -95,7 +95,7 @@ async function signUpAndVerify(b, email, phone = '4155551212') {
 
 test('public pages still work and the portal pages render', async () => {
   const b = browser();
-  for (const p of ['/', '/about', '/faq', '/verify', '/legal/terms', '/portal', '/portal/signup']) {
+  for (const p of ['/', '/faq', '/verify', '/legal/terms', '/portal', '/portal/signup']) {
     const r = await b.req(p);
     assert.equal(r.status, 200, p);
   }
@@ -109,7 +109,7 @@ test('pre-launch: emails not on the preview list cannot sign up or sign in', asy
   assert.match(r.text, /not yet open/);
   const s = await b.req('/portal', { email: 'stranger@example.com' });
   assert.equal(s.status, 403);
-  assert.equal((fake.tables.br_registrants || []).filter(x => x.email === 'stranger@example.com').length, 0);
+  assert.equal((fake.tables.csbfp_registrants || []).filter(x => x.email === 'stranger@example.com').length, 0);
 });
 
 test('sign-up validation messages', async () => {
@@ -123,27 +123,27 @@ test('sign-up validation messages', async () => {
 
 test('honeypot: a filled hidden field creates nothing', async () => {
   const b = browser();
-  const before = (fake.tables.br_registrants || []).length;
+  const before = (fake.tables.csbfp_registrants || []).length;
   await b.req('/portal/signup', { email: 'jane@example.com', phone: '4155551212', agree: 'yes', website: 'spam.com' });
-  assert.equal((fake.tables.br_registrants || []).length, before);
+  assert.equal((fake.tables.csbfp_registrants || []).length, before);
 });
 
 test('full journey: sign up, verify email, complete every form', async () => {
   const b = browser();
   await signUpAndVerify(b, 'jane@example.com');
 
-  const jane = fake.tables.br_registrants.find(r => r.email === 'jane@example.com');
+  const jane = fake.tables.csbfp_registrants.find(r => r.email === 'jane@example.com');
   assert.ok(jane.email_verified_at, 'email verified');
   assert.equal(jane.phone_e164, '+14155551212');
-  assert.equal(fake.tables.br_registrations.find(r => r.registrant_id === jane.id).status, 'pending');
-  const acc = fake.tables.br_legal_acceptances.filter(a => a.registrant_id === jane.id).map(a => `${a.document_key}@${a.document_version}`);
+  assert.equal(fake.tables.csbfp_registrations.find(r => r.registrant_id === jane.id).status, 'pending');
+  const acc = fake.tables.csbfp_legal_acceptances.filter(a => a.registrant_id === jane.id).map(a => `${a.document_key}@${a.document_version}`);
   assert.deepEqual(acc.sort(), ['privacy@1', 'terms@1']);
   await wait(50);
-  assert.ok(fake.tables.br_email_messages.some(m => m.dedupe_key === `welcome:${jane.id}`), 'welcome email logged');
+  assert.ok(fake.tables.csbfp_email_messages.some(m => m.dedupe_key === `welcome:${jane.id}`), 'welcome email logged');
 
   let d = await b.req('/portal/dashboard');
   assert.equal(d.status, 200);
-  assert.match(d.text, /Pending/);
+  assert.match(d.text, /In Progress/);
   assert.match(d.text, /Continue: Personal information/);
 
   // Personal: under 18 is refused.
@@ -153,46 +153,52 @@ test('full journey: sign up, verify email, complete every form', async () => {
 
   p = await b.req('/portal/personal', { legal_first_name: '  Jane ', middle_name: '', legal_last_name: 'Smith', dob: '1990-05-17', zip5: '94105', phone: '(415) 555-1212', industry_start_month: '3', industry_start_year: '2019' });
   assert.equal(p.status, 303);
-  const j2 = fake.tables.br_registrants.find(r => r.id === jane.id);
+  const j2 = fake.tables.csbfp_registrants.find(r => r.id === jane.id);
   assert.equal(j2.legal_first_name, 'Jane');
   assert.equal(j2.industry_start_month, '2019-03-01');
   assert.ok(j2.dob_enc.startsWith('v1:') && !j2.dob_enc.includes('1990'), 'DOB stored encrypted');
-  assert.ok(j2.dob_hash && !JSON.stringify(fake.tables.br_events).includes('1990'), 'DOB never in the activity log');
+  assert.ok(j2.dob_hash && !JSON.stringify(fake.tables.csbfp_events).includes('1990'), 'DOB never in the activity log');
   const pv = await b.req('/portal/personal?saved=1');
   assert.match(pv.text, /value="1990-05-17"/, 'DOB shown back to its owner');
 
   // Employment
   const e = await b.req('/portal/employment/new', { relationship_type: 'employee', company_name: 'Acme Funding', company_website: 'acmefunding.com/about',
-    start_month: '6', start_year: '2021', work_arrangement: 'hybrid', job_title_id: '3' , job_title_other: '' });
-  assert.equal(e.status, 422, 'choosing Other needs a typed title');
-  assert.match(e.text, /Your job title is required/);
+    start_month: '6', start_year: '2021', work_arrangement: 'hybrid', job_title_other: '', primary_role: 'other', primary_role_other: '' });
+  assert.equal(e.status, 422, 'job title is required, and Other role needs a typed role');
+  assert.match(e.text, /Job title is required/);
+  assert.match(e.text, /Your role is required/);
   const e2 = await b.req('/portal/employment/new', { relationship_type: 'employee', company_name: 'Acme Funding', company_website: 'acmefunding.com/about',
-    start_month: '6', start_year: '2021', work_arrangement: 'hybrid', job_title_id: '2' });
+    start_month: '6', start_year: '2021', work_arrangement: 'hybrid', job_title_other: 'Senior Underwriter', primary_role: 'underwriting_credit' });
   assert.equal(e2.status, 303);
-  const rel = fake.tables.br_employment_relationships.find(r => r.registrant_id === jane.id);
+  const rel = fake.tables.csbfp_employment_relationships.find(r => r.registrant_id === jane.id);
   assert.equal(rel.company_website, 'https://acmefunding.com');
-  assert.equal(fake.tables.br_registrants.find(r => r.id === jane.id).employment_status, 'working');
+  assert.equal(fake.tables.csbfp_registrants.find(r => r.id === jane.id).employment_status, 'working');
   const el = await b.req('/portal/employment');
   assert.match(el.text, /Acme Funding/);
-  assert.match(el.text, /Account Executive/);
+  assert.match(el.text, /Senior Underwriter/);
+  assert.match(el.text, /Underwriting \/ Credit/);
+  assert.equal(rel.primary_role, 'underwriting_credit');
 
   // Products
+  const px = await b.req('/portal/products', { products: ['1', '3'] });
+  assert.equal(px.status, 422, '"Not directly involved" cannot be combined with products');
   const pr = await b.req('/portal/products', { products: ['1', '2'], products_other: '' });
   assert.equal(pr.status, 303);
-  assert.ok(fake.tables.br_registrants.find(r => r.id === jane.id).profile_completed_at, 'profile marked complete');
+  assert.ok(fake.tables.csbfp_registrants.find(r => r.id === jane.id).profile_completed_at, 'profile marked complete');
 
   // Acknowledgments: all six required
   const a1 = await b.req('/portal/acknowledgments', { ack_0: 'yes', ack_1: 'yes' });
   assert.equal(a1.status, 422);
   const a2 = await b.req('/portal/acknowledgments', Object.fromEntries([0, 1, 2, 3, 4, 5].map(i => [`ack_${i}`, 'yes'])));
   assert.equal(a2.status, 303);
-  assert.ok(fake.tables.br_legal_acceptances.some(a => a.registrant_id === jane.id && a.document_key === 'acknowledgments' && a.context === 'acknowledgments'));
+  assert.ok(fake.tables.csbfp_legal_acceptances.some(a => a.registrant_id === jane.id && a.document_key === 'acknowledgments' && a.context === 'acknowledgments'));
 
   d = await b.req('/portal/dashboard');
   assert.match(d.text, /Continue: Training/);
   assert.equal((d.text.match(/>Complete</g) || []).length, 4);
-  assert.equal((await b.req('/portal/seal')).location, '/portal/dashboard', 'no seal before the registration is Active');
-  assert.doesNotMatch(d.text, /Download Seal/);
+  assert.match(d.text, /Background screening \(one time\)/);
+  assert.match(d.text, /Not active yet/);
+  assert.match(d.text, /demo record only/);
   const pp = await b.req('/portal/personal');
   assert.match(pp.text, /href="\/portal\/dashboard">← Dashboard</);
   assert.doesNotMatch(d.text, /← Dashboard/);
@@ -212,7 +218,7 @@ test('full journey: sign up, verify email, complete every form', async () => {
 });
 
 test('codes: wrong code, single use, lockout after 5 attempts', async () => {
-  fake.tables.br_login_codes = []; // as if 15 minutes have passed (max 3 codes per 15 minutes)
+  fake.tables.csbfp_login_codes = []; // as if 15 minutes have passed (max 3 codes per 15 minutes)
   const b = browser();
   const mark = sent.length;
   await b.req('/portal', { email: 'jane@example.com' });
@@ -239,7 +245,7 @@ test('codes: wrong code, single use, lockout after 5 attempts', async () => {
   assert.ok(sent.slice(m3).some(s => s.includes('to=john@example.com') && /No account found/.test(s)), 'no-account email instead of a code');
 
   // Five wrong tries locks the code: even the right code fails afterwards.
-  fake.tables.br_login_codes = [];
+  fake.tables.csbfp_login_codes = [];
   const b4 = browser();
   const m4 = sent.length;
   await b4.req('/portal/resend', {}); // no login cookie yet -> back to sign in
@@ -253,12 +259,12 @@ test('codes: wrong code, single use, lockout after 5 attempts', async () => {
 });
 
 test('at most 3 codes per account per 15 minutes', async () => {
-  fake.tables.br_login_codes = [];
+  fake.tables.csbfp_login_codes = [];
   const m = sent.length;
   for (let i = 0; i < 5; i++) await browser().req('/portal', { email: 'jane@example.com' });
   await wait(150);
   assert.equal(sent.slice(m).filter(s => s.includes('to=jane@example.com')).length, 3);
-  fake.tables.br_login_codes = [];
+  fake.tables.csbfp_login_codes = [];
 });
 
 test('the screen never reveals whether an account exists', async () => {
@@ -273,14 +279,14 @@ test('the screen never reveals whether an account exists', async () => {
 test('people can only see and change their own records', async () => {
   const john = browser();
   await signUpAndVerify(john, 'john@example.com', '3055550000');
-  const janeRel = fake.tables.br_employment_relationships.find(r => r.company_name === 'Acme Funding');
+  const janeRel = fake.tables.csbfp_employment_relationships.find(r => r.company_name === 'Acme Funding');
   const view = await john.req(`/portal/employment/${janeRel.id}`);
   assert.equal(view.status, 404);
   const edit = await john.req(`/portal/employment/${janeRel.id}`, { company_name: 'Hacked' });
   assert.equal(edit.status, 404);
   const del = await john.req(`/portal/employment/${janeRel.id}/delete`, {});
   assert.equal(del.status, 404);
-  assert.equal(fake.tables.br_employment_relationships.find(r => r.id === janeRel.id).company_name, 'Acme Funding');
+  assert.equal(fake.tables.csbfp_employment_relationships.find(r => r.id === janeRel.id).company_name, 'Acme Funding');
   const dash = await john.req('/portal/dashboard');
   assert.doesNotMatch(dash.text, /Jane|Acme/);
 });
@@ -298,8 +304,8 @@ test('possible duplicates are flagged for review, not blocked from signing in', 
   const b = browser();
   await signUpAndVerify(b, 'dupe@example.com', '7865550000');
   await b.req('/portal/personal', { legal_first_name: 'JANE', legal_last_name: 'smith', dob: '1990-05-17', zip5: '94105', phone: '7865550000', industry_start_month: '1', industry_start_year: '2020' });
-  const dupe = fake.tables.br_registrants.find(r => r.email === 'dupe@example.com');
-  const flags = fake.tables.br_duplicate_flags.filter(f => f.registrant_id === dupe.id);
+  const dupe = fake.tables.csbfp_registrants.find(r => r.email === 'dupe@example.com');
+  const flags = fake.tables.csbfp_duplicate_flags.filter(f => f.registrant_id === dupe.id);
   assert.equal(flags.length, 1);
   assert.equal(flags[0].match_reason, 'dob_last_name_zip');
   const d = await b.req('/portal/dashboard');

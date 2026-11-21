@@ -54,6 +54,9 @@ app.use((req, res, next) => {
   res.locals.assetV = ASSET_VERSION;
   res.locals.currentPath = req.path;
   res.locals.preLaunch = config.preLaunch;
+  res.locals.siteUrl = config.siteUrl;
+  res.locals.program = config.program;
+  res.locals.screeningEnabled = config.screening.enabled;
   res.locals.signedIn = Boolean(readSession(req));
   res.locals.query = req.query;
   res.locals.STATES = STATES;
@@ -90,6 +93,7 @@ app.use('/admin', require('./routes/admin-billing'));
 app.use('/admin', require('./routes/admin-emails'));
 app.use('/admin', require('./routes/admin-support'));
 app.use('/admin', require('./routes/admin-reports'));
+app.use('/admin', require('./routes/admin-certification'));
 
 app.use((req, res) => res.status(404).render('error', { pageTitle: 'Page not found', message: 'That page does not exist.' }));
 
@@ -108,5 +112,5 @@ if (config.portalReady() && process.env.DISABLE_DAILY_JOB !== 'true' && require.
 module.exports = app;
 if (require.main === module) {
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => console.log(`Broker Registry running on port ${PORT}`));
+  app.listen(PORT, () => console.log(`CSBFP running on port ${PORT}`));
 }

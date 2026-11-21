@@ -7,7 +7,7 @@ const assert = require('node:assert/strict');
 
 Object.assign(process.env, {
   NODE_ENV: 'test',
-  SITE_URL: 'https://broker-registry.org',
+  SITE_URL: 'https://csbfp-certification.org',
   SUPABASE_URL: 'http://fake.local',
   SUPABASE_SERVICE_KEY: 'fake',
   JWT_SECRET: 'b'.repeat(40),
@@ -33,12 +33,12 @@ const docs = ['terms', 'privacy', 'registration_agreement', 'automatic_renewal',
   .map(key => ({ key, version: 1, body_md: '- Statement.', status: 'published' }));
 
 const fake = createFake({
-  br_legal_documents: docs,
-  br_job_titles: [], br_financing_products: [{ id: 1, label: 'MCA', position: 1, active: true }],
-  br_curriculum_versions: [{ id: V, label: 'T', status: 'published', is_required: true, overview_md: '', completion_md: '' }],
-  br_modules: [{ id: MOD, curriculum_version_id: V, stable_key: 'm1', position: 1, title: 'M1', body_md: 'x' }],
-  br_assessment_settings: [{ curriculum_version_id: V, question_count: 1, pass_percent: 80, cooldown_minutes: 60, max_attempts_total: 10 }],
-  br_settings: [
+  csbfp_legal_documents: docs,
+  csbfp_job_titles: [], csbfp_financing_products: [{ id: 1, label: 'MCA', position: 1, active: true }],
+  csbfp_curriculum_versions: [{ id: V, label: 'T', status: 'published', is_required: true, overview_md: '', completion_md: '' }],
+  csbfp_modules: [{ id: MOD, curriculum_version_id: V, stable_key: 'm1', position: 1, title: 'M1', body_md: 'x' }],
+  csbfp_assessment_settings: [{ curriculum_version_id: V, question_count: 1, pass_percent: 80, cooldown_minutes: 60, max_attempts_total: 10 }],
+  csbfp_settings: [
     { key: 'stripe_test_price_id', value: 'price_test_99' },
     { key: 'stripe_test_portal_configuration_id', value: 'bpc_test_1' },
     { key: 'stripe_test_webhook_secret', value: encrypt(WH_SECRET) },
@@ -92,17 +92,17 @@ async function signUp(email, phone) {
   return b;
 }
 const regOf = email => {
-  const r = fake.tables.br_registrants.find(x => x.email === email);
-  return { r, reg: fake.tables.br_registrations.find(x => x.registrant_id === r.id) };
+  const r = fake.tables.csbfp_registrants.find(x => x.email === email);
+  return { r, reg: fake.tables.csbfp_registrations.find(x => x.registrant_id === r.id) };
 };
 // Everything before payment: profile, acknowledgments, training, passed assessment.
 function makeReady(email) {
   const { r } = regOf(email);
   Object.assign(r, { legal_first_name: 'Pat', legal_last_name: 'Lee', dob_hash: 'h', dob_enc: 'v1:x', zip5: '94105', industry_start_month: '2020-01-01', employment_status: 'not_currently_employed' });
-  fake.tables.br_registrant_products = [...(fake.tables.br_registrant_products || []), { registrant_id: r.id, product_id: 1 }];
-  fake.tables.br_legal_acceptances.push({ id: 900 + fake.tables.br_legal_acceptances.length, registrant_id: r.id, document_key: 'acknowledgments', document_version: 1, context: 'acknowledgments', accepted_at: new Date().toISOString() });
-  fake.tables.br_training_progress = [...(fake.tables.br_training_progress || []), { registrant_id: r.id, module_id: MOD, started_at: new Date().toISOString(), completed_at: new Date().toISOString() }];
-  fake.tables.br_assessment_attempts = [...(fake.tables.br_assessment_attempts || []), { id: `att-${r.id}`, registrant_id: r.id, curriculum_version_id: V, started_at: new Date().toISOString(), submitted_at: new Date().toISOString(), passed: true, correct_count: 1, question_count: 1, questions_snapshot: [], pass_percent_applied: 80 }];
+  fake.tables.csbfp_registrant_products = [...(fake.tables.csbfp_registrant_products || []), { registrant_id: r.id, product_id: 1 }];
+  fake.tables.csbfp_legal_acceptances.push({ id: 900 + fake.tables.csbfp_legal_acceptances.length, registrant_id: r.id, document_key: 'acknowledgments', document_version: 1, context: 'acknowledgments', accepted_at: new Date().toISOString() });
+  fake.tables.csbfp_training_progress = [...(fake.tables.csbfp_training_progress || []), { registrant_id: r.id, module_id: MOD, started_at: new Date().toISOString(), completed_at: new Date().toISOString() }];
+  fake.tables.csbfp_assessment_attempts = [...(fake.tables.csbfp_assessment_attempts || []), { id: `att-${r.id}`, registrant_id: r.id, curriculum_version_id: V, started_at: new Date().toISOString(), submitted_at: new Date().toISOString(), passed: true, correct_count: 1, question_count: 1, questions_snapshot: [], pass_percent_applied: 80 }];
 }
 async function webhook(type, object, { secret = WH_SECRET, id } = {}) {
   const payload = JSON.stringify({ id: id || `evt_${Math.random().toString(36).slice(2)}`, object: 'event', type, data: { object } });
@@ -127,8 +127,10 @@ test('payment is locked until every earlier step is done', async () => {
 test('checkout needs the automatic-renewal consent, records it, and sends them to Stripe', async () => {
   makeReady('pat@example.com');
   let r = await pat.req('/portal/checkout');
-  assert.match(r.text, /\$99 per year/);
-  assert.match(r.text, /I authorize Broker Registry to charge \$99 today/);
+  assert.match(r.text, /\$149 per year/);
+  assert.match(r.text, /I authorize Duncan Consulting LLC, administrator of CSBFP, to charge \$149 today/);
+  assert.match(r.text, /No refunds\./);
+  assert.match(r.text, /issues a DEMO record only/);
   r = await pat.req('/portal/checkout', {});
   assert.equal(r.status, 422);
   assert.match(r.text, /agree to automatic annual renewal/);
@@ -138,53 +140,57 @@ test('checkout needs the automatic-renewal consent, records it, and sends them t
   session = Object.values(fs.state.sessions)[0];
   const { r: who, reg } = regOf('pat@example.com');
   assert.equal(session.client_reference_id, reg.id);
-  assert.equal(session.metadata.app, 'broker-registry');
+  assert.equal(session.metadata.app, 'csbfp');
   assert.ok(reg.stripe_customer_id);
-  const consent = fake.tables.br_legal_acceptances.filter(a => a.registrant_id === who.id && a.context === 'checkout').map(a => `${a.document_key}:${a.ref}`).sort();
+  const consent = fake.tables.csbfp_legal_acceptances.filter(a => a.registrant_id === who.id && a.context === 'checkout').map(a => `${a.document_key}:${a.ref}`).sort();
   assert.deepEqual(consent, [`terms:${session.id}`]);
 });
 
-test('paying activates the registration with a permanent number, valid for a year', async () => {
+test('with screening off, paying issues a DEMO credential (DEMO- number, labeled not screened), valid for a year', async () => {
   fs.completeCheckout(session.id);
   const r = await pat.req(`/portal/checkout/return?session_id=${session.id}`);
-  assert.match(r.text, /Your Registration Is Active/);
+  assert.match(r.text, /Demo Credential Issued/);
+  assert.match(r.text, /DEMO \/ NOT SCREENED/);
   const { reg } = regOf('pat@example.com');
   assert.equal(reg.status, 'active');
-  assert.match(reg.registration_number, /^BR-\d{8}$/);
+  assert.equal(reg.is_demo, true);
+  assert.ok(reg.paid_at && reg.approved_at);
+  assert.match(reg.registration_number, /^DEMO-\d{8}$/);
+  assert.equal((fake.tables.csbfp_screenings || []).length, 0, 'no screening record pretends a check happened');
   assert.ok(reg.first_activated_at);
   const days = (Date.parse(reg.expires_at) - Date.now()) / 864e5;
   assert.ok(days > 364 && days < 366, `valid ~1 year (${days})`);
-  assert.equal(fake.tables.br_registration_status_history.at(-1).reason, 'Registration fee paid');
-  const pay = fake.tables.br_payments.find(p => p.registration_id === reg.id);
+  assert.equal(fake.tables.csbfp_registration_status_history.at(-1).reason, 'DEMO credential issued (background screening not enabled)');
+  const pay = fake.tables.csbfp_payments.find(p => p.registration_id === reg.id);
   assert.equal(pay.status, 'paid');
-  assert.equal(pay.amount_cents, 9900);
-  const sealDash = await pat.req('/portal/dashboard');
-  assert.match(sealDash.text, /href="\/portal\/seal">Download Seal/);
-  const seal = await pat.req('/portal/seal');
-  assert.equal(seal.status, 200, 'active registrants can download the seal');
+  assert.equal(pay.amount_cents, 14900);
   assert.equal(pay.billing_reason, 'initial');
   await wait(50);
   assert.ok(sent.some(s => s.includes('to=pat@example.com') && s.includes(reg.registration_number)), 'activation email with number');
   const dash = await pat.req('/portal/dashboard');
   assert.match(dash.text, new RegExp(reg.registration_number));
-  assert.match(dash.text, /Active/);
+  assert.match(dash.text, /DEMO \/ Not screened/);
   const conf = await pat.req('/portal/confirmation');
-  assert.match(conf.text, /Registration Confirmation/);
+  assert.match(conf.text, /Certificate/);
+  assert.match(conf.text, /not a valid CSBFP certification/);
+  const v = await pat.req(`/verify?number=${reg.registration_number}`);
+  assert.match(v.text, /DEMO RECORD: NOT SCREENED/);
+  assert.doesNotMatch(v.text, /verify-status ok/);
   assert.match(conf.text, /not a government license/);
 });
 
 test('the webhook for the same checkout changes nothing; duplicates and bad signatures are rejected', async () => {
   const { reg } = regOf('pat@example.com');
   const number = reg.registration_number;
-  const historyLen = fake.tables.br_registration_status_history.length;
+  const historyLen = fake.tables.csbfp_registration_status_history.length;
   const evt = { id: session.id, object: 'checkout.session', mode: 'subscription', metadata: session.metadata };
   let r = await webhook('checkout.session.completed', evt, { id: 'evt_dup_1' });
   assert.equal(r.status, 200);
   r = await webhook('checkout.session.completed', evt, { id: 'evt_dup_1' });
   assert.equal(r.body.result, 'duplicate');
   assert.equal(regOf('pat@example.com').reg.registration_number, number);
-  assert.equal(fake.tables.br_registration_status_history.length, historyLen);
-  assert.equal(fake.tables.br_payments.filter(p => p.registration_id === reg.id).length, 1);
+  assert.equal(fake.tables.csbfp_registration_status_history.length, historyLen);
+  assert.equal(fake.tables.csbfp_payments.filter(p => p.registration_id === reg.id).length, 1);
   r = await webhook('checkout.session.completed', evt, { secret: 'whsec_wrong' });
   assert.equal(r.status, 400);
   assert.equal((await pat.req('/portal/checkout', { agree_renewal: 'yes' })).location, '/portal/checkout', 'active: no second checkout');
@@ -199,7 +205,7 @@ test('cancel automatic renewal (stays active) and turn it back on', async () => 
   const sub = Object.values(fs.state.subscriptions)[0];
   assert.equal(sub.cancel_at_period_end, true);
   r = await pat.req('/portal/billing');
-  assert.match(r.text, /Registration ends/);
+  assert.match(r.text, /Certification ends/);
   assert.equal(regOf('pat@example.com').reg.status, 'active');
   await pat.req('/portal/billing/resume', {});
   assert.equal(sub.cancel_at_period_end, false);
@@ -214,9 +220,9 @@ test('a failed renewal makes the registration Inactive; paying reactivates it an
   let r = await webhook('invoice.payment_failed', inv);
   assert.equal(r.body.result, 'failed');
   assert.equal(regOf('pat@example.com').reg.status, 'inactive');
-  assert.equal(fake.tables.br_registration_status_history.at(-1).reason, 'Renewal payment failed');
+  assert.equal(fake.tables.csbfp_registration_status_history.at(-1).reason, 'Renewal payment failed');
   r = await pat.req('/portal/dashboard');
-  assert.match(r.text, /registration is Inactive/);
+  assert.match(r.text, /certification is Inactive/);
   r = await pat.req('/portal/billing/pay');
   assert.equal(r.location, inv.hosted_invoice_url);
 
@@ -226,8 +232,8 @@ test('a failed renewal makes the registration Inactive; paying reactivates it an
   const { reg } = regOf('pat@example.com');
   assert.equal(reg.status, 'active');
   assert.ok(Date.parse(reg.expires_at) > Date.parse(before) + 364 * 864e5, 'extended by a year');
-  assert.equal(fake.tables.br_registration_status_history.at(-1).reason, 'Renewal paid');
-  assert.ok(fake.tables.br_payments.some(p => p.stripe_invoice_id === inv.id && p.status === 'paid' && p.billing_reason === 'renewal'));
+  assert.equal(fake.tables.csbfp_registration_status_history.at(-1).reason, 'Renewal paid');
+  assert.ok(fake.tables.csbfp_payments.some(p => p.stripe_invoice_id === inv.id && p.status === 'paid' && p.billing_reason === 'renewal'));
 });
 
 test('if the subscription ends while Inactive, they rejoin through checkout and keep their number', async () => {
@@ -255,13 +261,13 @@ test('an open duplicate flag or an admin hold blocks payment', async () => {
   const b = await signUp('flag@example.com', '4155550404');
   makeReady('flag@example.com');
   const { r, reg } = regOf('flag@example.com');
-  fake.tables.br_duplicate_flags = [...(fake.tables.br_duplicate_flags || []), { id: 'f1', registrant_id: r.id, matched_registrant_id: regOf('pat@example.com').r.id, match_reason: 'phone', status: 'open' }];
+  fake.tables.csbfp_duplicate_flags = [...(fake.tables.csbfp_duplicate_flags || []), { id: 'f1', registrant_id: r.id, matched_registrant_id: regOf('pat@example.com').r.id, match_reason: 'phone', status: 'open' }];
   let page = await b.req('/portal/checkout');
   assert.match(page.text, /confirm a few details/);
-  fake.tables.br_duplicate_flags.find(f => f.id === 'f1').status = 'dismissed';
+  fake.tables.csbfp_duplicate_flags.find(f => f.id === 'f1').status = 'dismissed';
   reg.admin_hold = true;
   page = await b.req('/portal/checkout');
-  assert.match(page.text, /under review/);
+  assert.match(page.text, /application is on hold/);
   reg.admin_hold = false;
   page = await b.req('/portal/checkout');
   assert.match(page.text, /Continue to Secure Payment/);
@@ -283,17 +289,18 @@ test('admin: Stripe setup creates the product, price, portal and webhook once; p
   const mark = sent.length;
   await b.req('/admin/login', { email: 'boss@example.com' });
   await b.req('/admin/login/verify', { code: await codeFor('boss@example.com', mark) });
-  fake.tables.br_settings = []; // as if never set up
+  fake.tables.csbfp_settings = []; // as if never set up
   let r = await b.req('/admin/stripe');
   assert.match(r.text, /Test mode/);
   assert.match(r.text, /Set Up Stripe/);
   r = await b.req('/admin/stripe/setup', {});
   assert.match(decodeURIComponent(r.location), /Stripe is set up \(test mode\)/);
   assert.equal(fs.state.products.length, 1);
-  assert.equal(fs.state.prices[0].unit_amount, 9900);
+  assert.equal(fs.state.products[0].statement_descriptor, 'CSBFP CERTIFICATION');
+  assert.equal(fs.state.prices[0].unit_amount, 14900);
   assert.equal(fs.state.prices[0].recurring.interval, 'year');
   assert.equal(fs.state.endpoints.length, 1);
-  assert.equal(fs.state.endpoints[0].url, 'https://broker-registry.org/webhooks/stripe');
+  assert.equal(fs.state.endpoints[0].url, 'https://csbfp-certification.org/webhooks/stripe');
   const cfg = await S.stripeConfig();
   assert.ok(cfg.ready);
   assert.equal(cfg.webhookSecret, fs.state.endpoints[0].secret);
@@ -302,7 +309,7 @@ test('admin: Stripe setup creates the product, price, portal and webhook once; p
   assert.equal(fs.state.prices.length, 1, 'no duplicate price');
   assert.equal(fs.state.endpoints.length, 1, 'no duplicate webhook');
   r = await b.req('/admin/payments');
-  assert.match(r.text, /\$99\.00/);
+  assert.match(r.text, /\$149\.00/);
   const pat = regOf('pat@example.com').r;
   r = await b.req(`/admin/registrants/${pat.id}`);
   assert.match(r.text, /Subscription <code>sub_/);

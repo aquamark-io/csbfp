@@ -1,7 +1,8 @@
 <%- include('../partials/head') %>
 <div class="narrow">
-<h1>Create an Account</h1>
-<p class="lead">Start your registration. It takes about 30 minutes, and you can save your progress and come back.</p>
+<h1>Get Certified</h1>
+<p class="lead">Start your application. It takes about 30 minutes, and you can save your progress and come back.</p>
+<p class="notice-strong"><strong>No refunds.</strong> The <%= program.annualFee %> annual certification fee is non-refundable once you sign up to get certified, except where a refund is required by law.</p>
 <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
 <form method="post" action="/portal/signup" novalidate>
   <div class="field">
@@ -20,7 +21,7 @@
   </div>
   <div class="field check">
     <input id="agree" name="agree" type="checkbox" value="yes" <%= values.agree === 'yes' ? 'checked' : '' %>>
-    <label for="agree">I agree to the <a href="/legal/terms" target="_blank" rel="noopener">Program Terms</a> and <a href="/legal/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</label>
+    <label for="agree">I agree to the <a href="/legal/terms" target="_blank" rel="noopener">Program Terms</a> and <a href="/legal/privacy" target="_blank" rel="noopener">Privacy Policy</a>, and I understand fees are non-refundable once I sign up, except where required by law.</label>
   </div>
   <%- include('../partials/err', { field: 'agree' }) %>
   <% if (turnstileKey) { %>

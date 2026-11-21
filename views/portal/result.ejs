@@ -3,7 +3,7 @@
 <h1>Assessment Result</h1>
 <% if (attempt.passed) { %>
   <p class="notice-ok"><strong>Passed.</strong> You answered <%= attempt.correct_count %> of <%= attempt.question_count %> correctly.</p>
-  <p>Next, pay the annual fee to receive your registration number.</p>
+  <p>Next, pay the annual fee to receive your certification number.</p>
   <div class="actions"><a class="button" href="/portal/dashboard">Go to Your Dashboard</a></div>
 <% } else { %>
   <p class="alert"><strong>Not passed.</strong> You answered <%= attempt.correct_count %> of <%= attempt.question_count %> correctly. A score of <%= attempt.pass_percent_applied %>% is needed to pass.</p>
