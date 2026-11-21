@@ -1,49 +1,39 @@
-Effective date: November 19, 2026
+> **DRAFT: pending review and approval by the program owner and legal counsel. Not final.**
 
-This Privacy Policy explains how Duncan Consulting LLC, doing business as Broker Registry ("Broker Registry," "we," "us"), handles personal information through broker-registry.org and the Broker Registry services: registration, training, the assessment, payments and the public registration lookup.
+This policy explains how the Certified Small Business Finance Professional (CSBFP) program handles personal information. The program's technology and administration are provided by Duncan Consulting LLC ("we", "us"). *(The final roles of the program owner and the administrator as data controller or processor are pending agreement and will be stated here.)*
 
-## 1. Information we collect
+## What we collect
 
-- **Identity and contact:** legal first, middle and last name; date of birth; residential ZIP code; email address; mobile phone number.
-- **Professional information:** when you started in the industry; your current employers or contracting relationships (company name, website, how you work with them, work arrangement and start date); job title; and the financing products you work with.
-- **Registration records:** your registration number, status and dates; training progress; assessment attempts and results; and the acknowledgments and terms you accepted, with the date, time, IP address and browser used.
-- **Payments:** billing history and renewal details. Payments are handled by Stripe; we never receive or store your full card number.
-- **Technical and support information:** sign-in and security records (such as IP addresses), records of emails we send you and whether they were delivered, and messages you send us.
+- **Account and application:** legal name, date of birth, residential ZIP code, email, mobile number, when you entered the industry, current employer, job title, primary role, work arrangement and the financing products you work with.
+- **Program records:** training progress, assessment attempts and scores, acceptance of terms and standards (with date, time, IP address and browser), certification status and history.
+- **Payments:** handled by Stripe. We keep payment dates, amounts and status, never your full card number.
+- **Background screening (when in effect):** screening is performed by a third-party consumer reporting agency, which collects the identifying information it needs directly from you under its own disclosures. We keep only the workflow status, dates and the reviewer's decision. We do not collect your Social Security number on this website and do not store background reports.
 
-We do not collect Social Security numbers or full home addresses.
+## How we protect it
 
-## 2. How we use it
+Your date of birth is encrypted. Access is limited to authorized administrators, and administrative actions are logged.
 
-We use this information to run your account and registration; deliver the training and assessment; confirm identity and prevent duplicate accounts (including a limited, protected use of your date of birth); assign and maintain your permanent registration number; process payments and renewals and send required notices; provide the public lookup; prevent fraud and keep the Services secure; tell you about material program changes; and meet legal obligations.
+## How we use it
 
-## 3. The public lookup
+To run the program: verify identity and prevent duplicate accounts, deliver training and the assessment, process payments and renewals, issue and verify certifications, review eligibility, handle suspensions, revocations and appeals, send service emails, and meet legal obligations.
 
-The lookup requires an exact registration number and shows only your name, registration number, status (Active, Inactive or Expired) and the date your registration is valid through or expired. Your date of birth, contact details, ZIP code, employer, assessment results and payment information are never public. We use rate limits and other anti-scraping measures, though we can't guarantee that a public result is never copied.
+## Who we share it with
 
-## 4. Sharing and service providers
+- **The public:** only the certification lookup fields (name, number, status, valid-through date), and only for issued certifications.
+- **The program owner:** program records needed to set standards, oversee the program and make eligibility, suspension, revocation and appeal decisions. *(Scope pending agreement.)*
+- **Service providers:** hosting and database, email delivery, payment processing, and (when in effect) the background screening provider, each only for their service.
+- **Legal requirements:** when required by law or to protect rights and safety.
 
-We do not sell your information or share it with anyone for their own marketing. We do not give registrant data to employers, trade associations or other organizations, including those we work with on training standards. We use these service providers only as needed to operate Broker Registry: Supabase (database hosting), Render (website hosting), Postmark (email delivery) and Stripe (payment processing). If we add a bot-protection service on our forms, such as Cloudflare Turnstile, it will process limited technical information for that purpose. We may also disclose information when the law requires it, to protect rights or safety, or as part of a lawful business transfer.
+We do not sell personal information, and we do not share screening information, employment details or identifiers with other programs or databases without a separate lawful basis and notice to you.
 
-## 5. How long we keep it
+## Retention
 
-- **While you have an account**, we keep the information you provide so your registration stays accurate.
-- **Security records**, such as IP addresses on sign-ins and lookups, are deleted or de-identified within 90 days.
-- **If you request deletion** (from your account page or by contacting us), we turn off automatic renewal right away and delete your personal information within 30 days, unless we need it for an unresolved fraud, dispute, security or legal matter.
-- **Payment, consent and accounting records** are kept for seven years after the transaction, or longer if the law or an active dispute requires it.
-- **Your registration number** is kept indefinitely in a minimal, nonpublic record, without your name, date of birth or contact details, so that it is never assigned to anyone else.
+We keep program records while your account exists and for a limited time afterward for audit, legal and accounting purposes. If you ask us to delete your data, we delete your personal information but keep a minimal record: your retired certification number (so it is never reissued), payment records required for accounting, and records of the terms you accepted. *(Specific retention periods are pending approval.)*
 
-## 6. Your choices and rights
+## Your choices
 
-You can review and update your information in your account at any time, request deletion from your account page, or contact support@broker-registry.org to access or correct your information or for any other privacy request. We may need to verify your identity first. California residents may have rights under California privacy law, including to know, access, correct and delete personal information, subject to legal exceptions. We will not discriminate against you for exercising your privacy rights. We send only service emails about your account, registration and program; we do not send marketing emails.
+You can view and update your information from your account, and ask us to correct or delete it by contacting support@csbfp-certification.org.
 
-## 7. Security and age
+## Contact
 
-We use reasonable administrative, technical and organizational safeguards, including encrypting your date of birth, but no system is perfectly secure. The Services are for adults 18 and older. Do not submit anyone else's information.
-
-## 8. Cookies
-
-We use only essential cookies, to keep you signed in and to protect forms. We do not use advertising or analytics cookies. Information is processed in the United States.
-
-## 9. Changes and contact
-
-We may update this Policy and will give notice of material changes. Contact: support@broker-registry.org • Duncan Consulting LLC, doing business as Broker Registry • San Francisco, California • https://broker-registry.org
+support@csbfp-certification.org

@@ -163,13 +163,13 @@ router.get('/launch', async (req, res, next) => {
     const docs = must(await db().from('csbfp_legal_documents').select('key, version, body_md, status').eq('status', 'published').order('version', { ascending: false }), 'Legal');
     const current = new Map();
     for (const d of docs) if (!current.has(d.key)) current.set(d.key, d);
-    const placeholders = Object.keys(legal.KEYS).filter(k => !current.get(k) || /placeholder/i.test(current.get(k).body_md)).map(k => legal.KEYS[k]);
+    const placeholders = Object.keys(legal.KEYS).filter(k => !current.get(k) || /placeholder|DRAFT/i.test(current.get(k).body_md)).map(k => legal.KEYS[k]);
     const cur = await training.requiredCurriculum();
     const stripeCfg = S.blockedReason() ? { ready: false } : await S.stripeConfig();
     const pm = must(await db().from('csbfp_settings').select('key').eq('key', 'postmark_webhook_token').maybeSingle(), 'Postmark');
     res.render('admin/launch', { pageTitle: 'Launch', preLaunch: config.preLaunch, mode: S.mode(), stripeBlocked: S.blockedReason(), stripeReady: stripeCfg.ready,
       postmark: Boolean(pm) && Boolean(process.env.POSTMARK_SERVER_TOKEN), placeholders, training: cur, turnstile: turnstile.enabled(),
-      counts: await previewCounts(), adminEmails: config.adminEmails, ...msgOf(req) });
+      screening: config.screening, counts: await previewCounts(), adminEmails: config.adminEmails, ...msgOf(req) });
   } catch (err) { next(err); }
 });
 

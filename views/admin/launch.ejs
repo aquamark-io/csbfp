@@ -4,13 +4,14 @@
 <% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
 <% const item = (ok, label, detail) => { %><li class="<%= ok ? 'done' : '' %>"><span class="mark" aria-hidden="true"><% if (ok) { %><%- include('../partials/check') %><% } %></span><span><strong><%= label %></strong><% if (detail) { %><br><span class="muted-inline"><%- detail %></span><% } %></span></li><% } %>
 <ol class="checklist launch-list">
-  <% item(placeholders.length === 0, 'Legal documents are final', placeholders.length ? `Still placeholder: ${placeholders.join(', ')}. <a href="/admin/legal">Edit legal documents</a>` : 'All published.') %>
+  <% item(placeholders.length === 0, 'Legal documents are final', placeholders.length ? `Still draft or placeholder: ${placeholders.join(', ')}. <a href="/admin/legal">Edit legal documents</a>` : 'All published.') %>
   <% item(training && !/draft/i.test(training.label), 'Training is the reviewed version', training ? `Current: ${training.label}. <a href="/admin/training">Training</a>` : 'No training published.') %>
+  <% item(screening.enabled, 'Background screening enabled', screening.enabled ? `Provider: ${screening.provider}, policy ${screening.policyVersion}.` : 'Off: paid applications receive DEMO credentials only. Genuine certifications need the provider agreement, integration, approved screening criteria and legal review, then BACKGROUND_SCREENING_ENABLED=true in Render.') %>
   <% item(postmark, 'Email delivery tracking connected', postmark ? 'Postmark connected.' : '<a href="/admin/emails">Connect Postmark</a>') %>
   <% item(turnstile, 'Bot protection on sign-up (optional)', turnstile ? 'Cloudflare Turnstile is on.' : 'Off. Add TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY in Render to turn it on.') %>
-  <% item(counts.registrants === 0 || !preLaunch, 'Preview data removed', preLaunch ? `${counts.registrants} accounts, ${counts.registrations} registration numbers, ${counts.payments} payments from testing. Remove them below just before launch.` : 'Done.') %>
+  <% item(counts.registrants === 0 || !preLaunch, 'Preview data removed', preLaunch ? `${counts.registrants} accounts, ${counts.registrations} numbers, ${counts.payments} payments from testing. Remove them below just before launch.` : 'Done.') %>
   <% item(mode === 'live' && stripeReady, 'Stripe is live and set up', mode === 'live' ? (stripeReady ? 'Live key, product, price and webhook are set.' : 'Live key set. <a href="/admin/stripe">Run Set Up Stripe</a>.') : 'Still in test mode. At launch: replace STRIPE_SECRET_KEY in Render with the live key, set PRE_LAUNCH=false, then run Set Up Stripe again. In Stripe, turn off its own receipt and renewal emails.') %>
-  <% item(!preLaunch, 'Preview mode off', preLaunch ? 'PRE_LAUNCH is on: preview strip shown, search engines kept out, and only ADMIN_EMAILS / PREVIEW_EMAILS can sign up. Set PRE_LAUNCH=false in Render to open registration.' : 'Registration is open to everyone.') %>
+  <% item(!preLaunch, 'Preview mode off', preLaunch ? 'PRE_LAUNCH is on: preview strip shown, search engines kept out, and only ADMIN_EMAILS / PREVIEW_EMAILS can sign up. Set PRE_LAUNCH=false in Render to open certification.' : 'Certification is open to everyone.') %>
 </ol>
 <% if (preLaunch && mode !== 'live') { %>
 <section class="panel danger-panel">

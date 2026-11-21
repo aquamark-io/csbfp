@@ -191,7 +191,7 @@ test('legal documents: publishing a new version updates the site and keeps histo
 
 test('launch checklist, and removing preview data keeps setup but clears accounts', async () => {
   let r = await boss.req('/admin/launch');
-  assert.match(r.text, /Still placeholder/);
+  assert.match(r.text, /Still draft or placeholder/);
   assert.match(r.text, /Remove Preview Data/);
   r = await boss.req('/admin/launch/reset', { confirm: 'yes' });
   assert.match(decodeURIComponent(r.location), /Type REMOVE PREVIEW DATA/);
