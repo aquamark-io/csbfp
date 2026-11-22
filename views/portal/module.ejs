@@ -6,7 +6,14 @@
 <% } %>
 <div class="deck" data-deck>
   <div class="deck-progress" aria-hidden="true"><div class="deck-bar"><span></span></div><span class="deck-count"></span></div>
-  <div class="prose slides" aria-live="polite"><%- html %></div>
+  <div class="prose slides" aria-live="polite">
+    <section class="slide slide-cover" data-slide="0">
+      <p class="cover-kicker">Module <%= idx + 1 %> of <%= state.modules.length %></p>
+      <h2><%= mod.title %></h2>
+      <% if (mod.estimated_minutes) { %><p class="cover-meta">About <%= mod.estimated_minutes %> minutes</p><% } %>
+    </section>
+    <%- html %>
+  </div>
   <div class="deck-nav">
     <button class="button secondary" type="button" data-prev>← Back</button>
     <button class="button" type="button" data-next>Next →</button>

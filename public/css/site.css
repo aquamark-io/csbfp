@@ -729,3 +729,19 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .train-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .train-desc { font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
 .train-steps li.locked .train-desc { color: #b3bac6; }
+
+/* Financing products: question, hint, then one product per row */
+.products-field { margin-bottom: 24px; }
+.products-q { font-size: 1.05rem; font-weight: 600; color: var(--ink); line-height: 1.5; margin-bottom: 6px; }
+.products-hint { margin: 0 0 18px; font-size: 0.92rem; color: var(--muted); }
+.products-list { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.products-list li { padding: 14px 0; align-items: center; }
+.products-list input[type=checkbox] { margin-top: 0; }
+
+/* Training: a cover slide at the start of each module (blue, gold title) */
+.slides .slide.slide-cover { background: var(--navy); border-color: var(--navy); color: #fff; text-align: center;
+  display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 340px; }
+.slides .slide.slide-cover .cover-kicker { margin: 0 0 14px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255, 255, 255, 0.85); }
+.slides .slide.slide-cover h2 { margin: 0; color: var(--gold); font-size: clamp(1.7rem, 4vw, 2.3rem); letter-spacing: -0.01em; }
+.slides .slide.slide-cover h2::after { content: ""; display: block; width: 56px; height: 3px; margin: 18px auto 0; background: var(--gold); }
+.slides .slide.slide-cover .cover-meta { margin: 18px 0 0; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8); }
