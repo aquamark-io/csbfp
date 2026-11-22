@@ -13,7 +13,7 @@
 <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
 
 <div class="employer-cards">
-  <section class="home-card" id="request">
+  <section class="home-card theme-blue" id="request">
     <h2 class="home-card-band">Request an Employer ID</h2>
     <div class="home-card-body">
       <% if (created) { %>
@@ -32,7 +32,7 @@
     </div>
   </section>
 
-  <section class="home-card" id="buy">
+  <section class="home-card theme-gold" id="buy">
     <h2 class="home-card-band">Buy Credits</h2>
     <div class="home-card-body">
       <p><%= program.annualFee %> per credit.</p>
@@ -45,7 +45,7 @@
     </div>
   </section>
 
-  <section class="home-card" id="balance">
+  <section class="home-card theme-slate" id="balance">
     <h2 class="home-card-band">Check Your Balance</h2>
     <div class="home-card-body">
       <% if (balance) { %>
@@ -60,7 +60,7 @@
       <form method="post" action="/employers/balance#balance" class="stack" novalidate>
         <div class="field"><label for="bal_number">Employer ID</label><input id="bal_number" name="employer_number" type="text" autocapitalize="characters" spellcheck="false" placeholder="ER-XXXXXX" maxlength="20" value="<%= section === 'balance' ? (values.employer_number || '') : '' %>" required></div>
         <div class="field"><label for="bal_email">Email on file</label><input id="bal_email" name="email" type="email" autocomplete="email" value="<%= section === 'balance' ? (values.email || '') : '' %>" required></div>
-        <button class="button secondary" type="submit">Check Balance</button>
+        <button class="button" type="submit">Check Balance</button>
       </form>
       <% } %>
     </div>

@@ -759,3 +759,9 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .pay-cards .home-card-body p.pay-note { margin: 12px 0 0; font-size: 0.8rem; line-height: 1.5; color: var(--muted); }
 @media (max-width: 760px) { .pay-cards { grid-template-columns: 1fr; } }
 .pay-foot { margin-top: 18px; font-size: 0.85rem; }
+
+/* For Employers: one color per card (band and button match) */
+.theme-gold .home-card-band { background: var(--gold); color: var(--navy-dark); border-bottom-color: var(--navy); }
+.theme-slate .home-card-band { background: #475467; border-bottom-color: var(--gold); }
+.theme-slate .button { background: #475467; border-color: #475467; color: #fff; }
+.theme-slate .button:hover { background: #344054; border-color: #344054; color: #fff; }
