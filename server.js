@@ -41,14 +41,23 @@ app.use(helmet({
 }));
 app.use(express.urlencoded({ extended: false, limit: '20kb' }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '7d' }));
+// Changes on every deploy so browsers fetch fresh CSS/JS (Render sets RENDER_GIT_COMMIT).
+const ASSET_VERSION = (process.env.RENDER_GIT_COMMIT || String(Date.now())).slice(0, 12);
+// During a rolling deploy, a new page can ask an old server for ?v=<new version>. The old server's file is not that
+// version, so it must not be cached; the next load gets the right file from the new server.
+app.use((req, res, next) => {
+  if (req.query.v && req.query.v !== ASSET_VERSION) res.set('Cache-Control', 'no-store');
+  next();
+});
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '7d',
+  setHeaders: (res, filePath, stat) => { if (res.getHeader('Cache-Control') === 'no-store') res.setHeader('Cache-Control', 'no-store'); },
+}));
 
 app.set('view engine', 'ejs');
 Object.assign(app.locals, require('./lib/view-helpers'));
 app.set('views', path.join(__dirname, 'views'));
 
-// Changes on every deploy so browsers fetch fresh CSS/JS (Render sets RENDER_GIT_COMMIT).
-const ASSET_VERSION = (process.env.RENDER_GIT_COMMIT || String(Date.now())).slice(0, 12);
 
 app.use((req, res, next) => {
   res.locals.assetV = ASSET_VERSION;
