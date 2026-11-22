@@ -769,6 +769,4 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .employer-cards .band-note { margin-left: auto; font-size: 0.86rem; font-weight: 500; color: var(--muted); }
 .employer-steps li { border-bottom: 0; padding: 5px 0; }
 .employer-intro h1 { margin-bottom: 14px; }
-.employer-intro .lead { margin-bottom: 6px; }
-.employer-sub { color: var(--muted); font-size: 0.98rem; margin: 0; }
 .employer-cards { margin-top: 40px; }
