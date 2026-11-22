@@ -767,3 +767,4 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .employer-cards .home-card-band::before { content: counter(emp); flex: none; width: 28px; height: 28px; border-radius: 50%;
   background: var(--gold); color: var(--navy-dark); font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; }
 .employer-cards .band-note { margin-left: auto; font-size: 0.86rem; font-weight: 500; color: var(--muted); }
+.employer-steps li { border-bottom: 0; padding: 5px 0; }
