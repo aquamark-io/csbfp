@@ -732,8 +732,8 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 
 /* Financing products: question, hint, then one product per row */
 .products-field { margin-bottom: 24px; }
-.products-q { font-size: 1.05rem; font-weight: 600; color: var(--ink); line-height: 1.5; margin-bottom: 6px; }
-.products-hint { margin: 0 0 18px; font-size: 0.92rem; color: var(--muted); }
+.products-q { font-size: 1.05rem; font-weight: 600; color: var(--ink); line-height: 1.5; margin-bottom: 0; padding: 0; }
+.products-hint { margin: -2px 0 18px; font-size: 0.92rem; color: var(--muted); }
 .products-list { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
 .products-list li { padding: 14px 0; align-items: center; }
 .products-list input[type=checkbox] { margin-top: 0; }
