@@ -1,6 +1,8 @@
 /**
  * Admin: certification review, screening workflow, suspension / revocation / reinstatement, appeals.
  *
+ *   GET  /admin/background-checks               the 51 Checkr open invitation links (50 states + DC)
+ *   POST /admin/background-checks
  *   GET  /admin/review                          queue: pending screening, under review, not approved, suspended, open appeals
  *   POST /admin/registrants/:id/screening       record a screening workflow status (reviewer, note required)
  *   POST /admin/registrants/:id/decision        approve / not approve / send to review / suspend / reinstate / revoke
@@ -18,9 +20,10 @@ const { logAdmin } = require('../lib/audit');
 const { requireAdmin } = require('../middleware/admin');
 const certification = require('../lib/certification');
 const screening = require('../lib/screening');
+const { STATES, NAMES } = require('../lib/zip-state');
 
 const router = express.Router();
-router.use(['/review', '/registrants/:id/screening', '/registrants/:id/decision', '/registrants/:id/appeals', '/appeals'], requireAdmin);
+router.use(['/background-checks', '/review', '/registrants/:id/screening', '/registrants/:id/decision', '/registrants/:id/appeals', '/appeals'], requireAdmin);
 
 const isUuid = s => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || '');
 const clean = (x, max = 500) => (typeof x === 'string' ? x.trim().replace(/\s+/g, ' ').slice(0, max) : '');
@@ -33,6 +36,38 @@ async function load(req) {
   const reg = must(await db().from('csbfp_registrations').select('*').eq('registrant_id', r.id).single(), 'Registration');
   return { r, reg };
 }
+
+// ---------- Checkr open invitation links ----------
+
+router.get('/background-checks', async (req, res, next) => {
+  try {
+    const links = await screening.invitationLinks();
+    res.render('admin/background-checks', { pageTitle: 'Background Checks', states: STATES, names: NAMES, links,
+      set: STATES.filter(s => links[s]).length, screeningConfig: config.screening,
+      msg: typeof req.query.msg === 'string' ? req.query.msg.slice(0, 200) : null,
+      err: typeof req.query.err === 'string' ? req.query.err.slice(0, 300) : null });
+  } catch (err) { next(err); }
+});
+
+router.post('/background-checks', async (req, res, next) => {
+  try {
+    const before = await screening.invitationLinks();
+    const links = {};
+    const bad = [];
+    for (const st of STATES) {
+      const v = typeof req.body[`link_${st}`] === 'string' ? req.body[`link_${st}`].trim() : '';
+      if (!v) continue;
+      let ok = false;
+      try { ok = new URL(v).protocol === 'https:' && v.length <= 500; } catch { ok = false; }
+      if (ok) links[st] = v; else bad.push(NAMES[st]);
+    }
+    if (bad.length) return res.redirect(303, `/admin/background-checks?err=${encodeURIComponent(`Not saved. These need a full https:// link: ${bad.join(', ')}.`)}`);
+    await screening.saveInvitationLinks(links, req.admin.id);
+    const changed = STATES.filter(st => (before[st] || '') !== (links[st] || ''));
+    await logAdmin({ adminId: req.admin.id, action: 'checkr_links_updated', detail: { changed, total: Object.keys(links).length }, ip: req.ip });
+    return res.redirect(303, `/admin/background-checks?msg=${encodeURIComponent(`Saved. ${Object.keys(links).length} of ${STATES.length} links set${changed.length ? `; changed: ${changed.join(', ')}` : ''}.`)}`);
+  } catch (err) { next(err); }
+});
 
 // ---------- queue ----------
 

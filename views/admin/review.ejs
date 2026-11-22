@@ -6,23 +6,23 @@
     · Provider: <code><%= screeningConfig.provider %></code><%= screeningConfig.integrated ? '' : ' (not integrated)' %>
     · Policy version: <code><%= screeningConfig.policyVersion %></code></p>
   <% if (!screeningConfig.enabled) { %>
-  <p class="muted">While screening is off, each paid application receives a DEMO credential (DEMO- number) that the public lookup labels as not screened and not valid. Genuine certifications can only be issued with screening enabled. Set <code>BACKGROUND_SCREENING_ENABLED=true</code> in Render only after the provider agreement, integration and legal review are complete.</p>
+  <p class="muted">While screening is off, each paid application receives a DEMO credential (DEMO- number) that the public lookup labels as not screened and not valid. Genuine certifications can only be issued with screening enabled. Set <code>BACKGROUND_SCREENING_ENABLED=true</code> in Render once the Checkr links are set in <a href="/admin/background-checks">Background Checks</a>.</p>
   <% } else if (!screeningConfig.integrated) { %>
-  <p class="muted">No provider is integrated, so screening statuses are recorded here by hand. A provider result is never a decision: an authorized reviewer records every outcome.</p>
+  <p class="muted">When Checkr emails that a report is complete, find the applicant here by name and email, open their page and record the result under Background screening. Approved moves them to Under Review for final approval. A Checkr result is never a decision on its own: you record every outcome. Adverse-action notices are handled in Checkr.</p>
   <% } %>
 </div>
 
 <h2>Applications and certifications needing action</h2>
 <% if (!rows.length) { %><p class="muted">Nothing waiting.</p><% } else { %>
 <table class="table">
-  <thead><tr><th>Since</th><th>Name</th><th>Status</th><th>Screening</th><th></th></tr></thead>
+  <thead><tr><th>Since</th><th>Name</th><th>Status</th><th>Background check</th><th></th></tr></thead>
   <tbody>
   <% rows.forEach(x => { %>
     <tr>
       <td><%= fmtDate(x.updated_at) %></td>
       <td><%= fullName(x.person) %><br><span class="muted-inline"><%= x.person && x.person.email %></span></td>
       <td><%- statusPill(x.status, x.admin_hold, x.is_demo) %></td>
-      <td><%= x.screening ? screeningLabel(x.screening.status) : '—' %></td>
+      <td><%= x.screening ? screeningLabel(x.screening.status) : '—' %><% if (x.screening && x.screening.status === 'awaiting_authorization') { %><br><span class="muted-inline"><%= x.screening.link_opened_at ? `Opened Checkr link (${x.screening.state}) ${fmtTime(x.screening.link_opened_at)}` : 'Has not opened the Checkr link' %></span><% } %></td>
       <td><a href="/admin/registrants/<%= x.registrant_id %>#certification">Open</a></td>
     </tr>
   <% }) %>

@@ -30,8 +30,13 @@ background screening (when enabled) → eligibility approval → certification i
   annual term (the Stripe renewal date is moved to one year after approval). No decision is automatic.
 - Admins can suspend, reinstate and revoke (reason and evidence reference required; revocation stops renewal).
   Public lookup shows only status, never reasons.
-- Provider adapters live in `lib/screening.js`. Only a `none` placeholder exists. Add a provider only after the agreement,
-  using its real documentation (authorization flow, signed webhooks, idempotency).
+- **Phase 1 background checks (Checkr open invitation links):** after paying, the applicant opens `/portal/background-check`,
+  which picks their state from their home ZIP code (`lib/zip-state.js`) and shows the exact legal name and email to use.
+  The button goes through `/portal/background-check/go`, which records the state and time, then redirects to that state's
+  Checkr link. Links (50 states + DC) are set in Admin > Background Checks and never shown publicly. Checkr emails when
+  a report is complete; a reviewer finds the applicant in Admin > Review and records the result. Checkr runs adverse
+  action. A reminder goes out 3 days after payment if the link was never opened.
+- Phase 2: Checkr API invitations per applicant and signed webhooks (adapter interface in `lib/screening.js`).
 
 ## Database
 

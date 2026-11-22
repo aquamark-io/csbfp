@@ -1,0 +1,23 @@
+<%- include('../partials/head') %>
+<h1>Background Checks</h1>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<div class="message">
+  <p><strong><%= set %> of <%= states.length %></strong> state links set. Background checks are <strong><%= screeningConfig.enabled ? 'on' : 'off' %></strong><%= screeningConfig.enabled ? '' : ' (set BACKGROUND_SCREENING_ENABLED=true in Render when the links are ready)' %>.</p>
+  <p class="muted">Paste each state's Checkr open invitation link. Applicants see only their own state's link, chosen from their home ZIP code, and only after paying. These links are never shown publicly. Leave a state blank and its applicants are told the check isn't available yet.</p>
+</div>
+<form method="post" action="/admin/background-checks">
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>State</th><th>Checkr invitation link</th></tr></thead>
+    <tbody>
+    <% states.forEach(st => { %>
+      <tr>
+        <td><label for="link_<%= st %>"><%= names[st] %></label></td>
+        <td><input id="link_<%= st %>" name="link_<%= st %>" type="url" maxlength="500" placeholder="https://" value="<%= links[st] || '' %>" style="width: 100%"></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+  <div class="actions"><button class="button" type="submit">Save Links</button></div>
+</form>
+<%- include('../partials/foot') %>

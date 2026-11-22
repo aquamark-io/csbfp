@@ -146,13 +146,60 @@ test('with screening enabled, payment holds the application in Pending Screening
   assert.equal(reg.is_demo, false);
   const sc = fake.tables.csbfp_screenings.find(s => s.registration_id === reg.id);
   assert.equal(sc.status, 'awaiting_authorization');
-  assert.equal(sc.provider, 'none');
+  assert.equal(sc.provider, 'checkr');
   assert.ok(!('ssn' in sc) && !('report' in sc), 'no sensitive screening data stored');
+  assert.match(ret.text, /href="\/portal\/background-check">Start Your Background Check/);
   const dash = await ann.req('/portal/dashboard');
   assert.match(dash.text, /Pending Screening/);
-  assert.match(dash.text, /Awaiting Authorization/);
+  assert.match(dash.text, /href="\/portal\/background-check"/);
   await wait(30);
   assert.ok(sent.some(s => s.includes('to=ann@example.com') && s.includes('template=application_received')));
+});
+
+test('background check page: state from ZIP, exact name and email, private per-state Checkr link', async () => {
+  // No link for California yet
+  let page = await ann.req('/portal/background-check');
+  assert.equal(page.status, 200);
+  assert.match(page.text, /California/);
+  assert.match(page.text, /ann@example.com/);
+  assert.match(page.text, /Pat Lee/);
+  assert.match(page.text, /isn't available yet/);
+  assert.equal((await ann.req('/portal/background-check/go')).location, '/portal/background-check');
+
+  // Admin sets links; a non-https link is refused and nothing is saved
+  let r = await admin.req('/admin/background-checks', { link_CA: 'http://insecure.example/ca', link_TX: 'https://checkr.example/tx' });
+  assert.match(msgOf(r), /need a full https/);
+  r = await admin.req('/admin/background-checks', { link_CA: 'https://checkr.example/apply/ca', link_TX: 'https://checkr.example/apply/tx' });
+  assert.match(msgOf(r), /2 of 51 links set/);
+  assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'checkr_links_updated'));
+
+  page = await ann.req('/portal/background-check');
+  assert.match(page.text, /Start Background Check with Checkr/);
+  assert.doesNotMatch(page.text, /checkr\.example/, 'the link itself is not printed on the page');
+  const go = await ann.req('/portal/background-check/go');
+  assert.equal(go.location, 'https://checkr.example/apply/ca');
+  const { reg } = regOf('ann@example.com');
+  const sc = fake.tables.csbfp_screenings.find(s => s.registration_id === reg.id);
+  assert.equal(sc.state, 'CA');
+  assert.ok(sc.link_opened_at);
+  assert.match((await admin.req('/admin/review')).text, /Opened Checkr link \(CA\)/);
+  assert.match((await ann.req('/portal/dashboard')).text, /in progress with Checkr/);
+
+  // Not available to anyone who isn't a paid applicant waiting on the check, and never public
+  assert.equal((await browser().req('/portal/background-check')).status, 303);
+});
+
+test('reminder email 3 days after payment if the Checkr link was never opened (once)', async () => {
+  const jobs = require('../lib/jobs');
+  const fresh = { id: 'sc-old', registrant_id: regOf('ann@example.com').r.id, registration_id: regOf('ann@example.com').reg.id,
+    status: 'awaiting_authorization', created_at: new Date(Date.now() - 4 * 864e5).toISOString(), link_opened_at: null };
+  fake.tables.csbfp_screenings.push(fresh);
+  const before = sent.filter(s => s.includes('template=background_check_reminder')).length;
+  await jobs.runTasks(new Date());
+  await jobs.runTasks(new Date());
+  const after = sent.filter(s => s.includes('template=background_check_reminder')).length;
+  assert.equal(after - before, 1);
+  fake.tables.csbfp_screenings = fake.tables.csbfp_screenings.filter(s => s.id !== 'sc-old');
 });
 
 test('an application cannot be approved before a reviewer approves the screening', async () => {

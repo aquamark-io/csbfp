@@ -141,6 +141,7 @@
     <dt>Status</dt><dd><%= screeningLabel(screening.status) %></dd>
     <dt>Provider</dt><dd><code><%= screening.provider %></code></dd>
     <dt>Requirement version</dt><dd><%= screening.requirement_version %></dd>
+    <dt>Checkr link</dt><dd><%= screening.link_opened_at ? `Opened (${screening.state}) ${fmtTime(screening.link_opened_at)}` : 'Not opened yet' %></dd>
     <% if (screening.decision) { %><dt>Reviewer decision</dt><dd><%= screening.decision.replace('_', ' ') %> on <%= fmtDate(screening.decided_at) %></dd><% } %>
   </dl>
   <form method="post" action="/admin/registrants/<%= r.id %>/screening" class="stack">

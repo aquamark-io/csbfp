@@ -30,8 +30,10 @@
 <div class="list-card">
 <h2 class="list-card-head">Steps to complete</h2>
 <%
+  const checkOpen = reg.status === 'pending_screening';
   const screeningState = !screeningEnabled ? 'Not active yet'
-    : !paid ? '' : screening ? screeningLabel(screening.status) : 'Pending';
+    : !paid ? '' : checkOpen && screening && !screening.link_opened_at ? 'Start'
+    : checkOpen ? 'Results pending' : screening ? screeningLabel(screening.status) : '';
   const steps = [
     { done: progress.personal, label: 'Personal information', href: '/portal/personal' },
     { done: progress.employment, label: 'Employment', href: '/portal/employment' },
@@ -44,7 +46,7 @@
     { done: paid, label: `Annual certification fee (${program.annualFee})`,
       href: passed ? '/portal/checkout' : null, divider: true, locked: !passed && !paid,
       state: reg.status === 'inactive' ? 'Payment due' : reg.status === 'expired' ? 'Renew' : !passed ? '' : 'Start' },
-    { done: screeningEnabled && screening && screening.status === 'approved', label: 'Background screening (one time)', href: null, divider: true,
+    { done: screeningEnabled && screening && screening.status === 'approved', label: 'Background check', href: checkOpen ? '/portal/background-check' : null, divider: true,
       locked: !paid || !screeningEnabled, state: screeningState },
     { done: certified, label: 'Certification issued', href: certified ? '/portal/confirmation' : null,
       locked: !certified, state: reg.status === 'under_review' ? 'Under review' : reg.status === 'not_approved' ? 'Not approved' : '' },
@@ -70,7 +72,11 @@
 <% } else if (reg.status === 'expired') { %>
 <p class="message">Your certification has expired. <a href="/portal/checkout">Renew it</a> to make it active again with the same number.</p>
 <% } else if (reg.status === 'pending_screening') { %>
-<p class="message">Your application is complete. The next step is the one-time background screening. We will email you with instructions.</p>
+<% if (screening && screening.link_opened_at) { %>
+<p class="message">Your background check is in progress with Checkr. Results usually take 1–3 days, and we'll email you once they're reviewed.</p>
+<% } else { %>
+<div class="actions"><a class="button" href="/portal/background-check">Start Your Background Check</a></div>
+<% } %>
 <% } else if (reg.status === 'under_review') { %>
 <p class="message">Your application is under review. We will email you when a decision is made.</p>
 <% } else if (reg.status === 'not_approved') { %>

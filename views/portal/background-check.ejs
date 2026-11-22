@@ -1,0 +1,35 @@
+<%- include('../partials/head') %>
+<%- include('../partials/portal-nav') %>
+<h1>Background Check</h1>
+<p class="lead">The last step is a one-time background check through Checkr, our background check provider.</p>
+
+<% if (!state) { %>
+  <p class="message">We couldn't match your ZIP code (<%= r.zip5 || 'not entered' %>) to a U.S. state. Please <a href="/portal/personal">check your home ZIP code</a>, or contact <a href="mailto:<%= program.supportEmail %>"><%= program.supportEmail %></a>.</p>
+<% } else { %>
+  <dl class="summary">
+    <div><dt>Your state</dt><dd><%= stateName %> <span class="muted-inline">(from ZIP code <%= r.zip5 %>, <a href="/portal/personal">update</a>)</span></dd></div>
+  </dl>
+
+  <div class="notice-strong">
+    <p><strong>Use these exact details in Checkr</strong> so we can match your results to your application:</p>
+    <ul class="plain-list">
+      <li>Legal name: <strong><%= [r.legal_first_name, r.middle_name, r.legal_last_name].filter(Boolean).join(' ') %></strong></li>
+      <li>Email: <strong><%= r.email %></strong></li>
+    </ul>
+  </div>
+
+  <% if (link) { %>
+    <p>Checkr will ask you to review the required disclosures, authorize the background check and enter your details. It takes about 10 minutes. Results usually take 1–3 days.</p>
+    <div class="actions">
+      <a class="button" href="/portal/background-check/go" target="_blank" rel="noopener">Start Background Check with Checkr</a>
+    </div>
+    <% if (sc && sc.link_opened_at) { %>
+      <p class="muted">You opened the Checkr link on <%= fmtTime(sc.link_opened_at) %>. If you've finished, there's nothing else to do: we'll email you once your results are reviewed.</p>
+    <% } %>
+  <% } else { %>
+    <p class="message">The background check for <%= stateName %> isn't available yet. We'll email you as soon as it is.</p>
+  <% } %>
+<% } %>
+<p class="muted">Checkr handles your authorization and personal details directly. CSBFP never asks for your Social Security number.</p>
+<div class="actions"><a class="button secondary" href="/portal/dashboard">Back to Dashboard</a></div>
+<%- include('../partials/foot') %>

@@ -85,6 +85,7 @@ app.use('/portal', require('./routes/training'));
 app.use('/portal', require('./routes/billing'));
 app.use('/portal', require('./routes/account'));
 app.use('/portal', require('./routes/profile'));
+app.use('/portal', require('./routes/background-check'));
 app.use('/admin', (req, res, next) => (config.portalReady() ? next()
   : res.status(503).render('error', { pageTitle: 'Admin unavailable', message: 'The admin area is temporarily unavailable.' })));
 app.use('/admin', require('./routes/admin'));

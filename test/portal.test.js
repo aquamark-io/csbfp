@@ -196,7 +196,7 @@ test('full journey: sign up, verify email, complete every form', async () => {
   d = await b.req('/portal/dashboard');
   assert.match(d.text, /Continue: Training/);
   assert.equal((d.text.match(/>Complete</g) || []).length, 4);
-  assert.match(d.text, /Background screening \(one time\)/);
+  assert.match(d.text, /Background check/);
   assert.match(d.text, /Not active yet/);
   assert.match(d.text, /demo record only/);
   const pp = await b.req('/portal/personal');
