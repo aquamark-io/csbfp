@@ -4,8 +4,7 @@
 <% if (!doc) { %>
 <p class="message">The professional standards are not available yet. Please check back soon.</p>
 <% } else if (current) { %>
-<section class="home-card ack-card">
-  <h2 class="home-card-band">Accepted</h2>
+<section class="ack-card">
   <div class="ack-body">
     <p class="ack-intro">You accepted these standards on <%= new Date(accepted.accepted_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>.</p>
     <ul class="ack-list done"><% statements.forEach(s => { %><li><span class="dash-dot" aria-hidden="true"><%- include('../partials/check') %></span><span><%= s %></span></li><% }) %></ul>
@@ -16,8 +15,7 @@
 <p class="lead">Read each statement and check the box to confirm.</p>
 <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
 <form method="post" action="/portal/acknowledgments" novalidate>
-  <section class="home-card ack-card">
-    <h2 class="home-card-band">I agree that</h2>
+  <section class="ack-card">
     <fieldset class="ack-body">
       <legend class="visually-hidden">Professional Standards</legend>
       <ul class="ack-list">
