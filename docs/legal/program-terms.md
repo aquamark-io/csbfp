@@ -38,7 +38,7 @@ You may state that you are a Certified Small Business Finance Professional and s
 
 The certification fee is $149 per year. It renews automatically each year at the then-current fee, charged to your payment method on file, until you cancel. We email you at least 30 days before each renewal. You can cancel online at any time from your Billing page; your certification stays current through the period you have paid for. Renewal does not repeat the background check or the assessment unless the program rules change.
 
-**No refunds.** Fees are non-refundable once you sign up to get certified, including if you do not complete the remaining steps or are not approved, except where a refund is required by law. Nothing in these terms limits rights you have under applicable law or card-network rules. *(The treatment of applicants who are not approved after the background check is pending program-owner and legal approval.)*
+**No refunds.** The certification fee is non-refundable once paid, including if you do not complete the remaining steps or do not pass the background check, except where a refund is required by law. Nothing in these terms limits rights you have under applicable law or card-network rules.
 
 If a renewal payment fails, your certification becomes Inactive until the payment is made. You keep the same certification number if you renew or rejoin later.
 
