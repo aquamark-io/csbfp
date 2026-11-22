@@ -5,7 +5,7 @@
  *   GET  /portal/training/complete            completion message
  *   GET  /portal/training/:key                one module (modules open in order)
  *   POST /portal/training/:key/complete       "I've completed this module"
- *   GET  /portal/assessment                   rules, conduct acknowledgment, start
+ *   GET  /portal/assessment                   rules and start
  *   POST /portal/assessment/start
  *   GET  /portal/assessment/attempt           the open attempt's questions
  *   POST /portal/assessment/submit
@@ -19,7 +19,6 @@ const config = require('../lib/config');
 const { db, must } = require('../lib/supabase');
 const { logEvent } = require('../lib/events');
 const { sendQuietly, registrantVars } = require('../lib/email');
-const legal = require('../lib/legal');
 const training = require('../lib/training');
 const { render: renderMd, renderSlides } = require('../lib/markdown');
 const { requireRegistrant } = require('../middleware/auth');
@@ -109,15 +108,6 @@ router.post('/training/:key/complete', async (req, res, next) => {
 
 // ---------- assessment ----------
 
-async function conductDoc() { return legal.currentDoc('conduct_standards'); }
-
-async function hasConductAck(registrantId, doc) {
-  if (!doc) return true;
-  const row = must(await db().from('csbfp_legal_acceptances').select('id').eq('registrant_id', registrantId)
-    .eq('document_key', 'conduct_standards').eq('document_version', doc.version).limit(1).maybeSingle(), 'Conduct acknowledgment');
-  return Boolean(row);
-}
-
 // Why the registrant can't start an attempt right now, or null if they can.
 function blockedReason(state) {
   const a = state.assessment;
@@ -133,9 +123,7 @@ router.get('/assessment', async (req, res, next) => {
   try {
     const state = await training.stateFor(req.registrant.id);
     if (state.assessment && state.assessment.open && !state.assessment.passed) return res.redirect('/portal/assessment/attempt');
-    const doc = await conductDoc();
-    res.render('portal/assessment', { pageTitle: 'Assessment', state, blocked: blockedReason(state), doc,
-      statements: legal.statements(doc), acked: await hasConductAck(req.registrant.id, doc), error: null, checked: [] });
+    res.render('portal/assessment', { pageTitle: 'Assessment', state, blocked: blockedReason(state), error: null });
   } catch (err) { next(err); }
 });
 
@@ -145,17 +133,6 @@ router.post('/assessment/start', async (req, res, next) => {
     if (state.assessment && state.assessment.open) return res.redirect(303, '/portal/assessment/attempt');
     const blocked = blockedReason(state);
     if (blocked) return res.redirect(303, '/portal/assessment');
-
-    const doc = await conductDoc();
-    if (!(await hasConductAck(req.registrant.id, doc))) {
-      const statements = legal.statements(doc);
-      const checked = statements.map((_, i) => req.body[`ack_${i}`] === 'yes');
-      if (checked.includes(false)) {
-        return res.status(422).render('portal/assessment', { pageTitle: 'Assessment', state, blocked: null, doc, statements, acked: false, checked,
-          error: 'Please confirm each statement to begin.' });
-      }
-      await legal.recordAcceptance({ registrantId: req.registrant.id, keys: ['conduct_standards'], context: 'assessment', ip: req.ip, userAgent: req.get('user-agent') });
-    }
 
     const questions = (await training.questionsOf(state.curriculum.id)).slice(0, state.settings.question_count);
     if (!questions.length) return res.redirect(303, '/portal/assessment');

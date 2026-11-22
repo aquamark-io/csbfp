@@ -11,26 +11,16 @@
   <div class="actions"><a class="button secondary" href="/portal/training">Review the Training</a></div>
 <% } else { %>
   <% const passCount = Math.ceil(state.settings.question_count * state.settings.pass_percent / 100); %>
-  <dl class="stats">
-    <div><dt>Questions</dt><dd><%= state.settings.question_count %></dd></div>
-    <div><dt>To pass</dt><dd><%= passCount %> of <%= state.settings.question_count %></dd></div>
+  <p class="lead">You're ready for the final step of your training.</p>
+  <dl class="summary">
+    <div><dt>Questions</dt><dd><%= state.settings.question_count %> multiple choice</dd></div>
+    <div><dt>To pass</dt><dd><%= passCount %> correct (<%= state.settings.pass_percent %>%)</dd></div>
     <% if (a.attemptsLeft != null) { %><div><dt>Attempts left</dt><dd><%= a.attemptsLeft %></dd></div><% } %>
+    <div><dt>Format</dt><dd>One question per screen, submitted at the end</dd></div>
   </dl>
-  <p class="muted">One question per screen. Your answers are submitted together at the end.</p>
   <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
   <form method="post" action="/portal/assessment/start" novalidate>
-    <% if (!acked && statements.length) { %>
-    <div class="list-card ack-card">
-      <h2 class="list-card-head">Before you begin, confirm each statement</h2>
-      <fieldset class="ack-list">
-        <legend class="visually-hidden">Professional standards</legend>
-        <% statements.forEach((s, i) => { %>
-        <div class="check"><input id="ack-<%= i %>" type="checkbox" name="ack_<%= i %>" value="yes" <%= checked[i] ? 'checked' : '' %>><label for="ack-<%= i %>"><%= s %></label></div>
-        <% }) %>
-      </fieldset>
-    </div>
-    <% } %>
-    <div class="actions"><button class="button" type="submit">Begin the Assessment</button></div>
+    <div class="actions"><button class="button gold" type="submit">Begin the Assessment</button></div>
   </form>
 <% } %>
 <%- include('../partials/foot') %>

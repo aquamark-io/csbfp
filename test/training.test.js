@@ -152,15 +152,12 @@ test('modules open in order; completing them leads to the completion page and on
   assert.match((await amy.req('/portal/dashboard')).text, /2 of 2 modules/);
 });
 
-test('the conduct acknowledgment is required before the first attempt and is recorded', async () => {
+test('the assessment starts directly (no separate acknowledgment; the professional standards cover it)', async () => {
   let r = await amy.req('/portal/assessment');
-  assert.match(r.text, /I will be honest/);
-  r = await amy.req('/portal/assessment/start', { ack_0: 'yes' });
-  assert.equal(r.status, 422);
-  r = await amy.req('/portal/assessment/start', { ack_0: 'yes', ack_1: 'yes' });
+  assert.doesNotMatch(r.text, /I will be honest/);
+  assert.match(r.text, /Begin the Assessment/);
+  r = await amy.req('/portal/assessment/start', {});
   assert.equal(r.location, '/portal/assessment/attempt');
-  const amyId = fake.tables.csbfp_registrants.find(x => x.email === 'amy@example.com').id;
-  assert.ok(fake.tables.csbfp_legal_acceptances.some(a => a.registrant_id === amyId && a.document_key === 'conduct_standards' && a.context === 'assessment'));
 });
 
 test('questions appear in fixed order without the answer key; every question must be answered', async () => {
