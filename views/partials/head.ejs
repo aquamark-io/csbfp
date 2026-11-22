@@ -62,12 +62,13 @@
       <% } %>
     </nav>
     <% } else { %>
+    <% const pub = (href, label) => (currentPath === href ? '' : nav(href, label)); /* the current page isn't listed */ %>
     <nav class="nav" id="site-nav" aria-label="Main">
-      <%- nav('/about', 'About') %>
-      <%- nav('/faq', 'FAQ') %>
-      <%- nav('/employers', 'For Employers') %>
-      <%- nav('/support', 'Contact') %>
-      <% if (signedIn) { %><%- nav('/portal/dashboard', 'My Account') %><form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form><% } else { %><%- nav('/portal', 'Sign In') %><% } %>
+      <%- pub('/about', 'About') %>
+      <%- pub('/faq', 'FAQ') %>
+      <%- pub('/employers', 'For Employers') %>
+      <%- pub('/support', 'Contact') %>
+      <% if (signedIn) { %><%- pub('/portal/dashboard', 'My Account') %><form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form><% } else { %><%- pub('/portal', 'Sign In') %><% } %>
     </nav>
     <% } %>
   </div>
