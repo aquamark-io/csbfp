@@ -1,0 +1,22 @@
+<%- include('../partials/head') %>
+<h1>Employers</h1>
+<p class="muted">Employer IDs go live as soon as they're requested on the public <a href="/employers">For Employers</a> page. One credit pays one first-year certification fee.</p>
+<% if (!rows.length) { %><p class="muted">No employers yet.</p><% } else { %>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Employer ID</th><th>Company</th><th>Contact</th><th>Purchased</th><th>Used</th><th>Remaining</th><th></th></tr></thead>
+  <tbody>
+  <% rows.forEach(e => { %>
+    <tr>
+      <td><code><%= e.employer_number %></code><% if (!e.active) { %> <span class="tag">Replaced</span><% } %></td>
+      <td><%= e.company_name %></td>
+      <td><%= e.contact_name || '' %><br><span class="muted-inline"><%= e.email %></span></td>
+      <td><%= e.credits_purchased + e.credits_adjusted %></td>
+      <td><%= e.credits_used %></td>
+      <td><strong><%= e.active ? e.balance : 0 %></strong></td>
+      <td><a href="/admin/employers/<%= e.id %>">Open</a></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div>
+<% } %>
+<%- include('../partials/foot') %>

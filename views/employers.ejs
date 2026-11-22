@@ -1,0 +1,69 @@
+<%- include('partials/head') %>
+<h1>For Employers</h1>
+<p class="lead">Pay for your team's certification with certification credits. One credit covers one person's first-year <%= program.annualFee %> certification fee.</p>
+<ol class="numbered employer-steps">
+  <li>Request an Employer ID below. It's ready immediately.</li>
+  <li>Buy as many credits as you need.</li>
+  <li>Give your Employer ID to your employees. At the payment step, they choose "My employer is paying" and enter it.</li>
+</ol>
+<p class="muted">Credits are non-refundable and don't expire. Each covers one year; after that, the certificant renews on their own card. Anyone with your Employer ID can use your credits, so share it only with your team.</p>
+
+<% if (canceled) { %><p class="message">Payment was not completed. You can try again below.</p><% } %>
+<% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
+
+<div class="employer-cards">
+  <section class="home-card" id="request">
+    <h2 class="home-card-band">Request an Employer ID</h2>
+    <div class="home-card-body">
+      <% if (created) { %>
+        <p class="notice-ok" role="status">Your Employer ID is <strong><%= created.employer_number %></strong>. We've also emailed it to <%= created.email %>.</p>
+        <p>Next, buy credits below.</p>
+      <% } else { %>
+      <form method="post" action="/employers/request#request" class="stack" novalidate>
+        <div class="field"><label for="company_name">Company name</label><input id="company_name" name="company_name" type="text" maxlength="120" autocomplete="organization" value="<%= section === 'request' ? (values.company_name || '') : '' %>" required></div>
+        <div class="field"><label for="contact_name">Your name</label><input id="contact_name" name="contact_name" type="text" maxlength="80" autocomplete="name" value="<%= section === 'request' ? (values.contact_name || '') : '' %>" required></div>
+        <div class="field"><label for="req_email">Email</label><input id="req_email" name="email" type="email" autocomplete="email" value="<%= section === 'request' ? (values.email || '') : '' %>" required></div>
+        <div class="hp" aria-hidden="true"><label for="website">Leave this field empty</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+        <% if (turnstileKey) { %><div class="cf-turnstile" data-sitekey="<%= turnstileKey %>"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script><% } %>
+        <button class="button" type="submit">Get Employer ID</button>
+      </form>
+      <% } %>
+    </div>
+  </section>
+
+  <section class="home-card" id="buy">
+    <h2 class="home-card-band">Buy Credits</h2>
+    <div class="home-card-body">
+      <p><%= program.annualFee %> per credit. Paid by card through Stripe.</p>
+      <form method="post" action="/employers/buy" class="stack" novalidate>
+        <div class="field"><label for="buy_number">Employer ID</label><input id="buy_number" name="employer_number" type="text" autocapitalize="characters" spellcheck="false" placeholder="ER-XXXXXX" maxlength="20" value="<%= created ? created.employer_number : (section === 'buy' ? (values.employer_number || '') : '') %>" required></div>
+        <div class="field"><label for="buy_email">Email on file</label><input id="buy_email" name="email" type="email" autocomplete="email" value="<%= created ? created.email : (section === 'buy' ? (values.email || '') : '') %>" required></div>
+        <div class="field"><label for="quantity">Number of credits</label><input id="quantity" name="quantity" type="number" min="1" max="500" step="1" inputmode="numeric" value="<%= section === 'buy' ? (values.quantity || '') : '' %>" required></div>
+        <button class="button gold" type="submit">Continue to Payment</button>
+      </form>
+    </div>
+  </section>
+
+  <section class="home-card" id="balance">
+    <h2 class="home-card-band">Check Your Balance</h2>
+    <div class="home-card-body">
+      <% if (balance) { %>
+        <% if (balance.purchasedNow) { %><p class="notice-ok" role="status">Thank you. <%= balance.purchasedNow %> credit<%= balance.purchasedNow === 1 ? '' : 's' %> added.</p><% } %>
+        <dl class="summary">
+          <div><dt>Employer</dt><dd><%= balance.employer.company_name %> (<%= balance.employer.employer_number %>)</dd></div>
+          <div><dt>Credits purchased</dt><dd><%= balance.employer.credits_purchased + balance.employer.credits_adjusted %></dd></div>
+          <div><dt>Credits used</dt><dd><%= balance.employer.credits_used %></dd></div>
+          <div><dt>Credits remaining</dt><dd><strong><%= balance.remaining %></strong></dd></div>
+        </dl>
+      <% } else { %>
+      <form method="post" action="/employers/balance#balance" class="stack" novalidate>
+        <div class="field"><label for="bal_number">Employer ID</label><input id="bal_number" name="employer_number" type="text" autocapitalize="characters" spellcheck="false" placeholder="ER-XXXXXX" maxlength="20" value="<%= section === 'balance' ? (values.employer_number || '') : '' %>" required></div>
+        <div class="field"><label for="bal_email">Email on file</label><input id="bal_email" name="email" type="email" autocomplete="email" value="<%= section === 'balance' ? (values.email || '') : '' %>" required></div>
+        <button class="button secondary" type="submit">Check Balance</button>
+      </form>
+      <% } %>
+    </div>
+  </section>
+</div>
+<p class="muted">Questions or a lost Employer ID? <a href="/support">Contact us</a>.</p>
+<%- include('partials/foot') %>

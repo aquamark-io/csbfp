@@ -1,0 +1,72 @@
+<%- include('../partials/head') %>
+<p class="muted"><a href="/admin/employers">← Employers</a></p>
+<h1><%= e.company_name %></h1>
+<p class="muted meta"><code><%= e.employer_number %></code> · <%= e.contact_name || '' %> · <%= e.email %> · Created <%= fmtDate(e.created_at) %></p>
+<% if (msg) { %><p class="notice-ok" role="status"><%= msg %></p><% } %>
+<% if (err) { %><p class="alert" role="alert"><%= err %></p><% } %>
+<% if (!e.active) { %><p class="message">This ID no longer works. It was replaced by <a href="/admin/employers/<%= replacement && replacement.id %>"><%= replacement && replacement.employer_number %></a>; its balance moved there.</p><% } %>
+
+<dl class="summary">
+  <div><dt>Purchased</dt><dd><%= e.credits_purchased %></dd></div>
+  <div><dt>Adjustments</dt><dd><%= e.credits_adjusted %></dd></div>
+  <div><dt>Used</dt><dd><%= e.credits_used %></dd></div>
+  <div><dt>Remaining</dt><dd><strong><%= e.active ? balance : 0 %></strong></dd></div>
+</dl>
+
+<% if (e.active) { %>
+<div class="admin-grid">
+<section class="panel">
+  <h2>Adjust credits</h2>
+  <form method="post" action="/admin/employers/<%= e.id %>/adjust" class="stack">
+    <input name="amount" type="number" step="1" placeholder="e.g. 2 or -1" required>
+    <input name="reason" type="text" maxlength="500" placeholder="Reason (required)" required>
+    <button class="button secondary small" type="submit">Apply</button>
+  </form>
+  <p class="muted">Refunds are done by hand in Stripe; remove the matching credits here.</p>
+</section>
+<section class="panel">
+  <h2>Reissue Employer ID</h2>
+  <form method="post" action="/admin/employers/<%= e.id %>/reissue" class="stack">
+    <input name="reason" type="text" maxlength="500" placeholder="Reason (required), e.g. ID shared publicly" required>
+    <button class="button secondary small" type="submit">Issue New ID</button>
+  </form>
+  <p class="muted">The current ID stops working right away. Remaining credits move to the new ID, which is emailed to <%= e.email %>.</p>
+</section>
+</div>
+<% } %>
+
+<h2>Credits used</h2>
+<% const used = uses.filter(u => u.kind === 'use'); %>
+<% if (!used.length) { %><p class="muted">None yet.</p><% } else { %>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Date</th><th>Person</th><th>Status</th><th>Number</th></tr></thead>
+  <tbody>
+  <% used.forEach(u => { %>
+    <tr>
+      <td><%= fmtDate(u.created_at) %></td>
+      <td><% if (u.reg) { %><a href="/admin/registrants/<%= u.reg.registrant_id %>"><%= fullName(u.person) %></a><% } else { %>—<% } %></td>
+      <td><%- u.reg ? statusPill(u.reg.status, false, u.reg.is_demo) : '' %></td>
+      <td><%= (u.reg && u.reg.registration_number) || '—' %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table></div>
+<% } %>
+
+<h2>Purchases</h2>
+<% if (!purchases.length) { %><p class="muted">None yet.</p><% } else { %>
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Started</th><th>Credits</th><th>Amount</th><th>Status</th><th>Stripe session</th></tr></thead>
+  <tbody>
+  <% purchases.forEach(p => { %>
+    <tr><td><%= fmtDate(p.created_at) %></td><td><%= p.quantity %></td><td>$<%= (p.amount_cents / 100).toFixed(2) %></td><td><%= p.status === 'paid' ? `Paid ${fmtDate(p.paid_at)}` : 'Not completed' %></td><td><code><%= p.stripe_session_id %></code></td></tr>
+  <% }) %>
+  </tbody>
+</table></div>
+<% } %>
+
+<% const adj = uses.filter(u => u.kind === 'adjustment'); if (adj.length) { %>
+<h2>Adjustments</h2>
+<ul class="plain-list"><% adj.forEach(a => { %><li><%= fmtDate(a.created_at) %>: <%= a.amount > 0 ? '+' : '' %><%= a.amount %> (<%= a.note %>)</li><% }) %></ul>
+<% } %>
+<%- include('../partials/foot') %>

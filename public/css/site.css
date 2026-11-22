@@ -629,3 +629,9 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .status-revoked { background: #fee2e2; color: #991b1b; }
 .notice-strong { margin: 20px 0; padding: 12px 14px; border-left: 3px solid var(--gold); background: #fffbeb; color: var(--ink); font-size: 0.93rem; }
 .conf-logo { display: block; width: 126px; height: auto; margin-bottom: 10px; }
+
+/* For Employers */
+.employer-steps { margin: 8px 0 14px; }
+.employer-cards { display: grid; gap: 24px; margin: 28px 0 20px; }
+.employer-cards .home-card-body .field { margin-bottom: 14px; }
+.employer-cards .home-card-body form .button { align-self: flex-start; margin-top: 4px; }

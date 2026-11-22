@@ -44,6 +44,7 @@
       <%- nav('/admin/registrants', 'People') %>
       <%- nav('/admin/review', 'Review') %>
       <%- nav('/admin/background-checks', 'Background Checks') %>
+      <%- nav('/admin/employers', 'Employers') %>
       <%- nav('/admin/reports', 'Reports') %>
       <%- nav('/admin/duplicates', 'Duplicates') %>
       <%- nav('/admin/support', 'Support') %>
@@ -63,6 +64,7 @@
     <% } else { %>
     <nav class="nav" id="site-nav" aria-label="Main">
       <%- nav('/about', 'About') %>
+      <%- nav('/employers', 'For Employers') %>
       <%- nav('/faq', 'FAQ') %>
       <%- nav('/support', 'Contact') %>
       <% if (signedIn) { %><%- nav('/portal/dashboard', 'My Account') %><form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form><% } else { %><%- nav('/portal', 'Sign In') %><% } %>

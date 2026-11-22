@@ -32,7 +32,8 @@ function createFakeStripe() {
       sessions: {
         create: async p => {
           const sess = { id: id('cs'), object: 'checkout.session', mode: p.mode, customer: p.customer, client_reference_id: p.client_reference_id,
-            metadata: p.metadata, _subMeta: p.subscription_data.metadata, subscription: null, url: `https://checkout.stripe.com/c/pay/${n}`, payment_status: 'unpaid' };
+            metadata: p.metadata, _subMeta: (p.subscription_data || {}).metadata, _trialEnd: (p.subscription_data || {}).trial_end || null,
+            line_items: p.line_items, subscription: null, url: `https://checkout.stripe.com/c/pay/${n}`, payment_status: 'unpaid' };
           s.sessions[sess.id] = sess;
           return sess;
         },
@@ -81,8 +82,27 @@ function createFakeStripe() {
     webhooks: Stripe('sk_test_fake').webhooks,
 
     // ---- test controls: what Stripe would do ----
+    completePayment(sessionId) {
+      const sess = s.sessions[sessionId];
+      sess.payment_status = 'paid';
+      sess.status = 'complete';
+      return sess;
+    },
     completeCheckout(sessionId) {
       const sess = s.sessions[sessionId];
+      if (sess._trialEnd) {
+        const start = now();
+        const sub = { id: id('sub'), object: 'subscription', customer: sess.customer, status: 'trialing', metadata: sess._subMeta, trial_end: sess._trialEnd,
+          cancel_at_period_end: false, cancel_at: null, canceled_at: null, ended_at: null,
+          items: { data: [{ current_period_start: start, current_period_end: sess._trialEnd }] } };
+        s.subscriptions[sub.id] = sub;
+        const inv = makeInvoice(sub, { reason: 'subscription_create', paid: true, start, end: sess._trialEnd });
+        Object.assign(inv, { amount_paid: 0, amount_due: 0 });
+        sub.latest_invoice = inv.id;
+        sess.subscription = sub.id;
+        sess.payment_status = 'no_payment_required';
+        return sub;
+      }
       const start = now();
       const sub = { id: id('sub'), object: 'subscription', customer: sess.customer, status: 'active', metadata: sess._subMeta,
         cancel_at_period_end: false, cancel_at: null, canceled_at: null, ended_at: null,

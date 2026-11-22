@@ -25,12 +25,16 @@ const UNIQUE = {
   csbfp_registrant_products: [['registrant_id', 'product_id']],
   csbfp_registrant_states: [['registrant_id', 'state']],
   csbfp_screenings: [['registration_id'], ['idempotency_key']],
+  csbfp_employers: [['employer_number']],
+  csbfp_employer_purchases: [['stripe_session_id']],
 };
 
 const DEFAULTS = {
   csbfp_registrants: { account_status: 'active', is_test: false },
   csbfp_registrations: { status: 'pending', admin_hold: false, is_demo: false },
   csbfp_screenings: { status: 'not_started' },
+  csbfp_employers: { active: true, credits_purchased: 0, credits_adjusted: 0, credits_used: 0 },
+  csbfp_employer_purchases: { status: 'open' },
   csbfp_appeals: { status: 'open' },
   csbfp_login_codes: { attempts: 0, used_at: null, purpose: 'sign_in' },
   csbfp_email_messages: { status: 'queued', attempts: 0 },
@@ -170,6 +174,26 @@ function createFake(seed = {}) {
 
   // The two database functions the app calls, mirroring the SQL versions.
   async function rpc(name, p) {
+    // Employer credits (mirror the SQL functions).
+    if (name === 'csbfp_add_employer_credits') {
+      const pur = t('csbfp_employer_purchases').find(x => x.stripe_session_id === p.p_session_id);
+      if (!pur) return { data: null, error: { message: 'PURCHASE_NOT_FOUND' } };
+      if (pur.status === 'paid') return { data: false, error: null };
+      Object.assign(pur, { status: 'paid', paid_at: now() });
+      const e = t('csbfp_employers').find(x => x.id === pur.employer_id);
+      e.credits_purchased += pur.quantity;
+      return { data: true, error: null };
+    }
+    if (name === 'csbfp_use_employer_credit') {
+      const e = t('csbfp_employers').find(x => x.employer_number === String(p.p_employer_number).trim().toUpperCase() && x.active);
+      if (!e) return { data: null, error: { message: 'EMPLOYER_NOT_FOUND' } };
+      if (e.credits_purchased + e.credits_adjusted - e.credits_used < 1) return { data: null, error: { message: 'NO_CREDITS' } };
+      t('csbfp_employer_credit_uses').push({ id: serial++, employer_id: e.id, registration_id: p.p_registration_id, kind: 'use', amount: 1, created_at: now() });
+      e.credits_used += 1;
+      const r = t('csbfp_registrations').find(x => x.id === p.p_registration_id);
+      if (r) r.paid_by_employer_id = e.id;
+      return { data: e.id, error: null };
+    }
     const reg = t('csbfp_registrations').find(r => r.id === p.p_registration_id);
     if (!reg) return { data: null, error: { message: 'Registration not found' } };
     if (name === 'csbfp_assign_registration_number') {

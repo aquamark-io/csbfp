@@ -73,6 +73,7 @@ app.use(sameOrigin);
 app.use('/', require('./routes/verify').router);
 app.use('/', require('./routes/public'));
 app.use('/', require('./routes/support'));
+app.use('/', require('./routes/employers'));
 
 // The portal needs the database, email and secrets. Until they are all set, it says so instead of failing.
 app.use('/portal', (req, res, next) => {
@@ -95,6 +96,7 @@ app.use('/admin', require('./routes/admin-emails'));
 app.use('/admin', require('./routes/admin-support'));
 app.use('/admin', require('./routes/admin-reports'));
 app.use('/admin', require('./routes/admin-certification'));
+app.use('/admin', require('./routes/admin-employers'));
 
 app.use((req, res) => res.status(404).render('error', { pageTitle: 'Page not found', message: 'That page does not exist.' }));
 

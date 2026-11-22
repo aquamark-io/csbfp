@@ -35,13 +35,13 @@ async function statusFor(registrant) {
 
 // ---------- checkout ----------
 
-async function checkoutView(req, res, { status = 200, error = null } = {}) {
+async function checkoutView(req, res, { status = 200, error = null, employer = false } = {}) {
   const pay = await statusFor(req.registrant);
   const doc = await legal.currentDoc('terms');
   const renewsOn = new Date();
   renewsOn.setFullYear(renewsOn.getFullYear() + 1);
   res.status(status).render('portal/checkout', {
-    pageTitle: 'Certification Fee', pay, doc, fee: FEE, error,
+    pageTitle: 'Certification Fee', pay, doc, fee: FEE, error, employer, employerNumber: typeof (req.body || {}).employer_number === 'string' ? req.body.employer_number.slice(0, 20) : '',
     renewsOn: renewsOn.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'America/Los_Angeles' }),
     ready: await paymentsReady(), canceled: req.query.canceled === '1',
   });
@@ -54,8 +54,23 @@ router.post('/checkout', async (req, res, next) => {
     if (!(await paymentsReady())) return checkoutView(req, res, { status: 503, error: 'Payments are not available right now. Please try again later.' });
     const pay = await statusFor(req.registrant);
     if (pay.action === 'pay_invoice') return res.redirect(303, '/portal/billing');
-    if (pay.action !== 'checkout') return res.redirect(303, '/portal/checkout');
+    if (!['checkout', 'add_card'].includes(pay.action)) return res.redirect(303, '/portal/checkout');
     if (pay.live) return res.redirect(303, '/portal/billing'); // already subscribed
+
+    // "My employer is paying": one employer credit instead of a card.
+    if (req.body.method === 'employer' && pay.action === 'checkout') {
+      if (req.body.agree_terms !== 'yes') return checkoutView(req, res, { status: 422, error: 'Please confirm that you agree to the Program Terms.', employer: true });
+      await legal.recordAcceptance({ registrantId: req.registrant.id, keys: ['terms'], context: 'checkout', ref: 'employer', ip: req.ip, userAgent: req.get('user-agent') });
+      const result = await billing.payWithEmployerCredit(req.registrant, pay.registration, req.body.employer_number);
+      if (!result.ok) {
+        const error = result.reason === 'no_credits'
+          ? 'That Employer ID has no certification credits left. Ask your employer to buy more, or pay by card.'
+          : 'We couldn\'t find that Employer ID. Check it with your employer, or pay by card.';
+        return checkoutView(req, res, { status: 422, error, employer: true });
+      }
+      return res.redirect(303, '/portal/checkout/return');
+    }
+
     if (req.body.agree_renewal !== 'yes') {
       return checkoutView(req, res, { status: 422, error: 'Please confirm that you agree to automatic annual renewal.' });
     }
@@ -63,7 +78,8 @@ router.post('/checkout', async (req, res, next) => {
     const ref = crypto.randomUUID();
     await legal.recordAcceptance({ registrantId: req.registrant.id, keys: ['terms'], context: 'checkout',
       ref, ip: req.ip, userAgent: req.get('user-agent') });
-    const session = await billing.createCheckout(req.registrant, pay.registration, { acceptanceRef: ref });
+    const session = await billing.createCheckout(req.registrant, pay.registration, { acceptanceRef: ref,
+      trialEnd: pay.action === 'add_card' && pay.registration.expires_at ? new Date(pay.registration.expires_at) : null });
     await db().from('csbfp_legal_acceptances').update({ ref: session.id }).eq('registrant_id', req.registrant.id).eq('ref', ref);
     await logEvent({ registrantId: req.registrant.id, event: 'checkout_started', actor: 'registrant', ip: req.ip });
     return res.redirect(303, session.url);

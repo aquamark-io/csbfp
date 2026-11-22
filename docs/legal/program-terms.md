@@ -40,6 +40,8 @@ The certification fee is $149 per year. It renews automatically each year at the
 
 **No refunds.** The certification fee is non-refundable once paid, including if you do not complete the remaining steps or do not pass the background check, except where a refund is required by law. Nothing in these terms limits rights you have under applicable law or card-network rules.
 
+**Employer credits.** An employer may buy certification credits and give its Employer ID to its employees. One credit pays one first-year certification fee. Credits are non-refundable and do not expire. A certification paid with an employer credit runs for one year and does not renew automatically; to keep it active, the certificant puts their own payment method on file before the year ends. Anyone with an Employer ID can use its credits; the employer is responsible for sharing it only with its team.
+
 If a renewal payment fails, your certification becomes Inactive until the payment is made. You keep the same certification number if you renew or rejoin later.
 
 ## 7. Public verification
