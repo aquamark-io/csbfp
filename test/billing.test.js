@@ -169,7 +169,7 @@ test('with screening off, paying issues a DEMO credential (DEMO- number, labeled
   assert.ok(sent.some(s => s.includes('to=pat@example.com') && s.includes(reg.registration_number)), 'activation email with number');
   const dash = await pat.req('/portal/dashboard');
   assert.match(dash.text, new RegExp(reg.registration_number));
-  assert.match(dash.text, /DEMO \/ Not screened/);
+  assert.match(dash.text, /DEMO \/ NOT SCREENED/);
   const conf = await pat.req('/portal/confirmation');
   assert.match(conf.text, /Certificate/);
   assert.match(conf.text, /not a valid CSBFP certification/);

@@ -35,7 +35,7 @@
 
   // Stage for the tracker: 1 Application, 2 Training, 3 Payment, 4 Background check, 5 Certified.
   const stage = certified ? 5 : inCheck ? 4 : passed ? 3 : appDone ? 2 : 1;
-  const stages = ['Application', 'Training', 'Payment', 'Background check', 'Certified'];
+  const stages = ['Application', 'Training', 'Payment', 'Background', 'Certified'];
 %>
 <h1>Certification Dashboard</h1>
 <% if (typeof saved !== 'undefined' && saved) { %><p class="notice-ok" role="status">Saved.</p><% } %>
@@ -69,10 +69,10 @@
   else if (reg.status === 'revoked') card = { band: 'Certification revoked', title: 'Your certification has been revoked', html: `To ask about the appeal process, contact ${mail}.` };
   else if (reg.status === 'active') card = { band: 'Certified', title: 'You are a Certified Small Business Finance Professional', text: `Certification ${reg.registration_number}, valid through ${fmt(reg.expires_at)}.`, href: '/portal/confirmation', cta: 'View Certificate', second: { href: '/portal/billing', label: 'Billing' } };
   else if (checkOpen && linkOpened) card = { band: 'Next step', title: 'Background check in progress', text: 'Your background check is in progress with Checkr. Results usually take 1–3 days, and we\'ll email you once they\'re reviewed.' };
-  else if (checkOpen) card = { band: 'Next step', title: 'Background check', text: 'A one-time background check through Checkr. About 10 minutes; results in 1–3 days.', href: '/portal/background-check', cta: 'Start Your Background Check' };
+  else if (checkOpen) card = { band: 'Next step', title: 'Background check', href: '/portal/background-check', cta: 'Start Your Background Check' };
   else if (reg.status === 'under_review') card = { band: 'Next step', title: 'Under review', text: 'Your application is under review. We\'ll email you when a decision is made.' };
   else if (reg.status === 'not_approved') card = { band: 'Application status', title: 'Not approved', html: `Your application was not approved. To ask about reconsideration, contact ${mail}.` };
-  else if (next) card = { band: 'Next step', title: next.label, text: next.desc, href: next.href, cta: next.cta || 'Start', continueLabel: `Continue: ${next.label}` };
+  else if (next) card = { band: 'Next step', title: next.label, href: next.href, cta: next.cta || 'Start', continueLabel: `Continue: ${next.label}` };
 %>
 <% if (card) { %>
 <section class="home-card dash-card">
@@ -105,14 +105,7 @@
   </ol>
 </section>
 
-<div class="dash-meta">
-  <span>Status: <%- statusPill(reg.status, false, reg.is_demo) %>
-    · <%= reg.registration_number ? `Certification ${reg.registration_number}` : 'Certification number issued on approval' %>
-    <% if (reg.expires_at && certified) { %>· Valid through <%= fmt(reg.expires_at) %><% } %></span>
-  <span class="dash-links"><a href="/portal/account">Account settings</a><% if (paid) { %> · <a href="/portal/billing">Billing</a><% } %> · <a href="/support">Support and appeals</a></span>
-</div>
+<p class="dash-links"><a href="/portal/account">Account settings</a><% if (paid) { %> · <a href="/portal/billing">Billing</a><% } %> · <a href="/support">Support and appeals</a></p>
 
-<% if (!screeningEnabled && !certified) { %>
-<p class="notice-strong">Preview: background checks aren't active yet, so completing these steps creates a demo record only. It is not a valid certification and is never shown publicly as one.</p>
-<% } %>
+
 <%- include('../partials/foot') %>

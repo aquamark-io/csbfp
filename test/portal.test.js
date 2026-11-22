@@ -143,7 +143,7 @@ test('full journey: sign up, verify email, complete every form', async () => {
 
   let d = await b.req('/portal/dashboard');
   assert.equal(d.status, 200);
-  assert.match(d.text, /In Progress/);
+  assert.match(d.text, /Next step/);
   assert.match(d.text, /Continue: Personal information/);
 
   // Personal: under 18 is refused.
@@ -199,7 +199,7 @@ test('full journey: sign up, verify email, complete every form', async () => {
   assert.equal((d.text.match(/>Complete</g) || []).length, 4);
   assert.match(d.text, /Background check/);
   assert.match(d.text, /Not active yet/);
-  assert.match(d.text, /demo record only/);
+  assert.doesNotMatch(d.text, /demo record only/, "preview note removed from the dashboard");
   const pp = await b.req('/portal/personal');
   assert.match(pp.text, /href="\/portal\/dashboard">← Dashboard</);
   assert.doesNotMatch(d.text, /← Dashboard/);

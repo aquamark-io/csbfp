@@ -704,3 +704,5 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .dash-next-actions, .dash-next-actions .button { width: 100%; text-align: center; }
   .dash-steps { padding: 4px 18px 6px; }
 }
+.dash-links { font-size: 0.9rem; color: var(--muted); margin: 4px 0 8px; }
+.dash-next-title { margin-bottom: 0; }

@@ -35,3 +35,14 @@ document.addEventListener('input', function (e) {
   var out = d.length === 0 ? '' : d.length <= 3 ? '(' + d : d.length <= 6 ? '(' + d.slice(0, 3) + ') ' + d.slice(3) : '(' + d.slice(0, 3) + ') ' + d.slice(3, 6) + '-' + d.slice(6);
   if (out !== el.value) el.value = out;
 });
+
+// One-time notices (?saved=1) shouldn't come back on refresh: drop the flag from the address bar once shown.
+(function () {
+  try {
+    var url = new URL(window.location.href);
+    if (url.searchParams.has('saved')) {
+      url.searchParams.delete('saved');
+      window.history.replaceState(null, '', url.pathname + (url.search ? url.search : '') + url.hash);
+    }
+  } catch (e) { /* older browsers: leave the URL as is */ }
+}());
