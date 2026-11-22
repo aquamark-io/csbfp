@@ -621,10 +621,10 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .footer .footer-about { flex: none; max-width: none; }
   .footer .footer-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; width: 100%; }
   .footer .footer-cols > div { min-width: 0; }
-  .footer-row { flex-direction: column; align-items: center; gap: 20px; }
+  .footer-row { flex-direction: column; align-items: center; gap: 30px; padding: 36px 0; }
   /* Two even columns, each logo centered in its half; badges centered together below. */
-  .footer-logos { width: 100%; display: grid; grid-template-columns: 1fr; justify-items: center; align-items: center; gap: 22px; }
-  .footer-badges { grid-column: 1 / -1; display: flex; justify-content: center; gap: 20px; }
+  .footer-logos { width: 100%; display: grid; grid-template-columns: 1fr; justify-items: center; align-items: center; gap: 34px; }
+  .footer-badges { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 34px; }
   .footer-logos img { height: 33px; }
   .footer-logos img.badge { height: 62px; width: 62px; }
 }
