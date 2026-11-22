@@ -61,7 +61,7 @@ router.get('/dashboard', async (req, res, next) => {
   try {
     const [progress, flagged, train] = await Promise.all([progressFor(req.registrant), hasOpenFlag(req.registrant.id), training.stateFor(req.registrant.id)]);
     const sc = progress.registration && progress.registration.id ? await screening.forRegistration(progress.registration.id) : null;
-    res.render('portal/dashboard', { pageTitle: 'My Certification', progress, flagged, train, screening: sc });
+    res.render('portal/dashboard', { pageTitle: 'My Certification', progress, flagged, train, screening: sc, saved: req.query.saved === '1' });
   } catch (err) { next(err); }
 });
 
@@ -112,7 +112,7 @@ router.post('/personal', async (req, res, next) => {
     await checkDuplicates(fresh);
     await markProfileComplete(fresh);
     await infoUpdated(fresh);
-    return saved(res, '/portal/personal');
+    return saved(res, '/portal/dashboard');
   } catch (err) { next(err); }
 });
 
@@ -143,7 +143,7 @@ router.post('/employment/status', async (req, res, next) => {
         .eq('registrant_id', req.registrant.id).eq('is_current', true);
       if (!count) return res.redirect(303, '/portal/employment');
     }
-    return saved(res, '/portal/employment');
+    return saved(res, '/portal/dashboard');
   } catch (err) { next(err); }
 });
 
@@ -184,7 +184,7 @@ async function relSave(req, res, rel) {
   await logEvent({ registrantId: req.registrant.id, event: rel ? 'employer_updated' : 'employer_added', actor: 'registrant', ip: req.ip });
   await markProfileComplete(await refresh(req.registrant.id));
   await infoUpdated(req.registrant);
-  return saved(res, '/portal/employment');
+  return saved(res, '/portal/dashboard');
 }
 
 router.get('/employment/new', (req, res, next) => relForm(req, res, null).catch(next));
@@ -245,7 +245,7 @@ router.post('/products', async (req, res, next) => {
     await logEvent({ registrantId: id, event: 'products_updated', actor: 'registrant', ip: req.ip });
     await markProfileComplete(await refresh(id));
     await infoUpdated(req.registrant);
-    return saved(res, '/portal/products');
+    return saved(res, '/portal/dashboard');
   } catch (err) { next(err); }
 });
 

@@ -1,5 +1,6 @@
 <%- include('../partials/head') %>
 <h1>My Certification</h1>
+<% if (typeof saved !== 'undefined' && saved) { %><p class="notice-ok" role="status">Saved.</p><% } %>
 <%
   const reg = progress.registration || {};
   const fmt = d => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }) : '—';
