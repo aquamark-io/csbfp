@@ -745,3 +745,4 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .slides .slide.slide-cover h2 { margin: 0; color: var(--gold); font-size: clamp(1.7rem, 4vw, 2.3rem); letter-spacing: -0.01em; }
 .slides .slide.slide-cover h2::after { content: ""; display: block; width: 56px; height: 3px; margin: 18px auto 0; background: var(--gold); }
 .slides .slide.slide-cover .cover-meta { margin: 18px 0 0; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8); }
+.home-card .lookup-row input::placeholder { color: #a7afbd; opacity: 1; }
