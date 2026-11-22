@@ -1,6 +1,6 @@
 > **DRAFT: pending review and approval by the program owner and legal counsel. Not final.**
 
-These Program Terms govern the Certified Small Business Finance Professional (CSBFP) certification program. The program's technology and day-to-day administration are provided by Duncan Consulting LLC ("we", "us"). Credential standards, screening criteria, and appeal and revocation policies are set by the program owner. By creating an account, you agree to these terms.
+These Program Terms govern the Certified Small Business Finance Professional (CSBFP) certification program. The program's technology and day-to-day administration are provided by Duncan Consulting LLC ("we", "us"). Credential standards, background check criteria, and appeal and revocation policies are set by the program owner. By creating an account, you agree to these terms.
 
 ## 1. What CSBFP is
 
@@ -24,7 +24,7 @@ You must be at least 18 years old and working in, or seeking to enter, U.S. smal
 
 Your certification number is issued, and your first annual term begins, on final approval.
 
-## 4. Background screening
+## 4. Background check
 
 All applicants undergo a one-time background check through Checkr, a third-party consumer reporting agency, during initial certification, after receiving the required disclosures and giving authorization. The background check is not repeated at annual renewal unless the program rules change and you are notified.
 
@@ -36,9 +36,9 @@ You may state that you are a Certified Small Business Finance Professional and s
 
 ## 6. Fees and automatic renewal
 
-The certification fee is $149 per year. It renews automatically each year at the then-current fee, charged to your payment method on file, until you cancel. We email you at least 30 days before each renewal. You can cancel online at any time from your Billing page; your certification stays current through the period you have paid for. Renewal does not repeat the background screening or the assessment unless the program rules change.
+The certification fee is $149 per year. It renews automatically each year at the then-current fee, charged to your payment method on file, until you cancel. We email you at least 30 days before each renewal. You can cancel online at any time from your Billing page; your certification stays current through the period you have paid for. Renewal does not repeat the background check or the assessment unless the program rules change.
 
-**No refunds.** Fees are non-refundable once you sign up to get certified, including if you do not complete the remaining steps or are not approved, except where a refund is required by law. Nothing in these terms limits rights you have under applicable law or card-network rules. *(The treatment of applicants who are not approved after screening is pending program-owner and legal approval.)*
+**No refunds.** Fees are non-refundable once you sign up to get certified, including if you do not complete the remaining steps or are not approved, except where a refund is required by law. Nothing in these terms limits rights you have under applicable law or card-network rules. *(The treatment of applicants who are not approved after the background check is pending program-owner and legal approval.)*
 
 If a renewal payment fails, your certification becomes Inactive until the payment is made. You keep the same certification number if you renew or rejoin later.
 
