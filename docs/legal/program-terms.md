@@ -19,16 +19,16 @@ You must be at least 18 years old and working in, or seeking to enter, U.S. smal
 3. Complete the four training modules in order.
 4. Pass the assessment (80%, up to 10 attempts, with a 60-minute wait between attempts).
 5. Pay the annual certification fee.
-6. Complete a one-time background screening, when the screening requirement is in effect.
+6. Complete a one-time background check.
 7. Receive eligibility approval from an authorized reviewer.
 
 Your certification number is issued, and your first annual term begins, on final approval.
 
 ## 4. Background screening
 
-The program includes a one-time background screening at initial certification, performed by a third-party consumer reporting agency after you give separate disclosures and authorization. Screening is not repeated at annual renewal unless the program rules change and you are notified.
+All applicants undergo a one-time background check through Checkr, a third-party consumer reporting agency, during initial certification, after receiving the required disclosures and giving authorization. The background check is not repeated at annual renewal unless the program rules change and you are notified.
 
-The disqualifying criteria are expected to focus on financial crimes and fraud. **The exact definitions, lookback periods, treatment of pending matters, evidence standards and reconsideration rules are pending program-owner and legal approval and will be published here before screening begins.** A provider result is never a final decision on its own: an authorized reviewer reviews any potentially disqualifying result, and you will receive the notices and opportunity to dispute required by law.
+Convictions involving financial crimes or fraud within the past seven years may result in disqualification. An authorized reviewer reviews every potentially disqualifying result; a report alone is never a final decision. Before any adverse decision, you will receive a copy of the report, a summary of your rights, and an opportunity to dispute its accuracy with Checkr or provide additional information, as required by law.
 
 ## 5. Using your certification accurately
 
