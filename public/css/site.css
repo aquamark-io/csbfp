@@ -723,3 +723,9 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .ack-list.done .dash-dot { background: var(--navy); border-color: var(--navy); color: #fff; margin-top: 2px; }
 .ack-list.done span:last-child { line-height: 1.6; color: var(--ink); }
 @media (max-width: 640px) { .ack-body { padding: 4px 18px 6px; } .ack-list li { padding: 14px 0; } }
+.train-steps li { align-items: flex-start; }
+.train-steps .dash-dot { margin-top: 2px; }
+.train-steps .dash-state, .train-steps .dash-go { align-self: center; }
+.train-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.train-desc { font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
+.train-steps li.locked .train-desc { color: #b3bac6; }

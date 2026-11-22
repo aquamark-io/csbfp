@@ -5,30 +5,36 @@
 <p class="message">Training is not available yet. Please check back soon.</p>
 <% } else { %>
 <% if (overviewHtml) { %><div class="prose"><%- overviewHtml %></div><% } %>
-<div class="list-card">
-<h2 class="list-card-head">Modules</h2>
-<ol class="checklist modules">
-  <% state.modules.forEach((m, i) => { %>
-  <li class="<%= m.completed ? 'done' : !m.unlocked ? 'locked' : '' %>">
-    <span class="mark" aria-hidden="true"><% if (m.completed) { %><%- include('../partials/check') %><% } %></span>
-    <span class="step"><% if (m.unlocked) { %><a href="/portal/training/<%= m.stable_key %>"><%= i + 1 %>. <%= m.title %></a><% } else { %><span><%= i + 1 %>. <%= m.title %></span><% } %>
-      <% if (m.summary) { %><span class="step-desc"><%= m.summary %></span><% } %></span>
-    <% if (!m.completed) { %><span class="state"><%= !m.unlocked ? '' : m.started ? 'In progress' : 'Start' %></span><% } %>
-  </li>
-  <% }) %>
-  <li class="<%= state.assessment.passed ? 'done' : !state.allComplete ? 'locked' : '' %>">
-    <span class="mark" aria-hidden="true"><% if (state.assessment.passed) { %><%- include('../partials/check') %><% } %></span>
-    <span class="step"><% if (state.allComplete) { %><a href="/portal/assessment">Assessment</a><% } else { %><span>Assessment</span><% } %>
-      <span class="step-desc"><%= state.settings.question_count %> multiple-choice questions; <%= state.settings.pass_percent %>% to pass</span></span>
-    <% if (!state.assessment.passed) { %><span class="state"><%= !state.allComplete ? '' : 'Start' %></span><% } %>
-  </li>
-</ol>
-</div>
-<% const nextMod = state.modules.find(m => m.unlocked && !m.completed); %>
-<div class="actions">
-  <% if (nextMod) { %><a class="button" href="/portal/training/<%= nextMod.stable_key %>"><%= nextMod.started ? 'Continue' : 'Start' %>: <%= nextMod.title %></a>
-  <% } else if (!state.assessment.passed) { %><a class="button" href="/portal/assessment">Go to the Assessment</a><% } %>
-</div>
-<p class="muted">Your progress is saved automatically. You can return to any completed module at any time.</p>
+<%
+  const nextMod = state.modules.find(m => m.unlocked && !m.completed);
+  const assessmentNext = !nextMod && state.allComplete && !state.assessment.passed;
+  const doneCount = state.modules.filter(m => m.completed).length;
+%>
+<section class="home-card dash-card">
+  <h2 class="home-card-band dash-band">Modules <span><%= doneCount %> of <%= state.modules.length %> complete</span></h2>
+  <ol class="dash-steps train-steps">
+    <% state.modules.forEach((m, i) => { const isNext = nextMod && m === nextMod; %>
+    <li class="<%= [m.completed ? 'done' : '', isNext ? 'next' : '', !m.completed && !m.unlocked ? 'locked' : ''].filter(Boolean).join(' ') %>">
+      <span class="dash-dot" aria-hidden="true"><% if (m.completed) { %><%- include('../partials/check') %><% } %></span>
+      <span class="train-text">
+        <% if (m.unlocked) { %><a href="/portal/training/<%= m.stable_key %>"><%= i + 1 %>. <%= m.title %></a><% } else { %><span><%= i + 1 %>. <%= m.title %></span><% } %>
+        <% if (m.summary) { %><span class="train-desc"><%= m.summary %></span><% } %>
+      </span>
+      <% if (isNext) { %><a class="button gold small dash-go" href="/portal/training/<%= m.stable_key %>" aria-label="<%= m.started ? 'Continue' : 'Start' %>: <%= m.title %>"><%= m.started ? 'Continue' : 'Start' %></a>
+      <% } else { %><span class="dash-state"><%= m.completed ? 'Complete' : !m.unlocked ? 'Locked' : m.started ? 'In progress' : '' %></span><% } %>
+    </li>
+    <% }) %>
+    <li class="<%= [state.assessment.passed ? 'done' : '', assessmentNext ? 'next' : '', !state.allComplete ? 'locked' : ''].filter(Boolean).join(' ') %>">
+      <span class="dash-dot" aria-hidden="true"><% if (state.assessment.passed) { %><%- include('../partials/check') %><% } %></span>
+      <span class="train-text">
+        <% if (state.allComplete) { %><a href="/portal/assessment">Assessment</a><% } else { %><span>Assessment</span><% } %>
+        <span class="train-desc"><%= state.settings.question_count %> multiple-choice questions; <%= state.settings.pass_percent %>% to pass</span>
+      </span>
+      <% if (assessmentNext) { %><a class="button gold small dash-go" href="/portal/assessment" aria-label="Go to the Assessment">Start</a>
+      <% } else { %><span class="dash-state"><%= state.assessment.passed ? 'Passed' : !state.allComplete ? 'After training' : '' %></span><% } %>
+    </li>
+  </ol>
+</section>
+<p class="dash-links">Your progress is saved automatically. You can return to any completed module at any time.</p>
 <% } %>
 <%- include('../partials/foot') %>
