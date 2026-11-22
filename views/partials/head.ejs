@@ -24,9 +24,9 @@
   <link rel="stylesheet" href="/css/site.css?v=<%= assetV %>">
 </head>
 <body>
-<header class="header<%= signedIn && !(typeof adminArea !== 'undefined' && adminArea) ? ' burger' : '' %>">
+<header class="header">
   <div class="header-inner">
-    <a class="brand" href="<%= typeof adminArea !== 'undefined' && adminArea ? '/admin' : '/' %>" aria-label="CSBFP home">
+    <a class="brand" href="<%= typeof adminArea !== 'undefined' && adminArea ? '/admin' : signedIn ? '/portal/dashboard' : '/' %>" aria-label="<%= signedIn ? 'My certification' : 'CSBFP home' %>">
       <img class="logo" src="/img/csbfp-logo.png?v=<%= assetV %>" alt="Certified SBFP" width="104" height="54">
       <% if (typeof adminArea !== 'undefined' && adminArea) { %><span class="admin-badge">Admin</span><% } %>
     </a>
@@ -64,11 +64,17 @@
     <% } else { %>
     <% const pub = (href, label) => (currentPath === href ? '' : nav(href, label)); /* the current page isn't listed */ %>
     <nav class="nav" id="site-nav" aria-label="Main">
+      <% if (signedIn) { %>
+      <%- pub('/faq', 'FAQ') %>
+      <%- pub('/support', 'Contact') %>
+      <form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form>
+      <% } else { %>
       <%- pub('/about', 'About') %>
       <%- pub('/faq', 'FAQ') %>
       <%- pub('/employers', 'For Employers') %>
       <%- pub('/support', 'Contact') %>
-      <% if (signedIn) { %><%- pub('/portal/dashboard', 'My Account') %><form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form><% } else { %><%- pub('/portal', 'Sign In') %><% } %>
+      <%- pub('/portal', 'Sign In') %>
+      <% } %>
     </nav>
     <% } %>
   </div>
