@@ -2,21 +2,32 @@
 <%- include('../partials/portal-nav') %>
 <h1>Professional Standards</h1>
 <% if (!doc) { %>
-<p class="message">The acknowledgments are not available yet. Please check back soon.</p>
+<p class="message">The professional standards are not available yet. Please check back soon.</p>
 <% } else if (current) { %>
-<p class="notice-ok">You confirmed these statements on <%= new Date(accepted.accepted_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>.</p>
-<ul class="plain-list"><% statements.forEach(s => { %><li><%= s %></li><% }) %></ul>
+<section class="home-card ack-card">
+  <h2 class="home-card-band">Accepted</h2>
+  <div class="ack-body">
+    <p class="ack-intro">You accepted these standards on <%= new Date(accepted.accepted_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>.</p>
+    <ul class="ack-list done"><% statements.forEach(s => { %><li><span class="dash-dot" aria-hidden="true"><%- include('../partials/check') %></span><span><%= s %></span></li><% }) %></ul>
+  </div>
+</section>
+<div class="actions"><a class="button secondary" href="/portal/dashboard">Back to Dashboard</a></div>
 <% } else { %>
-<p class="lead">Please read and confirm each statement.</p>
+<p class="lead">Read each statement and check the box to confirm.</p>
 <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>
 <form method="post" action="/portal/acknowledgments" novalidate>
-  <fieldset class="field">
-    <legend class="visually-hidden">Professional Standards</legend>
-    <% statements.forEach((s, i) => { %>
-    <div class="check"><input id="ack-<%= i %>" type="checkbox" name="ack_<%= i %>" value="yes" <%= checked[i] ? 'checked' : '' %>><label for="ack-<%= i %>"><%= s %></label></div>
-    <% }) %>
-  </fieldset>
-  <button class="button" type="submit">Confirm</button>
+  <section class="home-card ack-card">
+    <h2 class="home-card-band">I agree that</h2>
+    <fieldset class="ack-body">
+      <legend class="visually-hidden">Professional Standards</legend>
+      <ul class="ack-list">
+        <% statements.forEach((s, i) => { %>
+        <li><input id="ack-<%= i %>" type="checkbox" name="ack_<%= i %>" value="yes" <%= checked[i] ? 'checked' : '' %>><label for="ack-<%= i %>"><%= s %></label></li>
+        <% }) %>
+      </ul>
+    </fieldset>
+  </section>
+  <div class="actions"><button class="button gold" type="submit">Confirm and Continue</button></div>
 </form>
 <% } %>
 <%- include('../partials/foot') %>
