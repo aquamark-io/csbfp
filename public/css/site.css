@@ -760,8 +760,10 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 @media (max-width: 760px) { .pay-cards { grid-template-columns: 1fr; } }
 .pay-foot { margin-top: 18px; font-size: 0.85rem; }
 
-/* For Employers: one color per card (band and button match) */
-.theme-gold .home-card-band { background: var(--gold); color: var(--navy-dark); border-bottom-color: var(--navy); }
-.theme-slate .home-card-band { background: #475467; border-bottom-color: var(--gold); }
-.theme-slate .button { background: #475467; border-color: #475467; color: #fff; }
-.theme-slate .button:hover { background: #344054; border-color: #344054; color: #fff; }
+/* For Employers: numbered white cards (1, 2, 3) matching the steps above */
+.employer-cards { counter-reset: emp; }
+.employer-cards .home-card-band { background: #fff; color: var(--ink); border-bottom: 0; padding: 22px 18px 4px;
+  font-size: 0.98rem; letter-spacing: 0.01em; text-transform: none; display: flex; align-items: center; gap: 12px; counter-increment: emp; }
+.employer-cards .home-card-band::before { content: counter(emp); flex: none; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--gold); color: var(--navy-dark); font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; }
+.employer-cards .band-note { margin-left: auto; font-size: 0.86rem; font-weight: 500; color: var(--muted); }
