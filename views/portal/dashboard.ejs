@@ -69,8 +69,8 @@
   else if (reg.status === 'suspended') card = { band: 'Certification suspended', title: 'Suspended pending review', html: `To respond or ask about the process, contact ${mail}.` };
   else if (reg.status === 'revoked') card = { band: 'Certification revoked', title: 'Your certification has been revoked', html: `To ask about the appeal process, contact ${mail}.` };
   else if (reg.status === 'active') card = { band: 'Certified', title: 'You are a Certified Small Business Finance Professional', text: `Certification ${reg.registration_number}, valid through ${fmt(reg.expires_at)}.`, href: '/portal/confirmation', cta: 'View Certificate', second: { href: '/portal/billing', label: 'Billing' } };
-  else if (checkOpen && linkOpened) card = { band: 'Next step', title: 'Background check in progress', text: 'Your background check is in progress with Checkr. Results usually take 1–3 days, and we\'ll email you once they\'re reviewed.' };
-  else if (reg.status === 'under_review') card = { band: 'Next step', title: 'Under review', text: 'Your application is under review. We\'ll email you when a decision is made.' };
+  else if (checkOpen && linkOpened) card = { band: 'Status', title: 'Background check in progress', text: 'Your background check is in progress with Checkr. Results usually take 1–3 days, and we\'ll email you once they\'re reviewed.' };
+  else if (reg.status === 'under_review') card = { band: 'Status', title: 'Under review', text: 'Your application is under review. We\'ll email you when a decision is made.' };
   else if (reg.status === 'not_approved') card = { band: 'Application status', title: 'Not approved', html: `Your application was not approved. To ask about reconsideration, contact ${mail}.` };
 %>
 <% if (card) { %>
@@ -91,6 +91,7 @@
 </section>
 <% } %>
 
+<% if (!certified) { %>
 <section class="home-card dash-card">
   <h2 class="home-card-band dash-band">All steps <span><%= doneCount %> of <%= steps.length %> complete</span></h2>
   <ol class="dash-steps">
@@ -104,6 +105,7 @@
     <% }) %>
   </ol>
 </section>
+<% } %>
 
 <p class="dash-links"><a href="/portal/account">Account settings</a><% if (paid) { %> · <a href="/portal/billing">Billing</a><% } %> · <a href="/support">Support and appeals</a></p>
 
