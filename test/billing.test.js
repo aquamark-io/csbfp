@@ -129,8 +129,8 @@ test('checkout needs the automatic-renewal consent, records it, and sends them t
   let r = await pat.req('/portal/checkout');
   assert.match(r.text, /\$149 per year/);
   assert.match(r.text, /I authorize CSBFP to charge \$149 today/);
-  assert.match(r.text, /No refunds\./);
-  assert.match(r.text, /issues a DEMO record only/);
+  assert.match(r.text, /Fees are non-refundable/);
+  assert.match(r.text, /Pay \$149/);
   r = await pat.req('/portal/checkout', {});
   assert.equal(r.status, 422);
   assert.match(r.text, /agree to automatic annual renewal/);
@@ -246,7 +246,7 @@ test('if the subscription ends while Inactive, they rejoin through checkout and 
   assert.equal(regOf('pat@example.com').reg.status, 'inactive', 'stays inactive');
 
   let r = await pat.req('/portal/checkout');
-  assert.match(r.text, /Continue to Secure Payment/);
+  assert.match(r.text, /Pay \$149/);
   r = await pat.req('/portal/checkout', { agree_renewal: 'yes' });
   const s2 = Object.values(fs.state.sessions).at(-1);
   fs.completeCheckout(s2.id);
@@ -270,7 +270,7 @@ test('an open duplicate flag or an admin hold blocks payment', async () => {
   assert.match(page.text, /application is on hold/);
   reg.admin_hold = false;
   page = await b.req('/portal/checkout');
-  assert.match(page.text, /Continue to Secure Payment/);
+  assert.match(page.text, /Pay \$149/);
 });
 
 test('a live Stripe key is refused while the site is in preview', async () => {

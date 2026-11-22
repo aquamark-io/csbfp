@@ -29,37 +29,36 @@
 <% } else if (!ready) { %>
   <p class="message">Payments are not available right now. Please check back soon.</p>
 <% } else { %>
-  <dl class="summary">
-    <div><dt>Annual certification fee</dt><dd><%= fee %> per year</dd></div>
-    <div><dt>Renews</dt><dd>Automatically every 12 months at <%= fee %>, until you cancel</dd></div>
-    <div><dt>Certification number</dt><dd><%= pay.registration.registration_number || '—' %></dd></div>
-  </dl>
-  <p class="notice-strong"><strong>No refunds.</strong> The certification fee is non-refundable, including if you do not complete the remaining steps<% if (screeningEnabled) { %> or do not pass the background check<% } %>, except where a refund is required by law.</p>
-  <% if (!screeningEnabled) { %><p class="demo-banner">Preview: background screening is not active yet. Completing payment issues a DEMO record only. It is not a valid certification.</p><% } %>
-  <h2>Pay by card</h2>
-  <p><% if (screeningEnabled && !pay.registration.first_activated_at) { %>Your certification term starts when it is approved and renews automatically one year later,<% } else { %>Your certification renews automatically every year on <strong><%= renewsOn.replace(/, \d{4}$/, '') %></strong>,<% } %> and <strong><%= fee %></strong> is charged to your card each time until you cancel. We email you 30 days before each renewal. Cancel online any time from your Billing page; you stay certified through the period you've paid for. See <a href="/legal/terms#6-fees-and-automatic-renewal" target="_blank" rel="noopener">Program Terms, section 6</a>.</p>
-  <form method="post" action="/portal/checkout" novalidate>
-    <div class="field check">
-      <input id="agree_renewal" type="checkbox" name="agree_renewal" value="yes">
-      <label for="agree_renewal">I authorize CSBFP to charge <%= fee %> today and to automatically charge <%= fee %> every year on my renewal date until I cancel. I can cancel online before my next renewal. Fees are non-refundable except where required by law. I will receive an email reminder 30 days before each renewal.</label>
-    </div>
-    <button class="button" type="submit">Continue to Secure Payment</button>
-  </form>
-  <p class="muted">Payment is processed by Stripe and appears on your statement as <%= program.statementDescriptor %>. CSBFP never sees or stores your card details.</p>
-
-  <h2 id="employer">My employer is paying</h2>
-  <p>If your employer bought certification credits, enter the Employer ID they gave you. One credit covers your first year; it does not renew automatically. Before the year ends, we'll ask you to put a card on file to keep your certification active.</p>
-  <form method="post" action="/portal/checkout#employer" class="stack" novalidate>
-    <input type="hidden" name="method" value="employer">
-    <div class="field">
-      <label for="employer_number">Employer ID</label>
-      <input id="employer_number" name="employer_number" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ER-XXXXXX" maxlength="20" value="<%= employerNumber %>">
-    </div>
-    <div class="field check">
-      <input id="agree_terms" type="checkbox" name="agree_terms" value="yes">
-      <label for="agree_terms">I agree to the <a href="/legal/terms" target="_blank" rel="noopener">Program Terms</a>.</label>
-    </div>
-    <button class="button secondary" type="submit">Use Employer Credit</button>
-  </form>
+  <p class="lead"><%= fee %> per year. Choose how you'd like to pay.</p>
+  <div class="pay-cards">
+    <section class="home-card">
+      <h2 class="home-card-band">I'm paying</h2>
+      <form method="post" action="/portal/checkout" class="home-card-body" novalidate>
+        <p>Pay by card. Renews automatically each year; cancel anytime from your account.</p>
+        <div class="field check pay-consent">
+          <input id="agree_renewal" type="checkbox" name="agree_renewal" value="yes">
+          <label for="agree_renewal">I authorize CSBFP to charge <%= fee %> today and <%= fee %> each year on my renewal date until I cancel. I can cancel anytime online. Fees are non-refundable except where required by law. See the <a href="/legal/terms#6-fees-and-automatic-renewal" target="_blank" rel="noopener">Program Terms</a>.</label>
+        </div>
+        <div class="pay-actions"><button class="button gold" type="submit">Pay <%= fee %></button></div>
+      </form>
+    </section>
+    <section class="home-card" id="employer">
+      <h2 class="home-card-band">My employer is paying</h2>
+      <form method="post" action="/portal/checkout#employer" class="home-card-body" novalidate>
+        <input type="hidden" name="method" value="employer">
+        <p>Enter the Employer ID from your employer. A credit covers one year and doesn't renew automatically.</p>
+        <div class="field">
+          <label for="employer_number">Employer ID</label>
+          <input id="employer_number" name="employer_number" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ER-XXXXXX" maxlength="20" value="<%= employerNumber %>">
+        </div>
+        <div class="field check pay-consent">
+          <input id="agree_terms" type="checkbox" name="agree_terms" value="yes">
+          <label for="agree_terms">I agree to the <a href="/legal/terms" target="_blank" rel="noopener">Program Terms</a>.</label>
+        </div>
+        <div class="pay-actions"><button class="button" type="submit">Use Employer Credit</button></div>
+      </form>
+    </section>
+  </div>
+  <p class="muted pay-foot">Card payments are processed securely by Stripe and appear on your statement as <%= program.statementDescriptor %>.</p>
 <% } %>
 <%- include('../partials/foot') %>
