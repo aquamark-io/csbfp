@@ -37,7 +37,7 @@
   const stage = certified ? 5 : inCheck ? 4 : passed ? 3 : appDone ? 2 : 1;
   const stages = ['Application', 'Training', 'Payment', 'Background check', 'Certified'];
 %>
-<h1>My Certification</h1>
+<h1>Certification Dashboard</h1>
 <% if (typeof saved !== 'undefined' && saved) { %><p class="notice-ok" role="status">Saved.</p><% } %>
 <% if (reg.is_demo) { %><p class="demo-banner">DEMO / NOT SCREENED: background checks are not active yet, so this preview credential is not a valid CSBFP certification.</p><% } %>
 
