@@ -163,20 +163,21 @@ test('full journey: sign up, verify email, complete every form', async () => {
 
   // Employment
   const e = await b.req('/portal/employment/new', { relationship_type: 'employee', company_name: 'Acme Funding', company_website: 'acmefunding.com/about',
-    start_month: '6', start_year: '2021', work_arrangement: 'hybrid', job_title_other: '', primary_role: 'other', primary_role_other: '' });
-  assert.equal(e.status, 422, 'job title is required, and Other role needs a typed role');
-  assert.match(e.text, /Job title is required/);
-  assert.match(e.text, /Your role is required/);
+    start_month: '6', start_year: '2021', work_arrangement: 'hybrid', company_type: '', primary_role: '' });
+  assert.equal(e.status, 422, 'company type and role are required pick lists');
+  assert.match(e.text, /choose the company type/);
+  assert.match(e.text, /choose your primary role/);
   const e2 = await b.req('/portal/employment/new', { relationship_type: 'employee', company_name: 'Acme Funding', company_website: 'acmefunding.com/about',
-    start_month: '6', start_year: '2021', work_arrangement: 'hybrid', job_title_other: 'Senior Underwriter', primary_role: 'underwriting_credit' });
+    start_month: '6', start_year: '2021', work_arrangement: 'hybrid', company_type: 'funder_lender', primary_role: 'underwriting_credit' });
   assert.equal(e2.status, 303);
   const rel = fake.tables.csbfp_employment_relationships.find(r => r.registrant_id === jane.id);
   assert.equal(rel.company_website, 'https://acmefunding.com');
   assert.equal(fake.tables.csbfp_registrants.find(r => r.id === jane.id).employment_status, 'working');
   const el = await b.req('/portal/employment');
   assert.match(el.text, /Acme Funding/);
-  assert.match(el.text, /Senior Underwriter/);
+  assert.match(el.text, /Funder \/ Lender/);
   assert.match(el.text, /Underwriting \/ Credit/);
+  assert.doesNotMatch((await b.req('/portal/employment/new')).text, /Job title/);
   assert.equal(rel.primary_role, 'underwriting_credit');
 
   // Products

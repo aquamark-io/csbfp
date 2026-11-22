@@ -126,7 +126,7 @@ router.get('/employment', async (req, res, next) => {
       .select('*').eq('registrant_id', req.registrant.id).eq('is_current', true)
       .order('start_month', { ascending: false }), 'Relationships')
       .map(r => ({ ...r, title: r.job_title_other || titleLabel.get(r.job_title_id) || '',
-        role: r.primary_role === 'other' ? r.primary_role_other : v.PRIMARY_ROLES[r.primary_role] }));
+        role: v.PRIMARY_ROLES[r.primary_role] || '', companyType: v.COMPANY_TYPES[r.company_type] || '' }));
     res.render('portal/employment', { pageTitle: 'Employment', rels, saved: req.query.saved === '1', error: null });
   } catch (err) { next(err); }
 });
@@ -153,8 +153,7 @@ function relValues(rel) {
   return {
     relationship_type: rel.relationship_type, company_name: rel.company_name, company_website: rel.company_website || '',
     start_year: sy || '', start_month: sm ? String(Number(sm)) : '',
-    work_arrangement: rel.work_arrangement, job_title_other: rel.job_title_other || '',
-    primary_role: rel.primary_role || '', primary_role_other: rel.primary_role_other || '',
+    work_arrangement: rel.work_arrangement, company_type: rel.company_type || '', primary_role: rel.primary_role || '',
   };
 }
 
@@ -165,13 +164,13 @@ async function loadRel(req) {
 }
 
 async function relForm(req, res, rel) {
-  res.render('portal/relationship', { pageTitle: rel ? 'Edit Employer' : 'Add Employer', rel, roles: v.PRIMARY_ROLES, values: relValues(rel), errors: {} });
+  res.render('portal/relationship', { pageTitle: rel ? 'Edit Employer' : 'Add Employer', rel, roles: v.PRIMARY_ROLES, companyTypes: v.COMPANY_TYPES, values: relValues(rel), errors: {} });
 }
 
 async function relSave(req, res, rel) {
   const { errors, data } = v.validateRelationship(req.body);
   if (Object.keys(errors).length) {
-    return res.status(422).render('portal/relationship', { pageTitle: rel ? 'Edit Employer' : 'Add Employer', rel, roles: v.PRIMARY_ROLES, values: req.body, errors });
+    return res.status(422).render('portal/relationship', { pageTitle: rel ? 'Edit Employer' : 'Add Employer', rel, roles: v.PRIMARY_ROLES, companyTypes: v.COMPANY_TYPES, values: req.body, errors });
   }
   if (rel) {
     must(await db().from('csbfp_employment_relationships').update(data).eq('id', rel.id).eq('registrant_id', req.registrant.id), 'Update relationship');

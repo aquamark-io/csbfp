@@ -24,7 +24,7 @@
       <li class="card-row">
         <div>
           <strong><%= r.company_name %></strong><br>
-          <span class="muted-inline"><%= [r.title, r.role, relType[r.relationship_type], arrangement[r.work_arrangement], r.start_month ? `Since ${fmtMonth(r.start_month)}` : ''].filter(Boolean).join(' · ') %></span>
+          <span class="muted-inline"><%= [r.companyType, r.role, relType[r.relationship_type], arrangement[r.work_arrangement], r.start_month ? `Since ${fmtMonth(r.start_month)}` : ''].filter(Boolean).join(' · ') %></span>
         </div>
         <a class="button secondary small" href="/portal/employment/<%= r.id %>">Edit</a>
       </li>
