@@ -40,8 +40,9 @@ document.addEventListener('input', function (e) {
 (function () {
   try {
     var url = new URL(window.location.href);
-    if (url.searchParams.has('saved')) {
+    if (url.searchParams.has('saved') || url.searchParams.has('done')) {
       url.searchParams.delete('saved');
+      url.searchParams.delete('done');
       window.history.replaceState(null, '', url.pathname + (url.search ? url.search : '') + url.hash);
     }
   } catch (e) { /* older browsers: leave the URL as is */ }

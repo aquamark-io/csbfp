@@ -13,7 +13,7 @@
     <button class="button secondary" type="button" data-prev>← Back</button>
     <button class="button" type="button" data-next>Next →</button>
     <% if (!mod.completed) { %><button class="button" type="submit" form="complete-module" data-finish hidden>Complete Module</button>
-    <% } else if (next) { %><a class="button" href="/portal/training/<%= next.stable_key %>" data-finish hidden>Next Module →</a>
+    <% } else if (next) { %><a class="button" href="/portal/training" data-finish hidden>Back to Training</a>
     <% } else { %><a class="button" href="/portal/assessment" data-finish hidden>Go to the Assessment</a><% } %>
   </div>
 </div>
@@ -22,7 +22,7 @@
     <p class="notice-ok">You completed this module.</p>
     <div class="actions">
       <% if (prev) { %><a class="button secondary" href="/portal/training/<%= prev.stable_key %>">← <%= prev.title %></a><% } %>
-      <% if (next) { %><a class="button" href="/portal/training/<%= next.stable_key %>"><%= next.title %> →</a><% } else { %><a class="button" href="/portal/assessment">Go to the Assessment</a><% } %>
+      <% if (next) { %><a class="button" href="/portal/training">Back to Training</a><% } else { %><a class="button" href="/portal/assessment">Go to the Assessment</a><% } %>
     </div>
   <% } else { %>
     <form method="post" action="/portal/training/<%= mod.stable_key %>/complete" id="complete-module">

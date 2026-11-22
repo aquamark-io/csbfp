@@ -44,7 +44,8 @@ function embedUrl(url) {
 router.get('/training', async (req, res, next) => {
   try {
     const state = await training.stateFor(req.registrant.id);
-    res.render('portal/training', { pageTitle: 'Training', state, overviewHtml: state.curriculum ? renderMd(state.curriculum.overview_md) : '' });
+    const done = typeof req.query.done === 'string' && state.modules ? state.modules.find(m => m.stable_key === req.query.done && m.completed) : null;
+    res.render('portal/training', { pageTitle: 'Training', state, done, overviewHtml: state.curriculum ? renderMd(state.curriculum.overview_md) : '' });
   } catch (err) { next(err); }
 });
 
@@ -92,7 +93,8 @@ router.post('/training/:key/complete', async (req, res, next) => {
       await logEvent({ registrantId: req.registrant.id, event: 'module_completed', actor: 'registrant', detail: { module: mod.stable_key, curriculum: state.curriculum.label }, ip: req.ip });
     }
     const nextMod = state.modules[idx + 1];
-    if (nextMod) return res.redirect(303, `/portal/training/${nextMod.stable_key}`);
+    // Back to the training list to choose the next module (a clear break between modules).
+    if (nextMod) return res.redirect(303, `/portal/training?done=${encodeURIComponent(mod.stable_key)}`);
 
     // That was the last one.
     const fresh = await training.stateFor(req.registrant.id);

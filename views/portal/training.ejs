@@ -1,6 +1,7 @@
 <%- include('../partials/head') %>
 <%- include('../partials/portal-nav') %>
 <h1>Training</h1>
+<% if (typeof done !== 'undefined' && done) { %><p class="notice-ok" role="status">You completed <%= done.title %>.</p><% } %>
 <% if (!state.curriculum) { %>
 <p class="message">Training is not available yet. Please check back soon.</p>
 <% } else { %>
