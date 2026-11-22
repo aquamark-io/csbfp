@@ -143,7 +143,7 @@ test('full journey: sign up, verify email, complete every form', async () => {
 
   let d = await b.req('/portal/dashboard');
   assert.equal(d.status, 200);
-  assert.match(d.text, /Next step/);
+  assert.match(d.text, /All steps/);
   assert.match(d.text, /Continue: Personal information/);
 
   // Personal: under 18 is refused.
@@ -195,7 +195,7 @@ test('full journey: sign up, verify email, complete every form', async () => {
   assert.ok(fake.tables.csbfp_legal_acceptances.some(a => a.registrant_id === jane.id && a.document_key === 'acknowledgments' && a.context === 'acknowledgments'));
 
   d = await b.req('/portal/dashboard');
-  assert.match(d.text, /Continue: Training/);
+  assert.match(d.text, /Continue: Training modules/);
   assert.equal((d.text.match(/>Complete</g) || []).length, 4);
   assert.match(d.text, /Background check/);
   assert.match(d.text, /Not active yet/);

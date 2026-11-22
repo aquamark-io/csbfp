@@ -706,3 +706,7 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 }
 .dash-links { font-size: 0.9rem; color: var(--muted); margin: 4px 0 8px; }
 .dash-next-title { margin-bottom: 0; }
+.main:has(.tracker) h1 { margin-bottom: 36px; }
+.dash-steps .dash-go { margin-left: auto; padding: 7px 18px; font-size: 0.9rem; border-radius: 4px; }
+.dash-steps .dash-go:hover { text-decoration: none; color: var(--navy-dark); }
+.dash-steps li.next { padding: 10px 0; }
