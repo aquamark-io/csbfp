@@ -126,7 +126,7 @@ router.get('/employment', async (req, res, next) => {
       .select('*').eq('registrant_id', req.registrant.id).eq('is_current', true)
       .order('start_month', { ascending: false }), 'Relationships')
       .map(r => ({ ...r, title: r.job_title_other || titleLabel.get(r.job_title_id) || '',
-        role: v.PRIMARY_ROLES[r.primary_role] || '', companyType: v.COMPANY_TYPES[r.company_type] || '' }));
+        role: v.PRIMARY_ROLES[r.primary_role] || '', companyType: v.COMPANY_TYPE_LABELS[r.company_type] || '' }));
     res.render('portal/employment', { pageTitle: 'Employment', rels, saved: req.query.saved === '1', error: null });
   } catch (err) { next(err); }
 });

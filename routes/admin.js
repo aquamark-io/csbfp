@@ -248,7 +248,7 @@ async function renderDetail(req, res, r, extra) {
     res.render('admin/registrant', {
       pageTitle: [r.legal_first_name, r.legal_last_name].filter(Boolean).join(' ') || r.email || 'Registrant',
       r, age, registration, history, train, attempts, subs: must(subs, 'Subscriptions'), payments: must(payments, 'Payments'),
-      rels: must(rels, 'Employment').map(x => ({ ...x, title: [v.COMPANY_TYPES[x.company_type], v.PRIMARY_ROLES[x.primary_role]].filter(Boolean).join(', ') })),
+      rels: must(rels, 'Employment').map(x => ({ ...x, title: [v.COMPANY_TYPE_LABELS[x.company_type], v.PRIMARY_ROLES[x.primary_role]].filter(Boolean).join(', ') })),
       products: must(prods, 'Products').map(p => productBy.get(p.product_id)).filter(Boolean),
       acceptances: must(acc, 'Acceptances'),
       flags: flagRows.map(f => ({ ...f, other: otherBy.get(f.registrant_id === id ? f.matched_registrant_id : f.registrant_id) || null })),

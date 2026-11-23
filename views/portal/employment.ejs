@@ -9,7 +9,7 @@
 <div class="employment">
   <form method="post" action="/portal/employment/status" class="status-form">
     <fieldset class="field">
-      <legend>Are you currently working in the small business finance industry?</legend>
+      <legend>Do you currently work for a broker, funder, or lender?</legend>
       <div class="check"><input id="es-working" type="radio" name="employment_status" value="working" <%= registrant.employment_status === 'working' ? 'checked' : '' %>><label for="es-working">Yes</label></div>
       <div class="check"><input id="es-none" type="radio" name="employment_status" value="not_currently_employed" <%= registrant.employment_status === 'not_currently_employed' ? 'checked' : '' %>><label for="es-none">No</label></div>
     </fieldset>
@@ -17,7 +17,7 @@
   </form>
 
   <div class="if-yes">
-    <% if (!rels.length) { %><p class="muted">Add your current employer to complete this section. If you are not currently working in the industry, choose No.</p><% } %>
+    <% if (!rels.length) { %><p class="muted">Add your current employer to complete this section.</p><% } %>
     <% if (rels.length) { %>
     <ul class="cards">
       <% rels.forEach(r => { %>
