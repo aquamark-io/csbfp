@@ -1,6 +1,6 @@
 <%- include('../partials/head') %>
-<p class="muted"><a href="/portal/training">← Training</a> · Module <%= idx + 1 %> of <%= state.modules.length %></p>
-<h1><%= mod.title %></h1>
+<p class="muted module-back"><a href="/portal/training">← Training</a></p>
+<h1 class="visually-hidden"><%= mod.title %></h1>
 <% if (video) { %>
 <div class="video"><iframe src="<%= video %>" title="<%= mod.title %> video" loading="lazy" allow="fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
 <% } %>
