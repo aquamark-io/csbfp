@@ -174,7 +174,7 @@ test('background check page: state from ZIP, exact name and email, private per-s
   assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'checkr_links_updated'));
 
   page = await ann.req('/portal/background-check');
-  assert.match(page.text, /Start Background Check/);
+  assert.match(page.text, />Start<\/a>/);
   assert.doesNotMatch(page.text, /checkr\.example/, 'the link itself is not printed on the page');
   const go = await ann.req('/portal/background-check/go');
   assert.equal(go.location, 'https://checkr.example/apply/ca');
@@ -184,6 +184,7 @@ test('background check page: state from ZIP, exact name and email, private per-s
   assert.ok(sc.link_opened_at);
   assert.match((await admin.req('/admin/review')).text, /Opened Checkr link \(CA\)/);
   assert.match((await ann.req('/portal/dashboard')).text, /in progress with Checkr/);
+  assert.match((await ann.req('/portal/background-check')).text, /<dt>Status<\/dt><dd>Started /);
 
   // Not available to anyone who isn't a paid applicant waiting on the check, and never public
   assert.equal((await browser().req('/portal/background-check')).status, 303);

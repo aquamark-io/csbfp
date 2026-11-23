@@ -13,9 +13,10 @@
       <div><dt>Legal name</dt><dd><%= [r.legal_first_name, r.middle_name, r.legal_last_name].filter(Boolean).join(' ') %></dd></div>
       <div><dt>Email</dt><dd><%= r.email %></dd></div>
       <div><dt>State</dt><dd><%= stateName %> <a class="bg-update" href="/portal/personal">Update</a></dd></div>
+      <% if (link && sc && sc.link_opened_at) { %><div><dt>Status</dt><dd>Started <%= new Date(sc.link_opened_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' }) %></dd></div><% } %>
     </dl>
     <% if (link) { %>
-      <div class="bg-actions"><a class="button gold" href="/portal/background-check/go" target="_blank" rel="noopener">Start Background Check</a></div>
+      <div class="bg-actions"><a class="button gold" href="/portal/background-check/go" target="_blank" rel="noopener" aria-label="Start your background check with Checkr">Start</a></div>
     <% } else { %>
       <p class="bg-note">The background check for <%= stateName %> isn't available yet. We'll email you as soon as it is.</p>
     <% } %>
