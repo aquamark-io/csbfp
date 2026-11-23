@@ -814,3 +814,17 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .slides .md-compare td:last-child { border-bottom: 0; }
   .md-compare td::before { content: attr(data-label); display: block; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
 }
+
+/* Training: cards (@icon Title | text) */
+.slides .slide .card-grid { list-style: none; padding: 0; margin: 14px 0 18px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.slides .slide .card-grid li { margin: 0; padding: 16px; border: 1px solid #d5ddec; border-top: 3px solid var(--navy); border-radius: 10px; background: #fff; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04); }
+.card-grid .icon-tile { width: 40px; height: 40px; margin-bottom: 10px; }
+.card-grid .icon-tile svg { width: 22px; height: 22px; }
+.slides .card-grid p { margin: 0; font-size: 0.93rem; line-height: 1.5; color: var(--body); }
+.slides .card-grid .card-title { font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+@media (max-width: 760px) { .slides .slide .card-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) {
+  .slides .slide .card-grid { grid-template-columns: 1fr; gap: 10px; }
+  .slides .slide .card-grid li { display: flex; gap: 14px; align-items: flex-start; padding: 14px; }
+  .card-grid .icon-tile { flex: none; margin: 0; }
+}
