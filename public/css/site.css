@@ -837,5 +837,3 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 /* Bottom footer line: small, light grey, left-aligned on every screen. */
 .footer .operator { font-size: 0.78rem; color: #8b94a5; text-align: left; }
 @media (max-width: 760px) { .footer .operator { text-align: center; } }
-/* About intro: a smaller follow-on line inside the lead paragraph. */
-.lead-note { display: block; margin-top: 8px; font-size: 0.9rem; color: var(--muted); }
