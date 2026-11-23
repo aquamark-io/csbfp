@@ -929,4 +929,4 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .slides ul + .statement, .slides .slide > p + .statement { margin-top: 28px; }
 
 /* Training: the same generous gap above every slide's closing statement (the letter keeps its own spacing). */
-.slides .slide > .statement { margin-top: 48px; }
+.slides .slide > .statement { margin-top: 64px; }
