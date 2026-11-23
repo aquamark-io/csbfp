@@ -849,7 +849,8 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .footer-slim a:hover { color: var(--navy); text-decoration: underline; }
 
 /* Training: timeline (-> Title | text). One step per row, running down the slide. */
-.slides .slide .timeline { list-style: none; padding: 0; margin: 22px 0 28px; display: grid; gap: 22px; }
+.slides .slide .timeline { list-style: none; padding: 0; margin: 34px 0 0; display: grid; gap: 22px; }
+.slides .slide .timeline + .statement { margin-top: 44px; }
 .slides .slide .timeline li { margin: 0; padding: 0; position: relative; display: grid; grid-template-columns: 36px 150px 1fr; gap: 0 18px; align-items: center; min-height: 36px; }
 /* A connector from each dot to the next one (none after the last). */
 .slides .slide .timeline li:not(:last-child)::after { content: ""; position: absolute; left: 17px; top: 36px; width: 2px; height: calc(100% - 14px); background: #d5ddec; }
