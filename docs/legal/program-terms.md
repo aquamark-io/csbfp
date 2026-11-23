@@ -1,65 +1,168 @@
-> **DRAFT: pending review and approval by the program owner and legal counsel. Not final.**
+Version 1.01
 
-These Program Terms govern the Certified Small Business Finance Professional (CSBFP) certification program. The program's technology and day-to-day administration are provided by Duncan Consulting LLC ("we", "us"). Credential standards, background check criteria, and appeal and revocation policies are set by the program owner. By creating an account, you agree to these terms.
+## 1. Program Ownership and Administration
 
-## 1. What CSBFP is
+The Certified Small Business Finance Professional (CSBFP) program is owned by the Small Business Finance Association (SBFA), which owns the CSBFP name, trademarks, certification marks, and associated program standards.
 
-CSBFP is a private industry certification for people who work at a brokerage or lender in U.S. small business finance. It shows that the holder completed the required training and assessment, agreed to the professional standards, met the initial eligibility requirements in effect when they were certified, and keeps the certification current.
+Duncan Consulting LLC serves as the program administrator, responsible for operating the certification website, application and training systems, assessment, payment administration, background-screening coordination, certification records, and related support.
 
-CSBFP is **not** a government license, registration or regulatory approval. It is not an employment endorsement, a guarantee of anyone's conduct, or proof of compliance with every applicable law. It does not authorize anyone to perform an activity that requires a license.
+Throughout these Terms, "the Program" refers to CSBFP as owned by SBFA and administered by Duncan Consulting LLC.
+
+By creating an account, submitting an application, or participating in the Program, you agree to these Terms and the applicable professional standards.
 
 ## 2. Eligibility
 
-You must be at least 18 years old and work at a brokerage or lender in U.S. small business finance. You must give accurate, current information and keep it current. Your certification belongs to you, stays with you across employers, and cannot be transferred.
+Applicants must be at least 18 years old and provide accurate, complete information.
 
-## 3. Requirements for initial certification
+Certification is available to individuals working in, or seeking to enter, the small business finance industry. Current employment is not required.
 
-1. Create an account and complete your application.
-2. Accept the professional standards.
-3. Complete the four training modules in order.
-4. Pass the assessment (80%, up to 10 attempts, with a 60-minute wait between attempts).
-5. Pay the annual certification fee.
-6. Complete a one-time background check.
-7. Receive eligibility approval from an authorized reviewer.
+The Program reserves the right to verify applicant information, assess eligibility, and deny applications that do not meet its requirements, subject to applicable law.
 
-Your certification number is issued, and your first annual term begins, on final approval.
+## 3. Certification Process
 
-## 4. Background check
+Applicants must:
 
-All applicants undergo a one-time background check through Checkr, a third-party consumer reporting agency, during initial certification, after receiving the required disclosures and giving authorization. The background check is not repeated at annual renewal unless the program rules change and you are notified.
+1. Create an account and complete an application.
+2. Agree to the Program's professional standards.
+3. Complete the required training modules.
+4. Pass the certification assessment.
+5. Pay the applicable certification fee.
+6. Complete a one-time background screening and eligibility review.
 
-Convictions involving financial crimes or fraud within the past seven years may result in disqualification. An authorized reviewer reviews every potentially disqualifying result; a report alone is never a final decision. Before any adverse decision, you will receive a copy of the report, a summary of your rights, and an opportunity to dispute its accuracy with Checkr or provide additional information, as required by law.
+The assessment currently consists of 20 multiple-choice questions, with a minimum passing score of 80%. Applicants may attempt the assessment up to 10 times, with a 60-minute waiting period between attempts.
 
-## 5. Using your certification accurately
+Successful completion of training and assessment does not guarantee certification. Certification is issued only after all applicable requirements have been satisfied and the application is approved.
 
-You may state that you are a Certified Small Business Finance Professional and share your certification number while your certification is current. You may not imply that CSBFP is a government license or approval, use the certification while it is inactive, expired, suspended or revoked, or misrepresent your status. Rules for using the CSBFP name and logo are pending program-owner approval.
+## 4. Background Screening
 
-## 6. Fees and automatic renewal
+Applicants must complete a one-time background screening through Checkr or another authorized screening provider.
 
-The certification fee is $149 per year. It renews automatically each year at the then-current fee, charged to your payment method on file, until you cancel. We email you at least 30 days before each renewal. You can cancel online at any time from your Billing page; your certification stays current through the period you have paid for. Renewal does not repeat the background check or the assessment unless the program rules change.
+Convictions involving financial crimes or fraud within the preceding seven years may affect eligibility. The Program may consider the nature, seriousness, timing, and relevance of information identified during screening, subject to applicable law.
 
-**No refunds.** The certification fee is non-refundable once paid, including if you do not complete the remaining steps or do not pass the background check, except where a refund is required by law. Nothing in these terms limits rights you have under applicable law or card-network rules.
+Applicants will receive any legally required disclosures, authorizations, notices, and opportunities to review or dispute inaccurate information.
 
-**Employer credits.** An employer may buy certification credits and give its Employer ID to its employees. One credit pays one first-year certification fee. Credits are non-refundable and do not expire. A certification paid with an employer credit runs for one year and does not renew automatically; to keep it active, the certificant puts their own payment method on file before the year ends. Anyone with an Employer ID can use its credits; the employer is responsible for sharing it only with its team.
+Background screening is generally required only at initial certification. Additional screening may be required when permitted by law and justified by changes in Program requirements or relevant circumstances.
 
-If a renewal payment fails, your certification becomes Inactive until the payment is made. You keep the same certification number if you renew or rejoin later.
+## 5. Fees and Refunds
 
-## 7. Public verification
+The annual certification fee is $149, payable after passing the assessment and before background screening is initiated.
 
-Anyone can look up a certification by its exact number. The lookup shows only your name, certification number, current status (Certified, Inactive, Expired, Suspended or Revoked) and valid-through date. It never shows reasons for a status, screening information, contact details or employer. There is no directory or name search.
+Certification fees are nonrefundable once paid, including when an applicant does not satisfy background-screening or other eligibility requirements, except where required by law.
 
-## 8. Suspension, revocation and appeals
+Fees are charged for participation in the certification process and do not guarantee approval or issuance of a credential.
 
-A certification may be suspended or revoked under the program rules, for example for material misrepresentation in an application, misconduct, or failure to meet the eligibility requirements. Decisions are made by an authorized reviewer, documented, and logged. You will be notified and given an opportunity to respond and to request reconsideration or appeal. *(Detailed notice, response and appeal procedures are pending program-owner approval.)* Revocation stops automatic renewal.
+Any changes to fees will be disclosed before they take effect.
 
-## 9. Your information
+## 6. Certification Term and Automatic Renewal
 
-How we collect, use and share your information is described in the Privacy Policy.
+Certification is valid for 12 months and automatically renews annually at the then-applicable disclosed renewal rate unless canceled.
 
-## 10. Changes
+The current annual renewal fee is $149.
 
-We may update these terms, the fee, the training or the requirements. We will give notice of material changes before they apply to you. Continued participation after a change takes effect means you accept it.
+The Program will send a renewal reminder approximately 30 days before the scheduled renewal date. Certificants may cancel future automatic renewals through their accounts at any time.
 
-## 11. Contact
+Cancellation prevents future renewal charges but does not ordinarily result in a refund of fees already paid.
+
+Background screening and assessments are not routinely repeated at renewal. Additional requirements may apply if Program standards change.
+
+Automatic-renewal enrollment, consent, cancellation, and notices will be administered in accordance with applicable law.
+
+## 7. Certification Numbers and Public Verification
+
+Approved individuals receive a unique, permanent certification number.
+
+Certification numbers remain associated with the individual and are not transferred or reassigned, including when employment changes or certification expires.
+
+Public verification is available by entering the exact certification number. Verification may display the certificant's name, certification status, and valid-through date.
+
+Public verification does not disclose background-screening results, private application information, or the reasons for suspension or revocation.
+
+A permanent certification number does not establish that a certification remains active.
+
+## 8. Professional Standards
+
+Certificants must conduct themselves honestly, accurately represent financing products and terms, protect confidential information, comply with applicable laws, and avoid fraud, deception, material misrepresentation, and other professional misconduct.
+
+Certificants must not misrepresent the scope, status, or significance of their CSBFP certification.
+
+Certification does not establish that SBFA or the administrator endorses an individual's employer, products, transactions, or business practices.
+
+## 9. Suspension, Revocation, and Appeals
+
+The Program may suspend, revoke, decline to renew, or otherwise restrict certification for material misrepresentation, fraud, professional misconduct, violations of Program standards, or failure to maintain eligibility.
+
+Except where immediate action is reasonably necessary to address a significant risk, affected individuals will receive notice of the concerns and a reasonable opportunity to respond before a final decision.
+
+The Program will review relevant information and determine an appropriate outcome. Decisions will be documented, and applicants or certificants will be informed of available review or appeal procedures.
+
+Public verification may reflect a certification's current status but will not disclose the underlying reason.
+
+## 10. Changes to Program Requirements
+
+SBFA may revise certification standards, training, assessments, eligibility criteria, continuing education requirements, renewal conditions, and other Program rules.
+
+Changes may apply to new applicants, existing certificants, or future renewals, as appropriate.
+
+Certificants will receive notice of material new requirements and a reasonable opportunity to comply, except where immediate changes are necessary for legal, security, or integrity reasons.
+
+Continued certification may depend on satisfying updated requirements.
+
+## 11. Individual Credential and Permitted Use
+
+CSBFP is an individual professional credential, not an employer certification.
+
+Certificants may accurately represent their certification status and use authorized CSBFP designations or digital credentials in accordance with Program branding guidelines.
+
+The CSBFP name, logo, and related intellectual property remain the property of SBFA. No ownership or unrestricted license is granted to applicants or certificants.
+
+Use of CSBFP marks must cease or be modified when certification expires, is suspended, or is revoked, as required by Program rules.
+
+## 12. No Government Authorization or Guarantee
+
+CSBFP is a private industry certification. It is not a government license, regulatory approval, professional license, or authorization to engage in activities requiring separate licensing or registration.
+
+Certification does not guarantee employment, professional competence, legal compliance, financing approval, business performance, or the absence of future misconduct.
+
+Individuals and employers remain responsible for satisfying all applicable legal and regulatory requirements.
+
+## 13. Accounts and Website Use
+
+Users are responsible for maintaining accurate account information, protecting login credentials, and promptly notifying the Program of suspected unauthorized access.
+
+Users may not submit false information, impersonate others, interfere with website operations, misuse certification records, or attempt unauthorized access to Program systems.
+
+The Program may restrict account access when reasonably necessary to protect security, investigate misuse, or enforce these Terms.
+
+## 14. Third-Party Services
+
+The Program uses third-party providers for functions including payments, background screening, email communications, and technology infrastructure.
+
+These services may be subject to additional notices, authorizations, and provider terms.
+
+The Program is not responsible for interruptions or errors outside its reasonable control, but will comply with applicable legal obligations concerning services it administers.
+
+## 15. Availability and Limitation of Liability
+
+The Program will use commercially reasonable efforts to maintain access to its website and services but does not guarantee uninterrupted availability.
+
+To the extent permitted by applicable law, SBFA and Duncan Consulting LLC disclaim liability for indirect, incidental, special, or consequential damages arising from participation in the Program or use of its services.
+
+Nothing in these Terms excludes liability or limits rights where prohibited by law.
+
+## 16. Changes to These Terms
+
+The Program may update these Terms to reflect operational, legal, regulatory, or program changes.
+
+Material changes will be communicated through the website, email, or another appropriate method. Where required by law, additional consent will be obtained.
+
+## 17. Contact
+
+For certification questions, account support, or inquiries regarding these Terms:
+
+**CSBFP Program Administration**
+
+Duncan Consulting LLC
 
 support@csbfp-certification.org
+
+Program Owner: Small Business Finance Association (SBFA)
