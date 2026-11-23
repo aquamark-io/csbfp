@@ -909,4 +909,4 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .slides .terms > div { grid-template-columns: 1fr; gap: 2px; padding: 12px 0; }
   .slides .terms dd { font-size: 0.95rem; }
 }
-.slides .terms + .statement, .slides .figures + .statement { margin-top: 30px; }
+.slides .terms + .statement, .slides .figures + .statement, .slides .table-wrap + .statement { margin-top: 30px; }
