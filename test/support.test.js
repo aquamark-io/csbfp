@@ -179,12 +179,13 @@ test('reports page shows counts without personal information', async () => {
 test('legal documents: publishing a new version updates the site and keeps history', async () => {
   let r = await boss.req('/admin/legal');
   assert.match(r.text, /Placeholder/);
-  assert.equal((await browser().req('/legal/automatic-renewal')).location, '/legal/terms#6-fees-and-automatic-renewal');
+  assert.equal((await browser().req('/legal/automatic-renewal')).location, '/legal/terms#6-certification-term-and-automatic-renewal');
   r = await boss.req('/admin/legal/terms', { body_md: '## 1. Agreement\n\nThese are the real terms.', confirm: 'yes' });
   assert.match(decodeURIComponent(r.location), /Version 2 is published/);
   r = await browser().req('/legal/terms');
   assert.match(r.text, /These are the real terms/);
-  assert.match(r.text, /Version 2/);
+  assert.match(r.text, /Effective /);
+  assert.doesNotMatch(r.text, /Version 2/, 'the internal version number is not shown publicly');
   r = await boss.req('/admin/legal/acknowledgments', { body_md: 'No list here', confirm: 'yes' });
   assert.match(decodeURIComponent(r.location), /statement line/);
 });
