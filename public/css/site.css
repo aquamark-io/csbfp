@@ -832,6 +832,7 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .bg-actions { margin: 0; }
 .bg-note { margin: 16px 0 0; font-size: 0.92rem; color: var(--muted); }
 .bg-ssn { max-width: 620px; margin-top: 16px; font-size: 0.88rem; }
-.footer .operator a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+.footer .operator a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 .footer .operator a:hover { color: var(--navy); }
-.footer .operator { text-align: center; }
+/* Bottom footer line: small, light grey, left-aligned on every screen. */
+.footer .operator { font-size: 0.78rem; color: #8b94a5; text-align: left; }
