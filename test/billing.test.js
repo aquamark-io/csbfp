@@ -314,3 +314,15 @@ test('admin: Stripe setup creates the product, price, portal and webhook once; p
   r = await b.req(`/admin/registrants/${pat.id}`);
   assert.match(r.text, /Subscription <code>sub_/);
 });
+
+test('signed-in pages get the one-line footer; public pages keep the full one', async () => {
+  const pub = await browser().req('/faq');
+  assert.match(pub.text, /Industry Partners/);
+  assert.doesNotMatch(pub.text, /footer-slim/);
+  for (const path of ['/portal/dashboard', '/faq']) {
+    const r = await pat.req(path);
+    assert.match(r.text, /<footer class="footer footer-slim">/, path);
+    assert.doesNotMatch(r.text, /Industry Partners/, path);
+    assert.match(r.text, /href="\/legal\/terms">Program Terms/, path);
+  }
+});

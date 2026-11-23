@@ -1,4 +1,14 @@
 </main>
+<% const year = Math.max(new Date().getFullYear(), 2027);
+   const slim = signedIn || (typeof adminArea !== 'undefined' && adminArea); /* signed-in pages get a one-line footer */ %>
+<% if (slim) { %>
+<footer class="footer footer-slim">
+  <div class="footer-inner">
+    <p>&copy; <%= year %> CSBFP</p>
+    <nav aria-label="Legal"><a href="/legal/terms">Program Terms</a><a href="/legal/privacy">Privacy Policy</a></nav>
+  </div>
+</footer>
+<% } else { %>
 <footer class="footer">
   <div class="footer-inner">
     <div class="footer-top">
@@ -33,8 +43,9 @@
         </span>
       </div>
     </div>
-    <p class="operator">&copy; <%= Math.max(new Date().getFullYear(), 2027) %> CSBFP</p>
+    <p class="operator">&copy; <%= year %> CSBFP</p>
   </div>
 </footer>
+<% } %>
 </body>
 </html>
