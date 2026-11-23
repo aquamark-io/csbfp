@@ -848,18 +848,16 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .footer-slim a { color: var(--muted); text-decoration: none; }
 .footer-slim a:hover { color: var(--navy); text-decoration: underline; }
 
-/* Training: timeline (-> Title | text). One step per row, running down the slide. */
-.slides .slide .timeline { list-style: none; padding: 0; margin: 34px 0 0; display: grid; gap: 22px; }
+/* Training: timeline (-> Title | text). Steps run down the slide beside one long blue arrow. */
+.slides .slide .timeline { list-style: none; padding: 0 0 0 44px; margin: 34px 0 0; display: grid; gap: 22px; position: relative; }
+.slides .slide .timeline::before { content: ""; position: absolute; left: 9px; top: 4px; bottom: 12px; width: 3px; border-radius: 2px; background: var(--navy); }
+.slides .slide .timeline::after { content: ""; position: absolute; left: 3px; bottom: 0; border-left: 7.5px solid transparent; border-right: 7.5px solid transparent; border-top: 13px solid var(--navy); }
 .slides .slide .timeline + .statement { margin-top: 44px; }
-.slides .slide .timeline li { margin: 0; padding: 0; position: relative; display: grid; grid-template-columns: 36px 150px 1fr; gap: 0 18px; align-items: center; min-height: 36px; }
-/* A connector from each dot to the next one (none after the last). */
-.slides .slide .timeline li:not(:last-child)::after { content: ""; position: absolute; left: 17px; top: 36px; width: 2px; height: calc(100% - 14px); background: #d5ddec; }
-.tl-dot { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 0.95rem; font-weight: 700; }
+.slides .slide .timeline li { margin: 0; padding: 0; display: grid; grid-template-columns: 150px 1fr; gap: 0 18px; align-items: baseline; }
 .slides .timeline .tl-title { margin: 0; font-size: 1rem; font-weight: 700; color: var(--navy); }
 .slides .timeline p { margin: 0; font-size: 1rem; line-height: 1.55; color: var(--body); }
 @media (max-width: 640px) {
-  .slides .slide .timeline li { grid-template-columns: 36px 1fr; align-items: start; }
-  .slides .slide .timeline li > p:last-child { grid-column: 2; }
-  .slides .timeline .tl-title { margin-top: 7px; }
+  .slides .slide .timeline { padding-left: 34px; gap: 18px; }
+  .slides .slide .timeline li { grid-template-columns: 1fr; }
   .slides .timeline p { font-size: 0.95rem; }
 }
