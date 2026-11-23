@@ -85,11 +85,12 @@ test('? Question | Answer makes a quick check with the answer hidden until opene
     '<details class="quick-check"><summary><span class="qc-label">Quick check</span><span class="qc-q">Is &quot;pre-qualified&quot; the same as <strong>approved</strong>?</span><span class="qc-show" aria-hidden="true"></span></summary><p>No. &lt;b&gt;Never&lt;/b&gt;.</p></details>');
 });
 
-test('employment only offers broker, or funder or lender; older types still have labels', () => {
+test('employment offers only brokerage and funder/lender company types; older types still have labels', () => {
   const v = require('../lib/validate');
-  assert.deepEqual(Object.keys(v.COMPANY_TYPES), ['broker', 'funder_lender']);
+  assert.deepEqual(Object.keys(v.COMPANY_TYPES), ['broker', 'funder_lender', 'funder_with_sales', 'broker_with_funding']);
   const base = { relationship_type: 'employee', company_name: 'Acme', start_month: '1', start_year: '2020', work_arrangement: 'remote', primary_role: 'sales_bizdev' };
   assert.ok(v.validateRelationship({ ...base, company_type: 'service_provider' }).errors.company_type);
   assert.ok(!v.validateRelationship({ ...base, company_type: 'broker' }).errors.company_type);
+  assert.ok(!v.validateRelationship({ ...base, company_type: 'broker_with_funding' }).errors.company_type);
   assert.equal(v.COMPANY_TYPE_LABELS.technology_provider, 'Technology / Software Provider');
 });

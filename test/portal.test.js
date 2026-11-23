@@ -175,7 +175,7 @@ test('full journey: sign up, verify email, complete every form', async () => {
   assert.equal(fake.tables.csbfp_registrants.find(r => r.id === jane.id).employment_status, 'working');
   const el = await b.req('/portal/employment');
   assert.match(el.text, /Acme Funding/);
-  assert.match(el.text, /Funder or Lender/);
+  assert.match(el.text, /Funder\/Lender only/);
   assert.match(el.text, /Underwriting \/ Credit/);
   assert.doesNotMatch((await b.req('/portal/employment/new')).text, /Job title/);
   assert.equal(rel.primary_role, 'underwriting_credit');
