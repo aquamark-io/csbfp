@@ -861,3 +861,21 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .slides .slide .timeline li { grid-template-columns: 1fr; }
   .slides .timeline p { font-size: 0.95rem; }
 }
+
+/* Timeline animation: the arrow draws downward and each step fades in as it passes. Runs each time the slide is shown. */
+@media (prefers-reduced-motion: no-preference) {
+  .slides .slide .timeline::before { transform-origin: top; animation: tl-draw 1.4s cubic-bezier(.4, 0, .2, 1) both; }
+  .slides .slide .timeline::after { animation: tl-head .25s ease-out 1.3s both; }
+  .slides .slide .timeline li { animation: tl-step .45s ease-out both; }
+  .slides .slide .timeline li:nth-child(1) { animation-delay: .05s; }
+  .slides .slide .timeline li:nth-child(2) { animation-delay: .27s; }
+  .slides .slide .timeline li:nth-child(3) { animation-delay: .49s; }
+  .slides .slide .timeline li:nth-child(4) { animation-delay: .71s; }
+  .slides .slide .timeline li:nth-child(5) { animation-delay: .93s; }
+  .slides .slide .timeline li:nth-child(6) { animation-delay: 1.15s; }
+  .slides .slide .timeline li:nth-child(n+7) { animation-delay: 1.3s; }
+  .slides .slide .timeline + .statement { animation: tl-step .5s ease-out 1.6s both; }
+}
+@keyframes tl-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes tl-head { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes tl-step { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
