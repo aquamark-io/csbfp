@@ -4,7 +4,7 @@
 <% const a = state.assessment; %>
 <% if (a && a.passed) { %>
   <p class="notice-ok">You passed the assessment with <%= a.passedAttempt.correct_count %> of <%= a.passedAttempt.question_count %> correct.</p>
-  <div class="actions"><a class="button" href="/portal/assessment/result/<%= a.passedAttempt.id %>">See Your Results</a><a class="button secondary" href="/portal/dashboard">Dashboard</a></div>
+  <div class="actions"><a class="button" href="/portal/assessment/result/<%= a.passedAttempt.id %>">See Your Results</a></div>
 <% } else if (blocked) { %>
   <p class="message"><%= blocked %></p>
   <% if (a && a.lastAttempt) { %><p class="muted">Your last attempt: <%= a.lastAttempt.correct_count %> of <%= a.lastAttempt.question_count %> correct.</p><% } %>

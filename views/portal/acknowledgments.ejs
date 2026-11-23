@@ -10,7 +10,6 @@
     <ul class="ack-list done"><% statements.forEach(s => { %><li><span class="ack-box" aria-hidden="true"><%- include('../partials/check') %></span><span><%= s %></span></li><% }) %></ul>
   </div>
 </section>
-<div class="actions"><a class="button secondary" href="/portal/dashboard">Back to Dashboard</a></div>
 <% } else { %>
 <p class="lead">Read each statement and check the box to confirm.</p>
 <% if (error) { %><p class="alert" role="alert"><%= error %></p><% } %>

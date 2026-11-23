@@ -25,7 +25,6 @@
 <% } else if (pay.action !== 'checkout') { %>
   <p class="lead">Payment becomes available once these steps are complete:</p>
   <ul class="plain-list"><% pay.reasons.forEach(r => { %><li><%= r %></li><% }) %></ul>
-  <div class="actions"><a class="button secondary" href="/portal/dashboard">Back to Dashboard</a></div>
 <% } else if (!ready) { %>
   <p class="message">Payments are not available right now. Please check back soon.</p>
 <% } else { %>

@@ -3,7 +3,7 @@
 
 <div class="message">
   <p><strong>Background screening:</strong> <%= screeningConfig.enabled ? 'Enabled' : 'Not enabled' %>
-    · Provider: <code><%= screeningConfig.provider %></code><%= screeningConfig.integrated ? '' : ' (not integrated)' %>
+    · Provider: <code><%= screeningConfig.provider %></code><%= screeningConfig.integrated ? '' : ' (invitation links)' %>
     · Policy version: <code><%= screeningConfig.policyVersion %></code></p>
   <% if (!screeningConfig.enabled) { %>
   <p class="muted">While screening is off, each paid application receives a DEMO credential (DEMO- number) that the public lookup labels as not screened and not valid. Genuine certifications can only be issued with screening enabled. Set <code>BACKGROUND_SCREENING_ENABLED=true</code> in Render once the Checkr links are set in <a href="/admin/background-checks">Background Checks</a>.</p>
@@ -14,7 +14,7 @@
 
 <h2>Applications and certifications needing action</h2>
 <% if (!rows.length) { %><p class="muted">Nothing waiting.</p><% } else { %>
-<table class="table">
+<div class="table-wrap"><table class="table">
   <thead><tr><th>Since</th><th>Name</th><th>Status</th><th>Background check</th><th></th></tr></thead>
   <tbody>
   <% rows.forEach(x => { %>
@@ -27,12 +27,12 @@
     </tr>
   <% }) %>
   </tbody>
-</table>
+</table></div>
 <% } %>
 
 <h2>Open appeals, disputes and reconsideration requests</h2>
 <% if (!appeals.length) { %><p class="muted">None open.</p><% } else { %>
-<table class="table">
+<div class="table-wrap"><table class="table">
   <thead><tr><th>Received</th><th>Name</th><th>Type</th><th>Subject</th><th>Status</th><th></th></tr></thead>
   <tbody>
   <% appeals.forEach(a => { %>
@@ -46,7 +46,7 @@
     </tr>
   <% }) %>
   </tbody>
-</table>
+</table></div>
 <% } %>
-<p class="muted">Procedures for notice, response, appeal and reconsideration are pending program-owner approval. These tools record each step; they do not decide anything automatically.</p>
+<p class="muted">Follow Program Terms section 9 (notice, a chance to respond, and a documented decision). These tools record each step; they do not decide anything automatically.</p>
 <%- include('../partials/foot') %>

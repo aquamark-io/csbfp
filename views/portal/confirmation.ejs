@@ -16,6 +16,6 @@
   <p class="muted">Current status can be confirmed at <a href="/verify?number=<%= registration.registration_number %>"><%= program.domain %>/verify</a> using the certification number. CSBFP is a private industry certification. It is not a government license or regulatory approval, and it does not replace any license or registration required by law.</p>
   <p class="muted">Issued <%= d(new Date()) %>.</p>
 </div>
-<div class="actions no-print"><button class="button" type="button" data-print>Print or Save as PDF</button><a class="button secondary" href="/portal/dashboard">Dashboard</a></div>
+<div class="actions no-print"><button class="button" type="button" data-print>Print or Save as PDF</button></div>
 <script src="/js/print.js?v=<%= assetV %>" defer></script>
 <%- include('../partials/foot') %>
