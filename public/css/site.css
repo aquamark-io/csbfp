@@ -802,8 +802,15 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .md-compare tbody tr:nth-child(even) th, .md-compare tbody tr:nth-child(even) td { background: var(--soft); }
 .slides .note, .note { font-size: 0.95rem; font-style: italic; color: var(--muted); margin: 0; }
 @media (max-width: 520px) {
-  .md-compare thead th:first-child { width: 26%; }
-  .md-compare thead th { font-size: 0.9rem; padding: 12px 8px 10px; }
-  .md-compare tbody th { font-size: 0.7rem; padding: 12px 8px; letter-spacing: 0.04em; }
-  .slides .md-compare td { padding: 12px 8px; font-size: 0.88rem; line-height: 1.5; }
+  /* Phones: each row stacks as a small block, with each answer labelled by its column. */
+  .md-compare, .md-compare tbody, .md-compare tr, .md-compare th, .md-compare td { display: block; width: auto; }
+  .md-compare { border: 0; }
+  .md-compare thead { display: none; }
+  .md-compare tbody tr { border: 1px solid var(--line); border-radius: 10px; margin: 0 0 10px; overflow: hidden; }
+  .md-compare tbody tr:nth-child(even) th, .md-compare tbody tr:nth-child(even) td { background: transparent; }
+  .md-compare tbody th { background: var(--soft); border-bottom: 1px solid var(--line); padding: 10px 14px; font-size: 0.72rem; }
+  .md-compare tbody tr:last-child th { border-bottom: 1px solid var(--line); }
+  .slides .md-compare td { padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 0.95rem; line-height: 1.5; }
+  .slides .md-compare td:last-child { border-bottom: 0; }
+  .md-compare td::before { content: attr(data-label); display: block; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
 }

@@ -55,6 +55,6 @@ test('a table with an empty first header cell is a comparison with row labels an
   const html = render('| | @bank Bank | Other |\n|---|---|---|\n| Speed | Weeks | Days |\n\n~ Terms matter.');
   assert.match(html, /<table class="md-table md-compare">/);
   assert.match(html, /<th scope="col"><span class="icon-tile"><svg[^>]*>.*<\/svg><\/span>Bank<\/th><th scope="col">Other<\/th>/);
-  assert.match(html, /<tr><th scope="row">Speed<\/th><td>Weeks<\/td><td>Days<\/td><\/tr>/);
+  assert.match(html, /<tr><th scope="row">Speed<\/th><td data-label="Bank">Weeks<\/td><td data-label="Other">Days<\/td><\/tr>/);
   assert.match(html, /<p class="note">Terms matter.<\/p>$/);
 });
