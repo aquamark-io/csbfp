@@ -789,3 +789,21 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .icon-tile svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 
 .module-back { margin-bottom: 18px; }
+
+/* Training: comparison table (empty first header cell) and small note */
+.md-compare { table-layout: fixed; }
+.md-compare thead th { text-transform: none; letter-spacing: 0; font-size: 1rem; color: var(--navy); background: #fff; padding: 16px 14px 12px; border-bottom: 2px solid var(--gold); vertical-align: bottom; }
+.md-compare thead th:first-child { width: 24%; }
+.md-compare thead th .icon-tile { width: 40px; height: 40px; margin-bottom: 8px; }
+.md-compare thead th .icon-tile svg { width: 22px; height: 22px; }
+.md-compare tbody th { text-align: left; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: transparent; padding: 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.slides .md-compare td, .md-compare td { width: auto; font-weight: 400; color: var(--body); }
+.md-compare tbody tr:last-child th { border-bottom: 0; }
+.md-compare tbody tr:nth-child(even) th, .md-compare tbody tr:nth-child(even) td { background: var(--soft); }
+.slides .note, .note { font-size: 0.95rem; font-style: italic; color: var(--muted); margin: 0; }
+@media (max-width: 520px) {
+  .md-compare thead th:first-child { width: 26%; }
+  .md-compare thead th { font-size: 0.9rem; padding: 12px 8px 10px; }
+  .md-compare tbody th { font-size: 0.7rem; padding: 12px 8px; letter-spacing: 0.04em; }
+  .slides .md-compare td { padding: 12px 8px; font-size: 0.88rem; line-height: 1.5; }
+}

@@ -49,3 +49,12 @@ test('@icon lines make an icon row; unknown icons show just the label', () => {
   assert.match(html, /^<ul class="icon-row"><li><span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true">.*<\/svg><\/span><span>Working capital<\/span><\/li>/);
   assert.match(html, /<li><span class="icon-tile"><\/span><span>Payroll &lt;x&gt;<\/span><\/li><\/ul>$/);
 });
+
+test('a table with an empty first header cell is a comparison with row labels and header icons', () => {
+  const { render } = require('../lib/markdown');
+  const html = render('| | @bank Bank | Other |\n|---|---|---|\n| Speed | Weeks | Days |\n\n~ Terms matter.');
+  assert.match(html, /<table class="md-table md-compare">/);
+  assert.match(html, /<th scope="col"><span class="icon-tile"><svg[^>]*>.*<\/svg><\/span>Bank<\/th><th scope="col">Other<\/th>/);
+  assert.match(html, /<tr><th scope="row">Speed<\/th><td>Weeks<\/td><td>Days<\/td><\/tr>/);
+  assert.match(html, /<p class="note">Terms matter.<\/p>$/);
+});
