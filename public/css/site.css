@@ -902,12 +902,26 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 
 /* Training: key terms (= Term | definition) */
 .slides .terms { margin: 8px 0 26px; border-top: 1px solid var(--line); }
-.slides .terms > div { display: grid; grid-template-columns: 180px 1fr; gap: 20px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.slides .terms > div { display: grid; grid-template-columns: 210px 1fr; gap: 20px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .slides .terms dt { font-weight: 700; color: var(--navy); font-size: 1rem; }
 .slides .terms dd { margin: 0; font-size: 1rem; line-height: 1.55; color: var(--body); }
 @media (max-width: 640px) {
   .slides .terms > div { grid-template-columns: 1fr; gap: 2px; padding: 12px 0; }
   .slides .terms dd { font-size: 0.95rem; }
 }
-.slides .terms + .statement, .slides .figures + .statement, .slides .table-wrap + .statement { margin-top: 30px; }
+.slides .terms + .statement, .slides .figures + .statement, .slides .table-wrap + .statement, .slides .slide .columns + .statement { margin-top: 30px; }
+.slides .statement + .note { margin-top: 18px; }
 .slides .slide .timeline + .terms { margin-top: 60px; }
+
+/* Training: quick check (? Question | Answer). The answer opens in place; not graded. */
+.quick-check { margin: 24px 0; border: 1px solid #d5ddec; border-left: 3px solid var(--gold); border-radius: 10px; background: #fff; }
+.quick-check summary { list-style: none; cursor: pointer; padding: 16px 20px; display: grid; gap: 4px; }
+.quick-check summary::-webkit-details-marker { display: none; }
+.qc-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.qc-q { font-size: 1rem; font-weight: 600; line-height: 1.5; color: var(--ink); }
+.qc-show { font-size: 0.9rem; font-weight: 600; color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
+.qc-show::after { content: "Show answer"; }
+.quick-check[open] .qc-show::after { content: "Hide answer"; }
+.quick-check summary:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 8px; }
+.slides .quick-check > p { margin: 0 20px; padding: 14px 0 18px; border-top: 1px solid var(--line); font-size: 1rem; line-height: 1.6; color: var(--body); }
+.slides .quick-check + .statement { margin-top: 28px; }

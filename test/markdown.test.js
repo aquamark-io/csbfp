@@ -78,3 +78,9 @@ test('$ lines make figures joined by arrows; = lines make a key terms list', () 
   assert.equal(render('= Remittance | Collected <daily>.\n= Reconciliation | Adjusts.'),
     '<dl class="terms"><div><dt>Remittance</dt><dd>Collected &lt;daily&gt;.</dd></div><div><dt>Reconciliation</dt><dd>Adjusts.</dd></div></dl>');
 });
+
+test('? Question | Answer makes a quick check with the answer hidden until opened', () => {
+  const { render } = require('../lib/markdown');
+  assert.equal(render('? Is "pre-qualified" the same as **approved**? | No. <b>Never</b>.'),
+    '<details class="quick-check"><summary><span class="qc-label">Quick check</span><span class="qc-q">Is &quot;pre-qualified&quot; the same as <strong>approved</strong>?</span><span class="qc-show" aria-hidden="true"></span></summary><p>No. &lt;b&gt;Never&lt;/b&gt;.</p></details>');
+});
