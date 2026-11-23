@@ -816,22 +816,24 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .md-compare td::before { content: attr(data-label); display: block; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
 }
 
-/* Training: columns side by side (+ Title | text), each with a blue title over a thin gold rule */
+/* Training: cards side by side (+ Title | text), each with a blue title over a thin gold rule.
+   Five cards sit as three over two, with both rows the same overall width. */
+.slides .slide .columns { list-style: none; padding: 0; margin: 18px 0 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .slides .slide .columns.cols-1 { grid-template-columns: 1fr; }
 .slides .slide .columns.cols-2 { grid-template-columns: repeat(2, 1fr); }
 .slides .slide .columns.cols-4 { grid-template-columns: repeat(4, 1fr); }
-.slides .slide .columns.cols-5 { grid-template-columns: repeat(5, 1fr); }
-.slides .slide .columns.cols-6 { grid-template-columns: repeat(6, 1fr); }
-.slides .slide .columns { list-style: none; padding: 0; margin: 14px 0 18px; display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #d5ddec; border-radius: 10px; overflow: hidden; }
-.slides .slide .columns li { margin: 0; padding: 0; border-right: 1px solid #d5ddec; }
-.slides .slide .columns li:last-child { border-right: 0; }
-.slides .columns .columns-head { display: flex; align-items: flex-end; box-sizing: border-box; height: 58px; margin: 0 14px; padding: 0 0 10px; background: transparent; color: var(--navy); font-size: 0.98rem; font-weight: 700; line-height: 1.3; border-bottom: 2px solid var(--gold); }
-.slides .columns p { margin: 0; padding: 12px 14px 16px; font-size: 0.93rem; line-height: 1.55; color: var(--body); }
-@media (max-width: 640px) {
-  .slides .slide .columns, .slides .slide .columns[class*=cols-] { grid-template-columns: 1fr; }
-  .slides .slide .columns li { border-right: 0; border-bottom: 1px solid #d5ddec; }
-  .slides .slide .columns li:last-child { border-bottom: 0; }
-  .slides .columns .columns-head { height: auto; padding: 14px 0 8px; }
+@media (min-width: 761px) {
+  .slides .slide .columns.cols-5 { grid-template-columns: repeat(6, 1fr); }
+  .slides .slide .columns.cols-5 li { grid-column: span 2; }
+  .slides .slide .columns.cols-5 li:nth-child(n+4) { grid-column: span 3; }
+}
+.slides .slide .columns li { margin: 0; padding: 18px 20px 20px; border: 1px solid #d5ddec; border-radius: 10px; background: #fff; }
+.slides .columns .columns-head { margin: 0 0 10px; padding: 0 0 8px; font-size: 1.02rem; font-weight: 700; line-height: 1.3; color: var(--navy); border-bottom: 2px solid var(--gold); }
+.slides .columns p { margin: 0; font-size: 0.97rem; line-height: 1.6; color: var(--body); }
+@media (max-width: 760px) {
+  .slides .slide .columns, .slides .slide .columns[class*=cols-] { grid-template-columns: 1fr; gap: 10px; }
+  .slides .slide .columns li { padding: 14px 16px 16px; }
+  .slides .columns p { font-size: 0.95rem; }
 }
 
 /* Training module pages: a wider page and roomier slides */
