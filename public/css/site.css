@@ -807,14 +807,14 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .md-compare thead { display: none; }
   .md-compare tbody tr { border: 1px solid #d5ddec; border-radius: 10px; margin: 0 0 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 4px 12px rgba(16, 24, 40, 0.05); }
   .md-compare tbody tr:nth-child(even) th, .md-compare tbody tr:nth-child(even) td { background: transparent; }
-  .md-compare tbody th, .md-compare tbody tr:nth-child(even) th { background: var(--navy); color: #fff; border-bottom: 3px solid var(--gold); padding: 10px 14px; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.08em; }
-  .md-compare tbody tr:last-child th { border-bottom: 3px solid var(--gold); }
+  .md-compare tbody th, .md-compare tbody tr:nth-child(even) th { background: #fff; color: var(--navy); border-bottom: 2px solid var(--gold); margin: 0 14px; padding: 12px 0 8px; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.08em; }
+  .md-compare tbody tr:last-child th { border-bottom: 2px solid var(--gold); }
   .slides .md-compare td { padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 0.95rem; line-height: 1.5; }
   .slides .md-compare td:last-child { border-bottom: 0; }
   .md-compare td::before { content: attr(data-label); display: block; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
 }
 
-/* Training: columns side by side (+ Title | text), each with a blue band and gold rule */
+/* Training: columns side by side (+ Title | text), each with a blue title over a thin gold rule */
 .slides .slide .columns.cols-1 { grid-template-columns: 1fr; }
 .slides .slide .columns.cols-2 { grid-template-columns: repeat(2, 1fr); }
 .slides .slide .columns.cols-4 { grid-template-columns: repeat(4, 1fr); }
@@ -823,13 +823,13 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .slides .slide .columns { list-style: none; padding: 0; margin: 14px 0 18px; display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #d5ddec; border-radius: 10px; overflow: hidden; }
 .slides .slide .columns li { margin: 0; padding: 0; border-right: 1px solid #d5ddec; }
 .slides .slide .columns li:last-child { border-right: 0; }
-.slides .columns .columns-head { display: flex; align-items: center; box-sizing: border-box; height: 64px; margin: 0; padding: 0 14px; background: var(--navy); color: #fff; font-size: 0.92rem; font-weight: 700; line-height: 1.3; border-bottom: 3px solid var(--gold); }
+.slides .columns .columns-head { display: flex; align-items: flex-end; box-sizing: border-box; height: 58px; margin: 0 14px; padding: 0 0 10px; background: transparent; color: var(--navy); font-size: 0.98rem; font-weight: 700; line-height: 1.3; border-bottom: 2px solid var(--gold); }
 .slides .columns p { margin: 0; padding: 12px 14px 16px; font-size: 0.93rem; line-height: 1.55; color: var(--body); }
 @media (max-width: 640px) {
   .slides .slide .columns, .slides .slide .columns[class*=cols-] { grid-template-columns: 1fr; }
   .slides .slide .columns li { border-right: 0; border-bottom: 1px solid #d5ddec; }
   .slides .slide .columns li:last-child { border-bottom: 0; }
-  .slides .columns .columns-head { height: auto; padding: 10px 14px; }
+  .slides .columns .columns-head { height: auto; padding: 14px 0 8px; }
 }
 
 /* Training module pages: a wider page and roomier slides */
@@ -846,23 +846,17 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .footer-slim a { color: var(--muted); text-decoration: none; }
 .footer-slim a:hover { color: var(--navy); text-decoration: underline; }
 
-/* Training: timeline (-> Title | text). Across on desktop, down on phones. */
-.slides .slide .timeline { list-style: none; padding: 0; margin: 22px 0 26px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 0 14px; position: relative; }
-.slides .slide .timeline.cols-3 { grid-template-columns: repeat(3, 1fr); }
-.slides .slide .timeline.cols-4 { grid-template-columns: repeat(4, 1fr); }
-.slides .slide .timeline.cols-5 { grid-template-columns: repeat(5, 1fr); }
-.slides .slide .timeline.cols-7 { grid-template-columns: repeat(7, 1fr); }
-.slides .slide .timeline.cols-8 { grid-template-columns: repeat(8, 1fr); }
+/* Training: timeline (-> Title | text). One step per row, running down the slide. */
+.slides .slide .timeline { list-style: none; padding: 0; margin: 22px 0 28px; display: grid; gap: 22px; }
+.slides .slide .timeline li { margin: 0; padding: 0; position: relative; display: grid; grid-template-columns: 36px 150px 1fr; gap: 0 18px; align-items: center; min-height: 36px; }
 /* A connector from each dot to the next one (none after the last). */
-.slides .slide .timeline li:not(:last-child)::after { content: ""; position: absolute; left: 18px; width: calc(100% + 14px); top: 17px; height: 2px; background: #d5ddec; }
-.slides .slide .timeline li { margin: 0; padding: 0; position: relative; }
-.tl-dot { position: relative; z-index: 1; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 0.95rem; font-weight: 700; box-shadow: 0 0 0 4px #fff; }
-.slides .timeline .tl-title { margin: 14px 0 4px; font-size: 1rem; font-weight: 700; color: var(--navy); }
-.slides .timeline p { margin: 0; font-size: 0.92rem; line-height: 1.55; color: var(--body); }
-@media (max-width: 760px) {
-  .slides .slide .timeline, .slides .slide .timeline[class*=cols-] { grid-template-columns: 1fr; gap: 18px; }
-  .slides .slide .timeline li:not(:last-child)::after { left: 17px; top: 18px; width: 2px; height: calc(100% + 18px); }
-  .slides .slide .timeline li { padding-left: 52px; min-height: 36px; }
-  .tl-dot { position: absolute; left: 0; top: 0; }
-  .slides .timeline .tl-title { margin: 6px 0 2px; }
+.slides .slide .timeline li:not(:last-child)::after { content: ""; position: absolute; left: 17px; top: 36px; width: 2px; height: calc(100% - 14px); background: #d5ddec; }
+.tl-dot { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 0.95rem; font-weight: 700; }
+.slides .timeline .tl-title { margin: 0; font-size: 1rem; font-weight: 700; color: var(--navy); }
+.slides .timeline p { margin: 0; font-size: 1rem; line-height: 1.55; color: var(--body); }
+@media (max-width: 640px) {
+  .slides .slide .timeline li { grid-template-columns: 36px 1fr; align-items: start; }
+  .slides .slide .timeline li > p:last-child { grid-column: 2; }
+  .slides .timeline .tl-title { margin-top: 7px; }
+  .slides .timeline p { font-size: 0.95rem; }
 }
