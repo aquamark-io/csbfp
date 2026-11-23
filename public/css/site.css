@@ -879,3 +879,6 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 @keyframes tl-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
 @keyframes tl-head { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 @keyframes tl-step { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+
+/* Page titles that go straight into a card, list or form get more room; titles followed by a lead line keep it close. */
+.main h1:not(:has(+ p)) { margin-bottom: 30px; }
