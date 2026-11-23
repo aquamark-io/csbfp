@@ -59,9 +59,8 @@ test('a table with an empty first header cell is a comparison with row labels an
   assert.match(html, /<p class="note">Terms matter.<\/p>$/);
 });
 
-test('@icon Title | text lines make cards', () => {
+test('+ Title | text lines make columns with header bands', () => {
   const { render } = require('../lib/markdown');
-  const html = render('@bank Funder | Provides **capital**.\n@search Underwriting | Reviews.');
-  assert.match(html, /^<ul class="card-grid"><li><span class="icon-tile"><svg[^>]*>.*?<\/svg><\/span><div><p class="card-title">Funder<\/p><p>Provides <strong>capital<\/strong>.<\/p><\/div><\/li><li>/);
-  assert.equal((html.match(/<li>/g) || []).length, 2);
+  const html = render('+ Funder | Provides **capital**.\n+ Broker | Helps <you>.');
+  assert.equal(html, '<ul class="columns" style="--cols:2"><li><p class="columns-head">Funder</p><p>Provides <strong>capital</strong>.</p></li><li><p class="columns-head">Broker</p><p>Helps &lt;you&gt;.</p></li></ul>');
 });
