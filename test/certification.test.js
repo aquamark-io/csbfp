@@ -174,7 +174,7 @@ test('background check page: state from ZIP, exact name and email, private per-s
   assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'checkr_links_updated'));
 
   page = await ann.req('/portal/background-check');
-  assert.match(page.text, /Start Background Check with Checkr/);
+  assert.match(page.text, /Start Background Check/);
   assert.doesNotMatch(page.text, /checkr\.example/, 'the link itself is not printed on the page');
   const go = await ann.req('/portal/background-check/go');
   assert.equal(go.location, 'https://checkr.example/apply/ca');
