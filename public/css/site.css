@@ -934,3 +934,5 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .slides .slide h2 { margin-bottom: 8px; }
 .slides .slide h2 + p { margin-bottom: 30px; }
 .slides .slide h2 + .terms { margin-top: 26px; }
+/* A line after a slide's closing statement (e.g. Industry Resources) gets clear space above it. */
+.slides .slide > .statement + p { margin-top: 48px; margin-bottom: 8px; }
