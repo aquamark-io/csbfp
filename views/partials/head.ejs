@@ -64,6 +64,7 @@
     <% } else { %>
     <% const pub = (href, label) => (currentPath === href ? '' : nav(href, label)); /* the current page isn't listed */ %>
     <nav class="nav" id="site-nav" aria-label="Main">
+      <%- pub('/verify', 'Verify') %>
       <% if (signedIn) { %>
       <%- pub('/faq', 'FAQ') %>
       <%- pub('/support', 'Contact') %>
