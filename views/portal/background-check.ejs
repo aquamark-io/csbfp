@@ -16,9 +16,6 @@
     </dl>
     <% if (link) { %>
       <div class="bg-actions"><a class="button gold" href="/portal/background-check/go" target="_blank" rel="noopener">Start Background Check</a></div>
-      <% if (sc && sc.link_opened_at) { %>
-        <p class="bg-note">You opened Checkr on <%= fmtTime(sc.link_opened_at) %>. If you've finished, there's nothing else to do. We'll email you once your results are reviewed.</p>
-      <% } %>
     <% } else { %>
       <p class="bg-note">The background check for <%= stateName %> isn't available yet. We'll email you as soon as it is.</p>
     <% } %>
