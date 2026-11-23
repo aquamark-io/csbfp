@@ -789,7 +789,6 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .icon-tile { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #eef2fa; color: var(--navy); }
 .icon-tile svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 
-.module-back { margin-bottom: 18px; }
 
 /* Training: comparison table (empty first header cell) and small note */
 .md-compare { table-layout: fixed; }
@@ -930,3 +929,8 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 
 /* Training: the same generous gap above every slide's closing statement (the letter keeps its own spacing). */
 .slides .slide > .statement { margin-top: 64px; }
+
+/* Training: the subtitle sits right under the slide title, with the space below it before the content. */
+.slides .slide h2 { margin-bottom: 8px; }
+.slides .slide h2 + p { margin-bottom: 30px; }
+.slides .slide h2 + .terms { margin-top: 26px; }
