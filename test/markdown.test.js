@@ -42,3 +42,10 @@ test('> makes a highlighted statement', () => {
   const { render } = require('../lib/markdown');
   assert.equal(render('> With opportunity comes <b>responsibility</b>.'), '<p class="statement">With opportunity comes &lt;b&gt;responsibility&lt;/b&gt;.</p>');
 });
+
+test('@icon lines make an icon row; unknown icons show just the label', () => {
+  const { render } = require('../lib/markdown');
+  const html = render('@cash Working capital\n@nope Payroll <x>');
+  assert.match(html, /^<ul class="icon-row"><li><span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true">.*<\/svg><\/span><span>Working capital<\/span><\/li>/);
+  assert.match(html, /<li><span class="icon-tile"><\/span><span>Payroll &lt;x&gt;<\/span><\/li><\/ul>$/);
+});
