@@ -64,3 +64,9 @@ test('+ Title | text lines make columns with header bands', () => {
   const html = render('+ Funder | Provides **capital**.\n+ Broker | Helps <you>.');
   assert.equal(html, '<ul class="columns cols-2"><li><p class="columns-head">Funder</p><p>Provides <strong>capital</strong>.</p></li><li><p class="columns-head">Broker</p><p>Helps &lt;you&gt;.</p></li></ul>');
 });
+
+test('-> Title | text lines make a numbered timeline', () => {
+  const { render } = require('../lib/markdown');
+  const html = render('-> Request | The business **asks**.\n-> Funding | Funds <go> out.');
+  assert.equal(html, '<ol class="timeline cols-2"><li><span class="tl-dot" aria-hidden="true">1</span><p class="tl-title">Request</p><p>The business <strong>asks</strong>.</p></li><li><span class="tl-dot" aria-hidden="true">2</span><p class="tl-title">Funding</p><p>Funds &lt;go&gt; out.</p></li></ol>');
+});
