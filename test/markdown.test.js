@@ -70,3 +70,11 @@ test('-> Title | text lines make a timeline', () => {
   const html = render('-> Request | The business **asks**.\n-> Funding | Funds <go> out.');
   assert.equal(html, '<ol class="timeline"><li><p class="tl-title">Request</p><p>The business <strong>asks</strong>.</p></li><li><p class="tl-title">Funding</p><p>Funds &lt;go&gt; out.</p></li></ol>');
 });
+
+test('$ lines make figures joined by arrows; = lines make a key terms list', () => {
+  const { render } = require('../lib/markdown');
+  assert.equal(render('$ Purchase price | $50,000 | Paid **upfront**\n$ Purchased amount | $65,000 | Delivered'),
+    '<div class="figures"><div class="figure"><p class="fig-label">Purchase price</p><p class="fig-value">$50,000</p><p>Paid <strong>upfront</strong></p></div><span class="fig-arrow" aria-hidden="true"></span><div class="figure"><p class="fig-label">Purchased amount</p><p class="fig-value">$65,000</p><p>Delivered</p></div></div>');
+  assert.equal(render('= Remittance | Collected <daily>.\n= Reconciliation | Adjusts.'),
+    '<dl class="terms"><div><dt>Remittance</dt><dd>Collected &lt;daily&gt;.</dd></div><div><dt>Reconciliation</dt><dd>Adjusts.</dd></div></dl>');
+});
