@@ -927,3 +927,6 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .slides .quick-check > p { margin: 0 20px; padding: 14px 0 18px; border-top: 1px solid var(--line); font-size: 1rem; line-height: 1.6; color: var(--body); }
 .slides .quick-check + .statement { margin-top: 28px; }
 .slides ul + .statement, .slides .slide > p + .statement { margin-top: 28px; }
+
+/* Training: the same generous gap above every slide's closing statement (the letter keeps its own spacing). */
+.slides .slide > .statement { margin-top: 48px; }
