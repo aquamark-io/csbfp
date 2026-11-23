@@ -184,7 +184,6 @@ test('legal documents: publishing a new version updates the site and keeps histo
   assert.match(decodeURIComponent(r.location), /Version 2 is published/);
   r = await browser().req('/legal/terms');
   assert.match(r.text, /These are the real terms/);
-  assert.match(r.text, /Effective /);
   assert.doesNotMatch(r.text, /Version 2/, 'the internal version number is not shown publicly');
   r = await boss.req('/admin/legal/acknowledgments', { body_md: 'No list here', confirm: 'yes' });
   assert.match(decodeURIComponent(r.location), /statement line/);

@@ -1,4 +1,4 @@
-Version 1.01
+Version 1.02
 
 ## 1. Program Ownership and Administration
 
@@ -14,7 +14,7 @@ By creating an account, submitting an application, or participating in the Progr
 
 Applicants must be at least 18 years old and provide accurate, complete information.
 
-Certification is available to individuals working in, or seeking to enter, the small business finance industry. Current employment is not required.
+Certification is available to individuals working in, or seeking to enter, the small business finance industry as a broker or lender. Current employment is not required.
 
 The Program reserves the right to verify applicant information, assess eligibility, and deny applications that do not meet its requirements, subject to applicable law.
 
@@ -53,6 +53,8 @@ Fees are charged for participation in the certification process and do not guara
 
 Any changes to fees will be disclosed before they take effect.
 
+**Employer credits.** An employer may purchase certification credits and share its Employer ID with its employees, who enter it at payment. One credit pays one first-year certification fee. Credits are nonrefundable and do not expire. Anyone with an Employer ID can use its credits, so the employer is responsible for sharing it only with its team.
+
 ## 6. Certification Term and Automatic Renewal
 
 Certification is valid for 12 months and automatically renews annually at the then-applicable disclosed renewal rate unless canceled.
@@ -66,6 +68,8 @@ Cancellation prevents future renewal charges but does not ordinarily result in a
 Background screening and assessments are not routinely repeated at renewal. Additional requirements may apply if Program standards change.
 
 Automatic-renewal enrollment, consent, cancellation, and notices will be administered in accordance with applicable law.
+
+A certification paid with an employer credit is valid for 12 months and does not renew automatically. To keep it active, the certificant must add their own payment method before the term ends.
 
 ## 7. Certification Numbers and Public Verification
 
@@ -111,7 +115,20 @@ Continued certification may depend on satisfying updated requirements.
 
 CSBFP is an individual professional credential, not an employer certification.
 
-Certificants may accurately represent their certification status and use authorized CSBFP designations or digital credentials in accordance with Program branding guidelines.
+Certificants may accurately represent their certification status and use authorized CSBFP designations or digital credentials as described below.
+
+While their certification is current, certificants may:
+
+- Use the designation "Certified Small Business Finance Professional" or "CSBFP" after their name, for example "Jane Smith, CSBFP."
+- Share their certification number so others can verify it.
+- Display the CSBFP logo or digital credential, if provided by the Program, without changes.
+
+Certificants may not:
+
+- Alter the CSBFP logo or create new marks, names, or abbreviations based on it.
+- Use the CSBFP name or logo in a company name, company logo, domain name, or product name.
+- Suggest that their employer, products, or transactions are certified or endorsed by SBFA or CSBFP.
+- Present CSBFP as a government license or regulatory approval.
 
 The CSBFP name, logo, and related intellectual property remain the property of SBFA. No ownership or unrestricted license is granted to applicants or certificants.
 

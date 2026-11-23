@@ -1,4 +1,4 @@
-Version 1.01
+Version 1.02
 
 ## 1. Overview
 
@@ -12,12 +12,14 @@ This Privacy Policy explains what information is collected, how it is used, when
 
 Depending on how you interact with the Program, we may collect:
 
-- **Personal information:** Name, email address, phone number, and other contact details.
+- **Personal information:** Name, date of birth, home ZIP code, email address, phone number, and other contact details.
 - **Professional information:** Employer, company type, job function, employment history where requested, and related application details.
 - **Certification information:** Training progress, assessment results, certification number, status, issuance date, and expiration date.
 - **Payment information:** Transaction records, payment status, billing details, and limited payment-method information supplied by our payment processor.
 - **Background-screening information:** Screening status, eligibility determinations, and relevant information provided by the authorized screening provider.
 - **Technical information:** IP address, browser information, device details, login activity, and website usage information.
+
+Your date of birth is stored encrypted and is used to confirm your identity and that you meet the minimum age. Your home ZIP code is used to identify your state for background screening.
 
 Additional information may be collected when necessary to administer the Program, investigate reported misconduct, or comply with legal obligations.
 
