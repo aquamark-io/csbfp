@@ -12,7 +12,7 @@ test('training slides split at headings and keep callouts with their slide', () 
   const { renderSlides } = require('../lib/markdown');
   const html = renderSlides('Goal: Learn.\n\n## Products\n\nIntro.\n\n### Loans\n\n- a\n\n### Remember\n\nBe careful.\n\n### Leases\n\nText');
   assert.equal((html.match(/<section class="slide/g) || []).length, 4);
-  assert.match(html, /^<section class="slide" data-slide="1"><p class="goal">.*Learn.<\/p><\/section>/, 'opening text is a slide with no heading');
+  assert.match(html, /^<section class="slide slide-letter" data-slide="1"><div class="letter">.*<p class="goal">.*Learn.<\/p><\/div><\/section>/, 'opening text is a letter slide with no heading');
   assert.doesNotMatch(html, /In this module/);
   assert.match(html, /<h2>Loans<\/h2><ul><li>a<\/li><\/ul>\n?<aside class="callout callout-remember">/);
 });
@@ -36,4 +36,9 @@ test('https links render; other schemes stay as text', () => {
   assert.match(render('See [Center](https://example.org/a/).'), /<a href="https:\/\/example.org\/a\/" target="_blank" rel="noopener noreferrer">Center<\/a>/);
   assert.doesNotMatch(render('[x](javascript:alert(1))'), /<a /);
   assert.doesNotMatch(render('[x](http://example.org)'), /<a /);
+});
+
+test('> makes a highlighted statement', () => {
+  const { render } = require('../lib/markdown');
+  assert.equal(render('> With opportunity comes <b>responsibility</b>.'), '<p class="statement">With opportunity comes &lt;b&gt;responsibility&lt;/b&gt;.</p>');
 });

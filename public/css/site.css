@@ -765,3 +765,17 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .employer-steps li { border-bottom: 0; padding: 5px 0; }
 .employer-intro h1 { margin-bottom: 14px; }
 .employer-cards { margin-top: 40px; }
+
+/* Training: the opening letter (text before a module's first heading) */
+.slides .slide-letter { display: flex; align-items: center; justify-content: center; background: #fff; border-top: 4px solid var(--gold); }
+.letter { max-width: 560px; margin: 8px auto; }
+.letter-logo { display: block; width: 92px; height: auto; margin: 0 0 26px; }
+.slides .letter p { font-size: 1.08rem; line-height: 1.75; color: var(--ink); margin: 0 0 16px; }
+.slides .letter .statement { font-size: 1.3rem; line-height: 1.45; font-weight: 600; color: var(--navy); margin: 26px 0; padding-left: 16px; border-left: 3px solid var(--gold); }
+.slides .letter p:last-child { margin: 26px 0 0; font-style: italic; color: var(--navy); font-weight: 500; }
+.slides .statement { font-size: 1.25rem; line-height: 1.45; font-weight: 600; color: var(--navy); padding-left: 16px; border-left: 3px solid var(--gold); }
+@media (max-width: 520px) {
+  .letter-logo { width: 76px; margin-bottom: 20px; }
+  .slides .letter p { font-size: 1rem; line-height: 1.7; }
+  .slides .letter .statement { font-size: 1.15rem; margin: 20px 0; }
+}
