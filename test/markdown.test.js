@@ -62,5 +62,5 @@ test('a table with an empty first header cell is a comparison with row labels an
 test('+ Title | text lines make columns with header bands', () => {
   const { render } = require('../lib/markdown');
   const html = render('+ Funder | Provides **capital**.\n+ Broker | Helps <you>.');
-  assert.equal(html, '<ul class="columns" style="--cols:2"><li><p class="columns-head">Funder</p><p>Provides <strong>capital</strong>.</p></li><li><p class="columns-head">Broker</p><p>Helps &lt;you&gt;.</p></li></ul>');
+  assert.equal(html, '<ul class="columns cols-2"><li><p class="columns-head">Funder</p><p>Provides <strong>capital</strong>.</p></li><li><p class="columns-head">Broker</p><p>Helps &lt;you&gt;.</p></li></ul>');
 });
