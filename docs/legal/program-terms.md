@@ -6,7 +6,7 @@ The Certified Small Business Finance Professional (CSBFP) program is owned by th
 
 Duncan Consulting LLC serves as the program administrator, responsible for operating the certification website, application and training systems, assessment, payment administration, background-screening coordination, certification records, and related support.
 
-Duncan Consulting LLC is an independent company. It is not owned or controlled by SBFA, and it does not speak for SBFA or set, endorse, or represent SBFA's policies or positions. SBFA alone sets the Program's standards and policies; Duncan Consulting LLC administers the Program under those standards. As an independent administrator, Duncan Consulting LLC applies those standards consistently and objectively to every applicant and certificant, so the certification process is fair and impartial.
+**Independence of the Administrator.** Duncan Consulting LLC is an independent entity and is not owned, controlled, or governed by SBFA. The administrator does not represent SBFA and does not establish, endorse, or speak on behalf of SBFA's policies or positions. Authority over the Program's standards and policies rests solely with SBFA. The administrator's role is limited to the impartial administration of those standards, applied uniformly and objectively to all applicants and certificants, to preserve the integrity and fairness of the certification process.
 
 Throughout these Terms, "the Program" refers to CSBFP as owned by SBFA and administered by Duncan Consulting LLC.
 
