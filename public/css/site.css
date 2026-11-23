@@ -461,11 +461,6 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .deck-on .deck-nav .button { flex: 1; }
   .deck-nav .button[disabled] { visibility: visible; opacity: .4; }
 }
-.slide-intro .goal { margin-bottom: 26px; }
-.slides .toc { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
-.slides .toc li { counter-increment: toc; display: flex; gap: 14px; align-items: baseline; padding: 10px 0; border-bottom: 1px solid var(--line); margin: 0; font-weight: 500; color: var(--ink); }
-.slides .toc li:last-child { border-bottom: 0; }
-.slides .toc li::before { content: counter(toc); font-size: 0.85rem; font-weight: 600; color: var(--navy); min-width: 1.2em; }
 .callout-example { border-left: 3px solid var(--navy); background: #f5f6fc; }
 .callout-example .callout-title { color: var(--navy); }
 .deck-nav [hidden] { display: none !important; }

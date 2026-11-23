@@ -12,7 +12,8 @@ test('training slides split at headings and keep callouts with their slide', () 
   const { renderSlides } = require('../lib/markdown');
   const html = renderSlides('Goal: Learn.\n\n## Products\n\nIntro.\n\n### Loans\n\n- a\n\n### Remember\n\nBe careful.\n\n### Leases\n\nText');
   assert.equal((html.match(/<section class="slide/g) || []).length, 4);
-  assert.match(html, /In this module<\/p><ol class="toc"><li>Products<\/li><\/ol>/);
+  assert.match(html, /^<section class="slide" data-slide="1"><p class="goal">.*Learn.<\/p><\/section>/, 'opening text is a slide with no heading');
+  assert.doesNotMatch(html, /In this module/);
   assert.match(html, /<h2>Loans<\/h2><ul><li>a<\/li><\/ul>\n?<aside class="callout callout-remember">/);
 });
 
@@ -21,7 +22,6 @@ test('a section heading with nothing under it does not make an empty slide', () 
   const html = renderSlides('Goal: G.\n\n## Loans\n\n### Business loans\n\n- a\n\n### Terms\n\n- b');
   assert.equal((html.match(/<section class="slide/g) || []).length, 3);
   assert.doesNotMatch(html, /<h2>Loans<\/h2><\/section>/);
-  assert.match(html, /<li>Loans<\/li>/, 'still listed on the opening slide');
 });
 
 test('#### is a subheading inside the same slide', () => {
