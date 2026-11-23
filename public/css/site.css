@@ -561,6 +561,7 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .mobile-br { display: none; }
 @media (max-width: 760px) { .mobile-br { display: inline; } }
 .home-hero p { margin: 0 auto; max-width: 34em; color: var(--muted); font-size: 1.05rem; line-height: 1.6; text-wrap: balance; }
+@media (min-width: 761px) { .home-hero p { max-width: none; white-space: nowrap; } }
 .home-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .home-card {
   display: flex; flex-direction: column; background: #fff; border: 1px solid #d9dee7; border-radius: 6px; overflow: hidden;
@@ -782,59 +783,6 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .slides .letter .statement { font-size: 1.15rem; margin: 20px 0; }
 }
 
-/* Training: icon row (@icon lines) */
-.slides .slide .icon-row { list-style: none; padding: 0; margin: 14px 0 6px; display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 12px; }
-@media (max-width: 520px) { .slides .slide .icon-row { grid-template-columns: repeat(3, 1fr); gap: 8px; } .slides .slide .icon-row li { padding: 12px 4px; font-size: 0.82rem; } }
-.slides .slide .icon-row li { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 16px 8px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 0.92rem; font-weight: 600; line-height: 1.3; color: var(--ink); }
-.icon-tile { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #eef2fa; color: var(--navy); }
-.icon-tile svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-
-
-/* Training: comparison table (empty first header cell) and small note */
-.md-compare { table-layout: fixed; }
-.md-compare thead th { text-transform: none; letter-spacing: 0; font-size: 1rem; color: var(--navy); background: #fff; padding: 16px 14px 12px; border-bottom: 2px solid var(--gold); vertical-align: bottom; }
-.md-compare thead th:first-child { width: 24%; }
-.md-compare thead th .icon-tile { width: 40px; height: 40px; margin-bottom: 8px; }
-.md-compare thead th .icon-tile svg { width: 22px; height: 22px; }
-.md-compare tbody th { text-align: left; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: transparent; padding: 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
-.slides .md-compare td, .md-compare td { width: auto; font-weight: 400; color: var(--body); }
-.md-compare tbody tr:last-child th { border-bottom: 0; }
-.md-compare tbody tr:nth-child(even) th, .md-compare tbody tr:nth-child(even) td { background: var(--soft); }
-.slides .note, .note { font-size: 0.95rem; font-style: italic; color: var(--muted); margin: 0; }
-@media (max-width: 520px) {
-  /* Phones: each row stacks as a small block, with each answer labelled by its column. */
-  .md-compare, .md-compare tbody, .md-compare tr, .md-compare th, .md-compare td { display: block; width: auto; }
-  .md-compare { border: 0; }
-  .md-compare thead { display: none; }
-  .md-compare tbody tr { border: 1px solid #d5ddec; border-radius: 10px; margin: 0 0 12px; overflow: hidden; box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05), 0 4px 12px rgba(16, 24, 40, 0.05); }
-  .md-compare tbody tr:nth-child(even) th, .md-compare tbody tr:nth-child(even) td { background: transparent; }
-  .md-compare tbody th, .md-compare tbody tr:nth-child(even) th { background: #fff; color: var(--navy); border-bottom: 2px solid var(--gold); margin: 0 14px; padding: 12px 0 8px; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.08em; }
-  .md-compare tbody tr:last-child th { border-bottom: 2px solid var(--gold); }
-  .slides .md-compare td { padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 0.95rem; line-height: 1.5; }
-  .slides .md-compare td:last-child { border-bottom: 0; }
-  .md-compare td::before { content: attr(data-label); display: block; font-size: 0.8rem; font-weight: 600; color: var(--navy); margin-bottom: 2px; }
-}
-
-/* Training: cards side by side (+ Title | text), each with a blue title over a thin gold rule.
-   Five cards sit as three over two, with both rows the same overall width. */
-.slides .slide .columns { list-style: none; padding: 0; margin: 18px 0 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.slides .slide .columns.cols-1 { grid-template-columns: 1fr; }
-.slides .slide .columns.cols-2 { grid-template-columns: repeat(2, 1fr); }
-.slides .slide .columns.cols-4 { grid-template-columns: repeat(4, 1fr); }
-@media (min-width: 761px) {
-  .slides .slide .columns.cols-5 { grid-template-columns: repeat(6, 1fr); }
-  .slides .slide .columns.cols-5 li { grid-column: span 2; }
-  .slides .slide .columns.cols-5 li:nth-child(n+4) { grid-column: span 3; }
-}
-.slides .slide .columns li { margin: 0; padding: 18px 20px 20px; border: 1px solid #d5ddec; border-radius: 10px; background: #fff; }
-.slides .columns .columns-head { margin: 0 0 10px; padding: 0 0 8px; font-size: 1.02rem; font-weight: 700; line-height: 1.3; color: var(--navy); border-bottom: 2px solid var(--gold); }
-.slides .columns p { margin: 0; font-size: 0.97rem; line-height: 1.6; color: var(--body); }
-@media (max-width: 760px) {
-  .slides .slide .columns, .slides .slide .columns[class*=cols-] { grid-template-columns: 1fr; gap: 10px; }
-  .slides .slide .columns li { padding: 14px 16px 16px; }
-  .slides .columns p { font-size: 0.95rem; }
-}
-
 /* Training module pages: a wider page and roomier slides */
 .main:has(.deck) { max-width: 1040px; }
 .deck-on .slides .slide { padding: 44px 56px 48px; min-height: 420px; }
@@ -849,55 +797,8 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .footer-slim a { color: var(--muted); text-decoration: none; }
 .footer-slim a:hover { color: var(--navy); text-decoration: underline; }
 
-/* Training: timeline (-> Title | text). Steps run down the slide beside one long blue arrow. */
-.slides .slide .timeline { list-style: none; padding: 0 0 0 44px; margin: 34px 0 0; display: grid; gap: 22px; position: relative; }
-.slides .slide .timeline::before { content: ""; position: absolute; left: 9px; top: 4px; bottom: 12px; width: 3px; border-radius: 2px; background: var(--navy); }
-.slides .slide .timeline::after { content: ""; position: absolute; left: 3px; bottom: 0; border-left: 7.5px solid transparent; border-right: 7.5px solid transparent; border-top: 13px solid var(--navy); }
-.slides .slide .timeline + .statement { margin-top: 44px; }
-.slides .slide .timeline li { margin: 0; padding: 0; display: grid; grid-template-columns: 150px 1fr; gap: 0 18px; align-items: baseline; }
-.slides .timeline .tl-title { margin: 0; font-size: 1rem; font-weight: 700; color: var(--navy); }
-.slides .timeline p { margin: 0; font-size: 1rem; line-height: 1.55; color: var(--body); }
-@media (max-width: 640px) {
-  .slides .slide .timeline { padding-left: 34px; gap: 18px; }
-  .slides .slide .timeline li { grid-template-columns: 1fr; }
-  .slides .timeline p { font-size: 0.95rem; }
-}
-
-/* Timeline animation: the arrow draws downward and each step fades in as it passes. Runs each time the slide is shown. */
-@media (prefers-reduced-motion: no-preference) {
-  .slides .slide .timeline::before { transform-origin: top; animation: tl-draw 1.4s cubic-bezier(.4, 0, .2, 1) both; }
-  .slides .slide .timeline::after { animation: tl-head .25s ease-out 1.3s both; }
-  .slides .slide .timeline li { animation: tl-step .45s ease-out both; }
-  .slides .slide .timeline li:nth-child(1) { animation-delay: .05s; }
-  .slides .slide .timeline li:nth-child(2) { animation-delay: .27s; }
-  .slides .slide .timeline li:nth-child(3) { animation-delay: .49s; }
-  .slides .slide .timeline li:nth-child(4) { animation-delay: .71s; }
-  .slides .slide .timeline li:nth-child(5) { animation-delay: .93s; }
-  .slides .slide .timeline li:nth-child(6) { animation-delay: 1.15s; }
-  .slides .slide .timeline li:nth-child(n+7) { animation-delay: 1.3s; }
-  .slides .slide .timeline + .statement { animation: tl-step .5s ease-out 1.6s both; }
-}
-@keyframes tl-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-@keyframes tl-head { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-@keyframes tl-step { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
-
 /* Page titles that go straight into a card, list or form get more room; titles followed by a lead line keep it close. */
 .main h1:not(:has(+ p)) { margin-bottom: 30px; }
-
-/* Training: large figures ($ Label | value | text), joined by gold arrows */
-.figures { display: flex; align-items: stretch; gap: 14px; margin: 26px 0 30px; }
-.figure { flex: 1; padding: 20px 22px; border: 1px solid #d5ddec; border-top: 3px solid var(--gold); border-radius: 10px; }
-.slides .figure p { margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--body); }
-.slides .figure .fig-label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.slides .figure .fig-value { margin: 6px 0 4px; font-size: 2.1rem; font-weight: 700; line-height: 1.1; color: var(--navy); letter-spacing: -0.02em; }
-.fig-arrow { flex: none; align-self: center; width: 34px; height: 3px; background: var(--gold); position: relative; border-radius: 2px; }
-.fig-arrow::after { content: ""; position: absolute; right: -2px; top: -5px; border-top: 6.5px solid transparent; border-bottom: 6.5px solid transparent; border-left: 10px solid var(--gold); }
-@media (max-width: 640px) {
-  .figures { flex-direction: column; gap: 10px; }
-  .fig-arrow { width: 3px; height: 22px; }
-  .fig-arrow::after { right: auto; left: -5px; top: auto; bottom: -4px; border-left: 6.5px solid transparent; border-right: 6.5px solid transparent; border-top: 10px solid var(--gold); border-bottom: 0; }
-  .slides .figure .fig-value { font-size: 1.8rem; }
-}
 
 /* Training: key terms (= Term | definition) */
 .slides .terms { margin: 8px 0 26px; border-top: 1px solid var(--line); }
@@ -908,23 +809,10 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .slides .terms > div { grid-template-columns: 1fr; gap: 2px; padding: 12px 0; }
   .slides .terms dd { font-size: 0.95rem; }
 }
-.slides .terms + .statement, .slides .figures + .statement, .slides .table-wrap + .statement, .slides .slide .columns + .statement { margin-top: 30px; }
-.slides .statement + .note, .slides .statement + p { margin-top: 26px; }
+.slides .terms + .statement, .slides .table-wrap + .statement { margin-top: 30px; }
+.slides .statement + p { margin-top: 26px; }
 .slides .table-wrap + .statement { margin-top: 44px; }
-.slides .slide .timeline + .terms { margin-top: 60px; }
 
-/* Training: quick check (? Question | Answer). The answer opens in place; not graded. */
-.quick-check { margin: 24px 0; border: 1px solid #d5ddec; border-left: 3px solid var(--gold); border-radius: 10px; background: #fff; }
-.quick-check summary { list-style: none; cursor: pointer; padding: 16px 20px; display: grid; gap: 4px; }
-.quick-check summary::-webkit-details-marker { display: none; }
-.qc-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.qc-q { font-size: 1rem; font-weight: 600; line-height: 1.5; color: var(--ink); }
-.qc-show { font-size: 0.9rem; font-weight: 600; color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
-.qc-show::after { content: "Show answer"; }
-.quick-check[open] .qc-show::after { content: "Hide answer"; }
-.quick-check summary:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 8px; }
-.slides .quick-check > p { margin: 0 20px; padding: 14px 0 18px; border-top: 1px solid var(--line); font-size: 1rem; line-height: 1.6; color: var(--body); }
-.slides .quick-check + .statement { margin-top: 28px; }
 .slides ul + .statement, .slides .slide > p + .statement { margin-top: 28px; }
 
 /* Training: the same generous gap above every slide's closing statement (the letter keeps its own spacing). */

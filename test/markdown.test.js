@@ -43,46 +43,11 @@ test('> makes a highlighted statement', () => {
   assert.equal(render('> With opportunity comes <b>responsibility</b>.'), '<p class="statement">With opportunity comes &lt;b&gt;responsibility&lt;/b&gt;.</p>');
 });
 
-test('@icon lines make an icon row; unknown icons show just the label', () => {
+test('= Term | definition lines make a key terms list; retired layout markers stay plain text', () => {
   const { render } = require('../lib/markdown');
-  const html = render('@cash Working capital\n@nope Payroll <x>');
-  assert.match(html, /^<ul class="icon-row"><li><span class="icon-tile"><svg viewBox="0 0 24 24" aria-hidden="true">.*<\/svg><\/span><span>Working capital<\/span><\/li>/);
-  assert.match(html, /<li><span class="icon-tile"><\/span><span>Payroll &lt;x&gt;<\/span><\/li><\/ul>$/);
-});
-
-test('a table with an empty first header cell is a comparison with row labels and header icons', () => {
-  const { render } = require('../lib/markdown');
-  const html = render('| | @bank Bank | Other |\n|---|---|---|\n| Speed | Weeks | Days |\n\n~ Terms matter.');
-  assert.match(html, /<table class="md-table md-compare">/);
-  assert.match(html, /<th scope="col"><span class="icon-tile"><svg[^>]*>.*<\/svg><\/span>Bank<\/th><th scope="col">Other<\/th>/);
-  assert.match(html, /<tr><th scope="row">Speed<\/th><td data-label="Bank">Weeks<\/td><td data-label="Other">Days<\/td><\/tr>/);
-  assert.match(html, /<p class="note">Terms matter.<\/p>$/);
-});
-
-test('+ Title | text lines make columns with header bands', () => {
-  const { render } = require('../lib/markdown');
-  const html = render('+ Funder | Provides **capital**.\n+ Broker | Helps <you>.');
-  assert.equal(html, '<ul class="columns cols-2"><li><p class="columns-head">Funder</p><p>Provides <strong>capital</strong>.</p></li><li><p class="columns-head">Broker</p><p>Helps &lt;you&gt;.</p></li></ul>');
-});
-
-test('-> Title | text lines make a timeline', () => {
-  const { render } = require('../lib/markdown');
-  const html = render('-> Request | The business **asks**.\n-> Funding | Funds <go> out.');
-  assert.equal(html, '<ol class="timeline"><li><p class="tl-title">Request</p><p>The business <strong>asks</strong>.</p></li><li><p class="tl-title">Funding</p><p>Funds &lt;go&gt; out.</p></li></ol>');
-});
-
-test('$ lines make figures joined by arrows; = lines make a key terms list', () => {
-  const { render } = require('../lib/markdown');
-  assert.equal(render('$ Purchase price | $50,000 | Paid **upfront**\n$ Purchased amount | $65,000 | Delivered'),
-    '<div class="figures"><div class="figure"><p class="fig-label">Purchase price</p><p class="fig-value">$50,000</p><p>Paid <strong>upfront</strong></p></div><span class="fig-arrow" aria-hidden="true"></span><div class="figure"><p class="fig-label">Purchased amount</p><p class="fig-value">$65,000</p><p>Delivered</p></div></div>');
   assert.equal(render('= Remittance | Collected <daily>.\n= Reconciliation | Adjusts.'),
     '<dl class="terms"><div><dt>Remittance</dt><dd>Collected &lt;daily&gt;.</dd></div><div><dt>Reconciliation</dt><dd>Adjusts.</dd></div></dl>');
-});
-
-test('? Question | Answer makes a quick check with the answer hidden until opened', () => {
-  const { render } = require('../lib/markdown');
-  assert.equal(render('? Is "pre-qualified" the same as **approved**? | No. <b>Never</b>.'),
-    '<details class="quick-check"><summary><span class="qc-label">Quick check</span><span class="qc-q">Is &quot;pre-qualified&quot; the same as <strong>approved</strong>?</span><span class="qc-show" aria-hidden="true"></span></summary><p>No. &lt;b&gt;Never&lt;/b&gt;.</p></details>');
+  assert.equal(render('$ Price | $5 | x'), '<p>$ Price | $5 | x</p>');
 });
 
 test('employment offers only brokerage and funder/lender company types; older types still have labels', () => {
