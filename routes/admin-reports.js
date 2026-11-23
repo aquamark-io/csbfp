@@ -182,10 +182,12 @@ router.post('/launch/reset', async (req, res, next) => {
     const before = await previewCounts();
     const del = (t, col = 'id') => db().from(t).delete().not(col, 'is', null);
     for (const [t, col] of [
-      ['csbfp_legal_acceptances'], ['csbfp_registration_status_history'], ['csbfp_payments'], ['csbfp_subscriptions'], ['csbfp_stripe_events'],
+      ['csbfp_legal_acceptances'], ['csbfp_screening_events'], ['csbfp_screenings'], ['csbfp_appeals'], ['csbfp_employer_credit_uses'],
+      ['csbfp_registration_status_history'], ['csbfp_payments'], ['csbfp_subscriptions'], ['csbfp_stripe_events'],
       ['csbfp_assessment_attempts'], ['csbfp_assessment_resets'], ['csbfp_training_progress', 'registrant_id'], ['csbfp_employment_relationships'],
       ['csbfp_registrant_products', 'registrant_id'], ['csbfp_registrant_states', 'registrant_id'], ['csbfp_duplicate_flags'], ['csbfp_support_requests'],
       ['csbfp_login_codes'], ['csbfp_email_messages'], ['csbfp_postmark_events'], ['csbfp_events'], ['csbfp_verify_lookups'], ['csbfp_registrations'], ['csbfp_registrants'],
+      ['csbfp_employer_purchases'], ['csbfp_employers'],
     ]) must(await del(t, col), `Clear ${t}`);
     await logAdmin({ adminId: req.admin.id, action: 'preview_data_removed', detail: before, ip: req.ip });
     return go(res, '/admin/launch', `Removed preview data: ${before.registrants} accounts, ${before.payments} payments. Training, legal documents, email wording, settings and the audit log were kept.`);

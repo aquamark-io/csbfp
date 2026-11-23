@@ -6,7 +6,7 @@
 <ol class="checklist launch-list">
   <% item(placeholders.length === 0, 'Legal documents are final', placeholders.length ? `Still draft or placeholder: ${placeholders.join(', ')}. <a href="/admin/legal">Edit legal documents</a>` : 'All published.') %>
   <% item(training && !/draft/i.test(training.label), 'Training is the reviewed version', training ? `Current: ${training.label}. <a href="/admin/training">Training</a>` : 'No training published.') %>
-  <% item(screening.enabled, 'Background screening enabled', screening.enabled ? `Provider: ${screening.provider}, policy ${screening.policyVersion}.` : 'Off: paid applications receive DEMO credentials only. Genuine certifications need the provider agreement, integration, approved screening criteria and legal review, then BACKGROUND_SCREENING_ENABLED=true in Render.') %>
+  <% item(screening.enabled, 'Background screening enabled', screening.enabled ? `Provider: ${screening.provider}, policy ${screening.policyVersion}.` : 'Off: paid applications receive DEMO credentials only. Once the Checkr links are saved under <a href="/admin/background-checks">Background Checks</a>, set BACKGROUND_SCREENING_ENABLED=true in Render.') %>
   <% item(postmark, 'Email delivery tracking connected', postmark ? 'Postmark connected.' : '<a href="/admin/emails">Connect Postmark</a>') %>
   <% item(turnstile, 'Bot protection on sign-up (optional)', turnstile ? 'Cloudflare Turnstile is on.' : 'Off. Add TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY in Render to turn it on.') %>
   <% item(counts.registrants === 0 || !preLaunch, 'Preview data removed', preLaunch ? `${counts.registrants} accounts, ${counts.registrations} numbers, ${counts.payments} payments from testing. Remove them below just before launch.` : 'Done.') %>
@@ -16,7 +16,7 @@
 <% if (preLaunch && mode !== 'live') { %>
 <section class="panel danger-panel">
   <h2>Remove preview data</h2>
-  <p>Deletes every test account, certification number, payment record, support request and log from testing. Training, legal documents, email wording, lists, settings and the audit log are kept. Stripe test-mode records are not touched. Only works while the site is in preview and Stripe is in test mode.</p>
+  <p>Deletes every test account, certification number, payment record, background check record, employer and employer credit, support request and log from testing. Training, legal documents, email wording, lists, settings and the audit log are kept. Stripe test-mode records are not touched. Only works while the site is in preview and Stripe is in test mode.</p>
   <form method="post" action="/admin/launch/reset" class="stack">
     <input name="confirm" type="text" placeholder="Type REMOVE PREVIEW DATA" autocomplete="off">
     <button class="button small" type="submit">Remove Preview Data</button>
