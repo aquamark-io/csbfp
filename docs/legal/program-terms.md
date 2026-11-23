@@ -4,13 +4,13 @@ These Program Terms govern the Certified Small Business Finance Professional (CS
 
 ## 1. What CSBFP is
 
-CSBFP is a private industry certification for people who work at a brokerage, funder, or lender in U.S. small business finance. It shows that the holder completed the required training and assessment, agreed to the professional standards, met the initial eligibility requirements in effect when they were certified, and keeps the certification current.
+CSBFP is a private industry certification for people who work at a brokerage or lender in U.S. small business finance. It shows that the holder completed the required training and assessment, agreed to the professional standards, met the initial eligibility requirements in effect when they were certified, and keeps the certification current.
 
 CSBFP is **not** a government license, registration or regulatory approval. It is not an employment endorsement, a guarantee of anyone's conduct, or proof of compliance with every applicable law. It does not authorize anyone to perform an activity that requires a license.
 
 ## 2. Eligibility
 
-You must be at least 18 years old and work at a brokerage, funder, or lender in U.S. small business finance. You must give accurate, current information and keep it current. Your certification belongs to you, stays with you across employers, and cannot be transferred.
+You must be at least 18 years old and work at a brokerage or lender in U.S. small business finance. You must give accurate, current information and keep it current. Your certification belongs to you, stays with you across employers, and cannot be transferred.
 
 ## 3. Requirements for initial certification
 
