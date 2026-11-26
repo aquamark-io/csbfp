@@ -1,4 +1,4 @@
--- Broker Registry: version 1 of each legal document, so sign-up and acknowledgments can record acceptance.
+-- CSBFP: version 1 of each legal document, so sign-up and acknowledgments can record acceptance.
 -- The five legal documents are PLACEHOLDERS: reviewed text will be published as version 2 before launch.
 -- The acknowledgments are the six statements from the project brief; each "- " line is one checkbox.
 
@@ -16,7 +16,7 @@ insert into public.csbfp_legal_documents (key, version, title, body_md, status, 
    'Placeholder. The Automatic Renewal Terms are being prepared and will be published here before registration opens.',
    'published', now(), now()),
   ('disclaimer', 1, 'Disclaimer',
-   'Broker Registry is a private, voluntary registration program operated by Duncan Consulting LLC. It is not a government agency or licensing authority.
+   'CSBFP is a private, voluntary certification program operated by Duncan Consulting LLC. It is not a government agency or licensing authority.
 
 Registration is not a license, does not replace any license or registration required by law, and does not authorize anyone to perform activities that require a state license.
 

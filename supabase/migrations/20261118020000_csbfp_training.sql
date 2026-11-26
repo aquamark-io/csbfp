@@ -1,4 +1,4 @@
--- Broker Registry: training and assessment additions (schema only; content is loaded separately and is
+-- CSBFP: training and assessment additions (schema only; content is loaded separately and is
 -- never stored in this repository).
 
 -- Curriculum-level text shown to learners: the training overview and the completion message.

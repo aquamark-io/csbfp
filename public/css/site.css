@@ -46,7 +46,7 @@ p { margin: 0 0 14px; }
 }
 .brand-mark.small { width: 30px; height: 30px; border-radius: 6px; font-size: 0.9rem; }
 .brand-text { display: inline-flex; flex-direction: column; line-height: 1.1; }
-/* Letter spacing is measured so both tagline lines are exactly as wide as BROKER REGISTRY, as in the logo. */
+/* Letter spacing is measured so both tagline lines are exactly as wide as the wordmark, as in the logo. */
 .brand-tag span { display: block; white-space: nowrap; }
 .brand-tag span:nth-child(1) { letter-spacing: 0.2383em; margin-right: -0.2383em; }
 .brand-tag span:nth-child(2) { letter-spacing: 0.2242em; margin-right: -0.2242em; }

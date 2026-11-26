@@ -63,7 +63,7 @@ function createFakeStripe() {
         update: async (cid, p) => Object.assign(s.portals[cid], p),
       },
     },
-    accounts: { retrieve: async () => ({ id: 'acct_test', business_profile: { name: 'Broker Registry' } }) },
+    accounts: { retrieve: async () => ({ id: 'acct_test', business_profile: { name: 'CSBFP' } }) },
     products: {
       list: async () => ({ data: s.products }),
       create: async p => { const x = { id: id('prod'), active: true, ...p }; s.products.push(x); return x; },

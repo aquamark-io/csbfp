@@ -1,8 +1,8 @@
--- Broker Registry: initial schema.
+-- CSBFP: initial schema.
 --
 -- Lives in the shared Aquamark project. Every object is prefixed csbfp_.
 -- Access model (same as FinDex): RLS on, no policies, no grants to anon/authenticated.
--- The Broker Registry server (service role) is the only access path.
+-- The CSBFP server (service role) is the only access path.
 --
 -- Never store: Social Security numbers, full home addresses, card details.
 -- DOB is stored encrypted (dob_enc, AES-256-GCM in the app) with an HMAC match key (dob_hash).

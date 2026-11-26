@@ -1,4 +1,4 @@
--- Broker Registry: billing additions.
+-- CSBFP: billing additions.
 
 -- The registrant's Stripe customer (created at first checkout, reused for renewals and rejoining).
 alter table public.csbfp_registrations
