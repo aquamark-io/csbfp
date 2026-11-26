@@ -144,9 +144,9 @@ test('full journey: sign up, verify email, complete every form', async () => {
   let d = await b.req('/portal/dashboard');
   assert.equal(d.status, 200);
   assert.match(d.text, /Certification status/);
-  assert.match(d.text, /<h2>Profile<\/h2>/);
-  assert.match(d.text, /href="\/portal\/account">Account settings/);
-  assert.match(d.text, /Continue: Personal information/);
+  assert.match(d.text, /Name<\/p>/);
+  assert.match(d.text, /href="\/portal\/account">Account Settings/);
+  assert.match(d.text, /href="\/portal\/personal">Next: Personal information/);
 
   // Personal: under 18 is refused.
   let p = await b.req('/portal/personal', { legal_first_name: 'Jane', legal_last_name: 'Smith', dob: '2015-01-01', zip5: '94105', phone: '(415) 555-1212', industry_start_month: '3', industry_start_year: '2019' });
@@ -197,15 +197,13 @@ test('full journey: sign up, verify email, complete every form', async () => {
   assert.ok(fake.tables.csbfp_legal_acceptances.some(a => a.registrant_id === jane.id && a.document_key === 'acknowledgments' && a.context === 'acknowledgments'));
 
   d = await b.req('/portal/dashboard');
-  assert.match(d.text, /Continue: Training modules/);
-  assert.equal((d.text.match(/>Complete</g) || []).length, 4);
-  assert.match(d.text, /Background check/);
-  assert.match(d.text, /Not active yet/);
+  assert.match(d.text, /href="\/portal\/training">Next: Training modules/);
+  assert.doesNotMatch(d.text, /Next: Personal information/, "application steps done");
   assert.doesNotMatch(d.text, /demo record only/, "preview note removed from the dashboard");
   const pp = await b.req('/portal/personal');
   assert.match(pp.text, /href="\/portal\/dashboard">← Dashboard</);
   assert.doesNotMatch(d.text, /← Dashboard/);
-  assert.match(d.text, /href="\/portal\/account">Account settings</);
+  assert.match(d.text, /href="\/portal\/account">Account Settings</);
   assert.match(d.text, /action="\/portal\/logout"/);
 
   // Sign out, sign back in with a fresh code
