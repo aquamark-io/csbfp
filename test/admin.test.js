@@ -209,7 +209,9 @@ test('locking an account ends the registrant\'s access at once', async () => {
   const acct = await jake.req('/portal/account');
   assert.equal(acct.status, 200);
   assert.match(acct.text, /Edit your application/);
-  for (const path of ['personal', 'employment', 'products']) assert.match(acct.text, new RegExp(`href="/portal/${path}"`));
+  const bill = await jake.req('/portal/billing');
+  assert.ok([200, 302, 303].includes(bill.status), 'billing page works before payment');
+  for (const path of ['personal', 'employment', 'products', 'billing']) assert.match(acct.text, new RegExp(`href="/portal/${path}"`));
 
   await boss.req(`/admin/registrants/${JAKE}/lock`, { action: 'lock', reason: 'Suspicious sign-ups' });
   assert.equal(fake.tables.csbfp_registrants.find(x => x.id === JAKE).account_status, 'locked');
