@@ -7,8 +7,11 @@
   <h2 class="missed-title">Questions you missed</h2>
   <ul class="missed-list"><% missed.forEach(m => { %><li><%= m %></li><% }) %></ul>
   <% } %>
-  <p>Next, pay the annual fee to receive your certification number.</p>
-  <div class="actions"><a class="button" href="/portal/dashboard">Go to Your Dashboard</a></div>
+  <div class="next-step">
+    <p class="next-step-label">Next step</p>
+    <p>Pay the annual fee to receive your certification number.</p>
+    <div class="actions"><a class="button" href="/portal/dashboard">Go to Your Dashboard</a></div>
+  </div>
 <% } else { %>
   <p class="alert"><strong>Not passed.</strong> You answered <%= attempt.correct_count %> of <%= attempt.question_count %> correctly. A score of <%= attempt.pass_percent_applied %>% is needed to pass.</p>
   <% if (missed.length) { %>

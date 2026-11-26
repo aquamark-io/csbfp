@@ -900,3 +900,7 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .missed-title{font-size:1.1rem;margin:36px 0 12px}
 .missed-list{list-style:none;margin:0 0 40px;padding:0;max-width:720px;border-top:1px solid var(--line, #dfe3ea)}
 .missed-list li{margin:0;padding:16px 0;line-height:1.55;border-bottom:1px solid var(--line, #dfe3ea)}
+.next-step{max-width:720px;margin:8px 0 0;padding:22px 24px;background:#f4f6fa;border:1px solid var(--line);border-radius:8px}
+.next-step p{margin:0 0 6px}
+.next-step .next-step-label{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted, #5b6474)}
+.next-step .actions{margin:16px 0 0}
