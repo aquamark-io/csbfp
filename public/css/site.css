@@ -919,5 +919,5 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .bill-actions{flex-direction:column;align-items:stretch}
   .bill-actions .inline-form,.bill-actions .button{width:100%;margin:0}
   .bill-actions .button{justify-content:center;text-align:center}
-  .bill-table th:nth-child(2),.bill-table td:nth-child(2),.bill-table th:nth-child(4),.bill-table td:nth-child(4){display:none}
+  .bill-table th:nth-child(2),.bill-table td:nth-child(2){display:none}
 }
