@@ -140,7 +140,7 @@ test('buy credits: ID + email on file, quantity, Stripe one-time payment; credit
   assert.match(r.location, /^https:\/\/checkout\.stripe\.com\//);
   const sess = Object.values(fs.state.sessions).find(s => s.mode === 'payment');
   assert.equal(sess.line_items[0].quantity, 2);
-  assert.equal(sess.line_items[0].price_data.unit_amount, 14900);
+  assert.equal(sess.line_items[0].price_data.unit_amount, 19900);
   assert.equal(sess.metadata.kind, 'employer_credits');
   fs.completePayment(sess.id);
   r = await browser().req(`/employers/purchase/return?session_id=${sess.id}`);

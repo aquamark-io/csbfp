@@ -14,7 +14,7 @@ function createFakeStripe() {
   function makeInvoice(sub, { reason, paid, start, end }) {
     const inv = {
       id: id('in'), object: 'invoice', customer: sub.customer, billing_reason: reason, status: paid ? 'paid' : 'open',
-      amount_paid: paid ? 14900 : 0, amount_due: 14900, currency: 'usd', attempt_count: paid ? 1 : 1, created: now(),
+      amount_paid: paid ? 19900 : 0, amount_due: 19900, currency: 'usd', attempt_count: paid ? 1 : 1, created: now(),
       parent: { type: 'subscription_details', subscription_details: { subscription: sub.id } },
       lines: { data: [{ period: { start, end } }] },
       status_transitions: { paid_at: paid ? now() : null },
@@ -124,7 +124,7 @@ function createFakeStripe() {
     },
     payInvoice(invId) {
       const inv = s.invoices[invId];
-      Object.assign(inv, { status: 'paid', amount_paid: 14900, status_transitions: { paid_at: now() } });
+      Object.assign(inv, { status: 'paid', amount_paid: 19900, status_transitions: { paid_at: now() } });
       const sub = s.subscriptions[inv.parent.subscription_details.subscription];
       const item = sub.items.data[0];
       item.current_period_start = inv.lines.data[0].period.start;

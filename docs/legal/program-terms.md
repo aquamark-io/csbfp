@@ -47,7 +47,7 @@ Background screening is generally required only at initial certification. Additi
 
 ## 5. Fees and Refunds
 
-The annual certification fee is $149, payable after passing the assessment and before background screening is initiated.
+The annual certification fee is $199, payable after passing the assessment and before background screening is initiated.
 
 Certification fees are nonrefundable once paid, including when an applicant does not satisfy background-screening or other eligibility requirements, except where required by law.
 
@@ -61,7 +61,7 @@ Any changes to fees will be disclosed before they take effect.
 
 Certification is valid for 12 months and automatically renews annually at the then-applicable disclosed renewal rate unless canceled.
 
-The current annual renewal fee is $149.
+The current annual renewal fee is $199.
 
 The Program will send a renewal reminder approximately 30 days before the scheduled renewal date. Certificants may cancel future automatic renewals through their accounts at any time.
 

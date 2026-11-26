@@ -127,10 +127,10 @@ test('payment is locked until every earlier step is done', async () => {
 test('checkout needs the automatic-renewal consent, records it, and sends them to Stripe', async () => {
   makeReady('pat@example.com');
   let r = await pat.req('/portal/checkout');
-  assert.match(r.text, /\$149 per year/);
-  assert.match(r.text, /I authorize CSBFP to charge \$149 today/);
+  assert.match(r.text, /\$199 per year/);
+  assert.match(r.text, /I authorize CSBFP to charge \$199 today/);
   assert.match(r.text, /Fees are non-refundable/);
-  assert.match(r.text, /Pay \$149/);
+  assert.match(r.text, /Pay \$199/);
   r = await pat.req('/portal/checkout', {});
   assert.equal(r.status, 422);
   assert.match(r.text, /agree to automatic annual renewal/);
@@ -163,7 +163,7 @@ test('with screening off, paying issues a DEMO credential (DEMO- number, labeled
   assert.equal(fake.tables.csbfp_registration_status_history.at(-1).reason, 'DEMO credential issued (background screening not enabled)');
   const pay = fake.tables.csbfp_payments.find(p => p.registration_id === reg.id);
   assert.equal(pay.status, 'paid');
-  assert.equal(pay.amount_cents, 14900);
+  assert.equal(pay.amount_cents, 19900);
   assert.equal(pay.billing_reason, 'initial');
   await wait(50);
   assert.ok(sent.some(s => s.includes('to=pat@example.com') && s.includes(reg.registration_number)), 'activation email with number');
@@ -246,7 +246,7 @@ test('if the subscription ends while Inactive, they rejoin through checkout and 
   assert.equal(regOf('pat@example.com').reg.status, 'inactive', 'stays inactive');
 
   let r = await pat.req('/portal/checkout');
-  assert.match(r.text, /Pay \$149/);
+  assert.match(r.text, /Pay \$199/);
   r = await pat.req('/portal/checkout', { agree_renewal: 'yes' });
   const s2 = Object.values(fs.state.sessions).at(-1);
   fs.completeCheckout(s2.id);
@@ -270,7 +270,7 @@ test('an open duplicate flag or an admin hold blocks payment', async () => {
   assert.match(page.text, /application is on hold/);
   reg.admin_hold = false;
   page = await b.req('/portal/checkout');
-  assert.match(page.text, /Pay \$149/);
+  assert.match(page.text, /Pay \$199/);
 });
 
 test('a live Stripe key is refused while the site is in preview', async () => {
@@ -297,7 +297,7 @@ test('admin: Stripe setup creates the product, price, portal and webhook once; p
   assert.match(decodeURIComponent(r.location), /Stripe is set up \(test mode\)/);
   assert.equal(fs.state.products.length, 1);
   assert.equal(fs.state.products[0].statement_descriptor, 'CSBFP CERTIFICATION');
-  assert.equal(fs.state.prices[0].unit_amount, 14900);
+  assert.equal(fs.state.prices[0].unit_amount, 19900);
   assert.equal(fs.state.prices[0].recurring.interval, 'year');
   assert.equal(fs.state.endpoints.length, 1);
   assert.equal(fs.state.endpoints[0].url, 'https://csbfp-certification.org/webhooks/stripe');
@@ -309,7 +309,7 @@ test('admin: Stripe setup creates the product, price, portal and webhook once; p
   assert.equal(fs.state.prices.length, 1, 'no duplicate price');
   assert.equal(fs.state.endpoints.length, 1, 'no duplicate webhook');
   r = await b.req('/admin/payments');
-  assert.match(r.text, /\$149\.00/);
+  assert.match(r.text, /\$199\.00/);
   const pat = regOf('pat@example.com').r;
   r = await b.req(`/admin/registrants/${pat.id}`);
   assert.match(r.text, /Subscription <code>sub_/);
