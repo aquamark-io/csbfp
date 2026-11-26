@@ -194,6 +194,8 @@ test('background check page: state from ZIP, exact name and email, private per-s
   const done = await ann.req('/portal/background-check/done', {});
   assert.equal(done.location, '/portal/dashboard');
   assert.equal(fake.tables.csbfp_screenings.find(s => s.registration_id === reg.id).status, 'in_progress');
+  await wait(60);
+  assert.ok(sent.some(s => s.includes('to=boss@example.com') && s.includes('template=admin_background_submitted')), 'admins are told to review in Checkr');
   dash = (await ann.req('/portal/dashboard')).text;
   assert.match(dash, /<dt>Background<\/dt><dd><span class="dstat">Submitted/);
   assert.match(dash, /Submitted <span class="dhint">\(allow 1–3 days\)/);

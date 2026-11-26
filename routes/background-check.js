@@ -12,6 +12,8 @@ const express = require('express');
 const { db, must } = require('../lib/supabase');
 const { requireRegistrant } = require('../middleware/auth');
 const { logEvent } = require('../lib/events');
+const { sendQuietly } = require('../lib/email');
+const config = require('../lib/config');
 const screening = require('../lib/screening');
 const { stateForZip, NAMES } = require('../lib/zip-state');
 
@@ -60,6 +62,12 @@ router.post('/background-check/done', async (req, res, next) => {
       if (!sc.link_opened_at && c.state) sc = await screening.recordLinkOpened(sc, c.state);
       await screening.setStatus(sc, 'in_progress', { note: 'Applicant marked the Checkr form complete' });
       await logEvent({ registrantId: req.registrant.id, event: 'background_check_marked_complete', actor: 'registrant', ip: req.ip });
+      const r = req.registrant;
+      const vars = { name: [r.legal_first_name, r.legal_last_name].filter(Boolean).join(' ') || 'An applicant', state: c.stateName || 'state unknown',
+        admin_url: `${config.siteUrl}/admin/registrants/${r.id}` };
+      for (const to of config.adminEmails) {
+        sendQuietly({ dedupeKey: `background_submitted:${sc.id}:${to}`, templateKey: 'admin_background_submitted', to, vars });
+      }
     }
     return res.redirect(303, '/portal/dashboard');
   } catch (err) { next(err); }
