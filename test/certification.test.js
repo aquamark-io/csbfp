@@ -150,7 +150,7 @@ test('with screening enabled, payment holds the application in Pending Screening
   assert.ok(!('ssn' in sc) && !('report' in sc), 'no sensitive screening data stored');
   assert.match(ret.text, /href="\/portal\/background-check">Start Your Background Check/);
   const dash = await ann.req('/portal/dashboard');
-  assert.match(dash.text, /aria-current="step"><span>Background</);
+  assert.doesNotMatch(dash.text, /class="tracker"/, 'no stage tracker: the step list shows progress');
   assert.match(dash.text, /href="\/portal\/background-check"/);
   await wait(30);
   assert.ok(sent.some(s => s.includes('to=ann@example.com') && s.includes('template=application_received')));

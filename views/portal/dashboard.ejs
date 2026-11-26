@@ -34,19 +34,11 @@
   const next = checkOpen && screeningEnabled && !linkOpened ? steps.find(s => s.label === 'Background check')
     : !certified && !inCheck ? steps.find(s => !s.done && s.href) : null;
 
-  // Stage for the tracker: 1 Application, 2 Training, 3 Payment, 4 Background check, 5 Certified.
-  const stage = certified ? 5 : inCheck ? 4 : passed ? 3 : appDone ? 2 : 1;
-  const stages = ['Application', 'Training', 'Payment', 'Background', 'Certified'];
 %>
-<h1>Certification Dashboard</h1>
+<h1 class="dash-title">Certification Dashboard</h1>
 <% if (typeof saved !== 'undefined' && saved) { %><p class="notice-ok" role="status">Saved.</p><% } %>
 <% if (reg.is_demo) { %><p class="demo-banner">DEMO / NOT SCREENED: background checks are not active yet, so this preview credential is not a valid CSBFP certification.</p><% } %>
 
-<ol class="tracker" aria-label="Progress">
-  <% stages.forEach((name, i) => { const n = i + 1; %>
-  <li class="<%= n < stage || (n === 5 && certified) ? 'past' : n === stage ? 'now' : '' %>"<%- n === stage ? ' aria-current="step"' : '' %>><span><%= name %></span></li>
-  <% }) %>
-</ol>
 
 <% const renewSoon = reg.status === 'active' && reg.expires_at && Date.parse(reg.expires_at) - Date.now() < 30 * 864e5;
    const confirmedRecently = registrant.info_confirmed_at && Date.now() - Date.parse(registrant.info_confirmed_at) < 300 * 864e5; %>
