@@ -1,7 +1,7 @@
 {
-  "name": "broker-registry",
+  "name": "csbfp",
   "version": "0.1.0",
-  "description": "Broker Registry: public site, registrant portal and admin",
+  "description": "CSBFP: public site, applicant portal and admin",
   "main": "server.js",
   "private": true,
   "engines": {
