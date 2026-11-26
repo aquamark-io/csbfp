@@ -59,3 +59,10 @@ test('employment offers only brokerage and funder/lender company types; older ty
   assert.ok(!v.validateRelationship({ ...base, company_type: 'broker_with_funding' }).errors.company_type);
   assert.equal(v.COMPANY_TYPE_LABELS.technology_provider, 'Technology / Software Provider');
 });
+
+test('slide rows with "year: subject" labels stack the label above the text; plain labels stay side by side', () => {
+  const { renderSlides } = require('../lib/markdown');
+  const html = renderSlides('## A\n\n= Pre-2008: Early Foundations | Rooted in factoring.\n\n## B\n\n= Speed | Fast.');
+  assert.match(html, /<dl class="terms stacked"><div><dt>Pre-2008: Early Foundations<\/dt><dd>Rooted in factoring\.<\/dd>/);
+  assert.match(html, /<dl class="terms"><div><dt>Speed<\/dt>/);
+});

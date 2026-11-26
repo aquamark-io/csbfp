@@ -880,3 +880,6 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 
 /* Dashboard: next-step button at a standard width */
 .drow-go .button { min-width: 150px; justify-content: center; text-align: center; padding-left: 28px; padding-right: 28px; }
+
+/* Training slides: rows whose labels are headings (year: subject) stack the label above the text */
+.slides .terms.stacked > div { grid-template-columns: 1fr; gap: 4px; padding: 16px 0; }
