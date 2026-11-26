@@ -73,3 +73,11 @@ test('a numbered list of "Step | description" items renders as a process timelin
   assert.match(html, /<ol class="process"><li><strong>Request<\/strong><span>The business asks\.<\/span><\/li><li><strong>Funding<\/strong>/);
   assert.match(renderSlides('## Q\n\n1. One\n2. Two'), /<ol><li>One<\/li>/, 'plain numbered lists unchanged');
 });
+
+test('module cover: the title comes first as its own slide, then the content slides', () => {
+  const { renderSlides } = require('../lib/markdown');
+  const html = renderSlides('## One\n\nText.', { cover: 'Products & Terminology' });
+  assert.match(html, /^<section class="slide slide-cover" data-slide="1"><h2>Products &amp; Terminology<\/h2><\/section>/);
+  assert.match(html, /<section class="slide" data-slide="2"><h2>One<\/h2>/);
+  assert.doesNotMatch(renderSlides('## One\n\nText.'), /slide-cover/, 'no cover unless asked');
+});

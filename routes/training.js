@@ -75,7 +75,7 @@ router.get('/training/:key', async (req, res, next) => {
       const { error } = await db().from('csbfp_training_progress').insert({ registrant_id: req.registrant.id, module_id: mod.id });
       if (error && error.code !== '23505') throw new Error(`Start module: ${error.message}`);
     }
-    res.render('portal/module', { pageTitle: mod.title, state, mod, idx, html: renderSlides(mod.body_md), video: embedUrl(mod.video_url),
+    res.render('portal/module', { pageTitle: mod.title, state, mod, idx, html: renderSlides(mod.body_md, { cover: mod.title }), video: embedUrl(mod.video_url),
       prev: state.modules[idx - 1] || null, next: state.modules[idx + 1] || null });
   } catch (err) { next(err); }
 });
