@@ -168,7 +168,7 @@ test('with screening off, paying issues a DEMO credential (DEMO- number, labeled
   await wait(50);
   assert.ok(sent.some(s => s.includes('to=pat@example.com') && s.includes(reg.registration_number)), 'activation email with number');
   const dash = await pat.req('/portal/dashboard');
-  assert.match(dash.text, new RegExp(reg.registration_number));
+  assert.match(dash.text, /<dt>Certification<\/dt><dd><span class="dstat">Certified/);
   assert.match(dash.text, /DEMO \/ NOT SCREENED/);
   const conf = await pat.req('/portal/confirmation');
   assert.match(conf.text, /Certificate/);
@@ -222,7 +222,8 @@ test('a failed renewal makes the registration Inactive; paying reactivates it an
   assert.equal(regOf('pat@example.com').reg.status, 'inactive');
   assert.equal(fake.tables.csbfp_registration_status_history.at(-1).reason, 'Renewal payment failed');
   r = await pat.req('/portal/dashboard');
-  assert.match(r.text, /certification is Inactive/);
+  assert.match(r.text, /<dt>Certification<\/dt><dd><span class="dstat">Inactive/);
+  assert.match(r.text, /href="\/portal\/billing">Pay Now/);
   r = await pat.req('/portal/billing/pay');
   assert.equal(r.location, inv.hosted_invoice_url);
 

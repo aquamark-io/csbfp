@@ -84,7 +84,7 @@
   <dl class="drows">
     <div><dt>Name</dt><dd><%= name || 'Not added yet' %></dd></div>
 <%
-  // Milestones: [label, value]; the status note shows under Background or Certification.
+  // Milestones: [label, value]. Status names only, no notes.
   const sc = screening || {};
   const appVal = appDone ? 'Complete' : progress.personal ? 'In progress' : 'Not started';
   const trainVal = passed ? 'Complete' : modulesDone || train.allComplete ? 'In progress' : 'Not started';
@@ -92,13 +92,10 @@
   const bgVal = sc.status === 'approved' || certified ? 'Approved' : sc.status === 'not_approved' || reg.status === 'not_approved' ? 'Not approved'
     : checkSubmitted ? 'Submitted' : linkOpened ? 'Started' : 'Not started';
   const certVal = reg.status === 'active' ? 'Certified' : certified ? statusLabel : reg.status === 'under_review' ? 'Under review' : 'Pending';
-  const note = card && (card.text || card.html) ? (card.html || card.text) : '';
-  const noteHtml = card && card.html;
-  const noteOn = checkOpen ? 'Background' : 'Certification';
   const miles = [['Application', appVal], ['Training', trainVal], ['Fee', feeVal], ['Background', bgVal], ['Certification', certVal]];
 %>
     <% miles.forEach(([label, val]) => { %>
-    <div><dt><%= label %></dt><dd><span class="dstat"><%= val %><% if (label === 'Background' && val === 'Submitted') { %> <span class="dhint">(allow 1–3 days)</span><% } %></span><% if (note && label === noteOn) { %><span class="dnote"><% if (noteHtml) { %><%- note %><% } else { %><%= note %><% } %></span><% } %></dd></div>
+    <div><dt><%= label %></dt><dd><span class="dstat"><%= val %><% if (label === 'Background' && val === 'Submitted') { %> <span class="dhint">(allow 1–3 days)</span><% } %></span></dd></div>
     <% }) %>
     <% if (!certified) { const pct = Math.round(doneCount / steps.length * 100); %><div><dt>Progress</dt><dd class="dprog"><svg class="dprog-bar" viewBox="0 0 100 6" preserveAspectRatio="none" role="progressbar" aria-valuemin="0" aria-valuemax="<%= steps.length %>" aria-valuenow="<%= doneCount %>" aria-label="Steps complete"><rect width="100" height="6" rx="3" fill="#e6eaf2"/><% if (pct) { %><rect width="<%= pct %>" height="6" rx="3" fill="#1f4796"/><% } %></svg><span class="dprog-text"><%= pct %>%</span></dd></div><% } %>
     <% if (go) { %><div class="drow-go"><dt>Next step</dt><dd><span><%= next && go.label === `Next: ${next.label}` ? next.label : go.label %></span><a class="button gold small" href="<%= go.href %>"><%= next && go.label === `Next: ${next.label}` ? (next.cta || 'Continue') : go.label %></a></dd></div><% } %>
