@@ -64,12 +64,14 @@
     <% } else { %>
     <% const pub = (href, label) => (currentPath === href ? '' : nav(href, label)); /* the current page isn't listed */ %>
     <nav class="nav" id="site-nav" aria-label="Main">
-      <%- pub('/verify', 'Verify') %>
       <% if (signedIn) { %>
+      <%- pub('/portal/account', 'My Account') %>
+      <%- pub('/verify', 'Verify') %>
       <%- pub('/faq', 'FAQ') %>
       <%- pub('/support', 'Contact') %>
       <form method="post" action="/portal/logout" class="nav-form"><button class="link-button nav-signout" type="submit">Sign Out</button></form>
       <% } else { %>
+      <%- pub('/verify', 'Verify') %>
       <%- pub('/about', 'About') %>
       <%- pub('/faq', 'FAQ') %>
       <%- pub('/employers', 'For Employers') %>
