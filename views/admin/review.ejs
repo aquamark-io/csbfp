@@ -8,7 +8,7 @@
   <% if (!screeningConfig.enabled) { %>
   <p class="muted">While screening is off, each paid application receives a DEMO credential (DEMO- number) that the public lookup labels as not screened and not valid. Genuine certifications can only be issued with screening enabled. Set <code>BACKGROUND_SCREENING_ENABLED=true</code> in Render once the Checkr links are set in <a href="/admin/background-checks">Background Checks</a>.</p>
   <% } else if (!screeningConfig.integrated) { %>
-  <p class="muted">When Checkr emails that a report is complete, find the applicant here by name and email, open their page and record the result under Background screening. Approved moves them to Under Review for final approval. A Checkr result is never a decision on its own: you record every outcome. Adverse-action notices are handled in Checkr.</p>
+  <p class="muted">When Checkr emails that a report is complete, find the applicant here by name and email, open their page and record the result under Background screening. Recording Approved issues their certification right away. A Checkr result is never a decision on its own: you record every outcome. Adverse-action notices are handled in Checkr.</p>
   <% } %>
 </div>
 

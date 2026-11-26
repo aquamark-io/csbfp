@@ -104,12 +104,16 @@ router.post('/registrants/:id/screening', async (req, res, next) => {
     const sc = await screening.forRegistration(reg.id);
     if (!sc) return back(res, r.id, 'There is no screening record for this application.', true);
     await screening.setStatus(sc, to, { note, actorType: 'admin', actorId: req.admin.id });
-    // A reviewer-approved screening moves the application on to the eligibility review. Nothing is decided automatically.
-    if (to === 'approved' && reg.status === 'pending_screening') {
-      await certification.sendToReview(reg, { adminId: req.admin.id, reason: 'Background screening approved by reviewer' });
+    // One step: a reviewer approving the background check also issues the certification.
+    let issued = null;
+    if (to === 'approved' && ['pending_screening', 'under_review'].includes(reg.status)) {
+      if (reg.status === 'pending_screening') await certification.sendToReview(reg, { adminId: req.admin.id, reason: 'Background screening approved by reviewer' });
+      const fresh = must(await db().from('csbfp_registrations').select('*').eq('id', reg.id).single(), 'Registration');
+      issued = await certification.approve(fresh, { adminId: req.admin.id, reason: 'Background check approved' });
+      await logAdmin({ adminId: req.admin.id, action: 'certification_approve', targetType: 'registrant', targetId: r.id, reason: note, detail: { number: issued }, ip: req.ip });
     }
     await logAdmin({ adminId: req.admin.id, action: 'screening_status', targetType: 'registrant', targetId: r.id, reason: note, detail: { to }, ip: req.ip });
-    return back(res, r.id, `Screening status set to ${screening.LABELS[to]}.`);
+    return back(res, r.id, issued ? `Background check approved. Certification ${issued} issued.` : `Screening status set to ${screening.LABELS[to]}.`);
   } catch (err) { next(err); }
 });
 

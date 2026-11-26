@@ -152,6 +152,7 @@
     <input name="reason" type="text" maxlength="500" placeholder="Note (required). Do not enter report contents." required>
     <button class="button secondary small" type="submit">Record</button>
   </form>
+  <p class="muted">Recording Approved also issues the certification and emails the applicant.</p>
   <% if (screeningEvents.length) { %>
   <ul class="plain-list small"><% screeningEvents.forEach(e => { %><li><%= fmtTime(e.created_at) %>: <%= screeningLabel(e.to_status) %> (<%= e.actor_type %>)<%= e.note ? ` – ${e.note}` : '' %></li><% }) %></ul>
   <% } %>

@@ -1,6 +1,6 @@
 /**
  * Certification lifecycle with background screening ENABLED (provider not integrated, so a reviewer records each
- * screening step): payment -> pending screening -> reviewer approves screening -> under review -> approve -> certified,
+ * screening step): payment -> pending screening -> reviewer approves screening -> certified (one step),
  * then suspend / reinstate / revoke, not approved, appeals, and the rules that stop shortcuts.
  */
 const test = require('node:test');
@@ -232,17 +232,13 @@ test('an application cannot be approved before a reviewer approves the screening
   assert.equal(regOf('ann@example.com').reg.status, 'pending_screening', 'a screening flag decides nothing by itself');
 });
 
-test('reviewer approves screening -> Under Review -> approval issues the permanent number and starts the term', async () => {
+test('approving the background check issues the permanent number and starts the term (one step)', async () => {
   const { r, reg } = regOf('ann@example.com');
-  await admin.req(`/admin/registrants/${r.id}/screening`, { status: 'approved', reason: 'No disqualifying records after review' });
+  const res = await admin.req(`/admin/registrants/${r.id}/screening`, { status: 'approved', reason: 'No disqualifying records after review' });
+  assert.match(msgOf(res), /Background check approved\. Certification CSBFP-\d{8} issued/);
   const sc = fake.tables.csbfp_screenings.find(s => s.registration_id === reg.id);
   assert.equal(sc.decision, 'approved');
   assert.ok(sc.reviewer_id);
-  assert.equal(regOf('ann@example.com').reg.status, 'under_review');
-  assert.match((await admin.req('/admin/review')).text, /Under Review/);
-
-  const res = await act(r.id, { action: 'approve', reason: 'All initial requirements met' });
-  assert.match(msgOf(res), /Certification issued/);
   const after = regOf('ann@example.com').reg;
   assert.equal(after.status, 'active');
   assert.match(after.registration_number, /^CSBFP-\d{8}$/);
