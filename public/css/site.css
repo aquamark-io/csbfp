@@ -869,3 +869,6 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
   .dpanel-foot { padding: 12px 18px; }
   .dcheck-h, .dcheck { width: 70px; }
 }
+
+/* Before You Get Started: room between the subtitle and the form */
+.first-lead { margin-bottom: 32px; }
