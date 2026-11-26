@@ -1,7 +1,7 @@
 <%- include('../partials/head') %>
 <%- include('../partials/portal-nav') %>
 <h1>Background Check</h1>
-<p class="lead">A one-time background check through Checkr. It takes about 10 minutes, and results usually take 1–3 days.</p>
+<p class="lead">A one-time background check through Checkr.</p>
 
 <% if (!state) { %>
   <p class="message">We couldn't match your ZIP code (<%= r.zip5 || 'not entered' %>) to a U.S. state. Please <a href="/portal/personal">check your home ZIP code</a>, or contact <a href="mailto:<%= program.supportEmail %>"><%= program.supportEmail %></a>.</p>

@@ -185,8 +185,8 @@ test('background check page: state from ZIP, exact name and email, private per-s
   assert.ok(sc.link_opened_at);
   assert.match((await admin.req('/admin/review')).text, /Opened Checkr link \(CA\)/);
   let dash = (await ann.req('/portal/dashboard')).text;
-  assert.match(dash, /<dt>Fee<\/dt><dd><span class="dstat ok">Paid/);
-  assert.match(dash, /<dt>Background<\/dt><dd><span class="dstat due">Started/);
+  assert.match(dash, /<dt>Fee<\/dt><dd><span class="dstat">Paid/);
+  assert.match(dash, /<dt>Background<\/dt><dd><span class="dstat">Started/);
   assert.match(dash, /href="\/portal\/background-check">Continue/, 'they can get back to the background check');
   assert.match((await ann.req('/portal/background-check')).text, /<dt>Status<\/dt><dd>Started /);
 
