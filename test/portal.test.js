@@ -143,7 +143,9 @@ test('full journey: sign up, verify email, complete every form', async () => {
 
   let d = await b.req('/portal/dashboard');
   assert.equal(d.status, 200);
-  assert.match(d.text, /All steps/);
+  assert.match(d.text, /Certification status/);
+  assert.match(d.text, /<h2>Profile<\/h2>/);
+  assert.match(d.text, /href="\/portal\/account">Account settings/);
   assert.match(d.text, /Continue: Personal information/);
 
   // Personal: under 18 is refused.

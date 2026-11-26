@@ -65,41 +65,76 @@
   else if (reg.status === 'under_review') card = { band: 'Status', title: 'Under review', text: 'Your application is under review. We\'ll email you when a decision is made.' };
   else if (reg.status === 'not_approved') card = { band: 'Application status', title: 'Not approved', html: `Your application was not approved. To ask about reconsideration, contact ${mail}.` };
 %>
-<% if (card) { %>
-<section class="home-card dash-card">
-  <h2 class="home-card-band"><%= card.band %></h2>
-  <div class="dash-next">
-    <div>
-      <p class="dash-next-title"><%= card.title %></p>
-      <% if (card.html) { %><p><%- card.html %></p><% } else if (card.text) { %><p><%= card.text %></p><% } %>
-    </div>
-    <% if (card.href) { %>
-    <div class="dash-next-actions">
-      <a class="button gold" href="<%= card.href %>"<% if (card.continueLabel) { %> aria-label="<%= card.continueLabel %>"<% } %>><%= card.cta %></a>
-      <% if (card.second) { %><a class="button secondary" href="<%= card.second.href %>"><%= card.second.label %></a><% } %>
-    </div>
+<%
+  const statusLabel = { active: 'Certified', inactive: 'Inactive', expired: 'Expired', suspended: 'Suspended', revoked: 'Revoked',
+    pending_screening: 'Background check', under_review: 'Under review', not_approved: 'Not approved' }[reg.status] || 'In progress';
+  const statusTone = reg.status === 'active' ? 'ok' : ['suspended', 'revoked', 'not_approved', 'inactive', 'expired'].includes(reg.status) ? 'warn' : 'info';
+  const name = [registrant.legal_first_name, registrant.legal_last_name].filter(Boolean).join(' ');
+  const appSteps = steps.filter(s => !['Training modules', 'Assessment', 'Certification issued'].includes(s.label));
+  const stepState = s => s.done ? (s.doneState || 'Complete') : next && s === next ? 'Next step' : s.href ? (s.state && s.state !== 'Start' ? s.state : 'Not started') : (s.hint || 'Locked');
+  const nextMod = train.modules.find(m => m.unlocked && !m.completed);
+%>
+<div class="dboard">
+  <aside class="dpanel dprofile">
+    <h2>Profile</h2>
+    <dl class="dlist">
+      <div><dt>Name</dt><dd><%= name || 'Not added yet' %></dd></div>
+      <div><dt>Email</dt><dd class="break"><%= registrant.email %></dd></div>
+      <div><dt>Mobile</dt><dd><%= phone || 'Not added yet' %></dd></div>
+      <div><dt>Employer</dt><dd><%= employer || (registrant.employment_status === 'not_currently_employed' ? 'Not currently employed' : 'Not added yet') %></dd></div>
+      <div><dt>Member since</dt><dd><%= fmt(registrant.created_at) %></dd></div>
+    </dl>
+    <p class="dlinks"><a href="/portal/account">Account settings</a><% if (paid) { %><a href="/portal/billing">Billing</a><% } %><a href="/support">Contact</a></p>
+  </aside>
+
+  <div class="dmain">
+    <section class="dpanel">
+      <h2>Certification status</h2>
+      <p class="dstatus"><span class="dpill <%= statusTone %>"><%= statusLabel %></span><% if (reg.registration_number && certified) { %><span class="dnum">No. <%= reg.registration_number %></span><% } %></p>
+      <% if (card) { %>
+        <p class="dnext-title"><%= card.title %></p>
+        <% if (card.html) { %><p class="dtext"><%- card.html %></p><% } else if (card.text) { %><p class="dtext"><%= card.text %></p><% } %>
+        <% if (card.href) { %><p class="dactions"><a class="button gold" href="<%= card.href %>"><%= card.cta %></a><% if (card.second) { %> <a class="button secondary" href="<%= card.second.href %>"><%= card.second.label %></a><% } %></p><% } %>
+      <% } else if (next) { %>
+        <p class="dnext-title">Next step: <%= next.label %></p>
+        <% if (next.desc) { %><p class="dtext"><%= next.desc %></p><% } %>
+        <p class="dactions"><a class="button gold" href="<%= next.href %>" aria-label="Continue: <%= next.label %>"><%= next.cta || 'Start' %></a></p>
+      <% } %>
+      <% if (!certified) { %>
+      <div class="dprogress" role="img" aria-label="<%= doneCount %> of <%= steps.length %> steps complete"><span style="width: <%= Math.round(doneCount / steps.length * 100) %>%"></span></div>
+      <p class="dsmall"><%= doneCount %> of <%= steps.length %> steps complete</p>
+      <% } %>
+    </section>
+
+    <section class="dpanel">
+      <h2>Training</h2>
+      <table class="dtable">
+        <thead><tr><th>Module</th><th>Status</th></tr></thead>
+        <tbody>
+        <% train.modules.forEach((m, i) => { %>
+          <tr><td><% if (m.unlocked) { %><a href="/portal/training/<%= m.stable_key %>"><%= i + 1 %>. <%= m.title %></a><% } else { %><%= i + 1 %>. <%= m.title %><% } %></td>
+            <td><%= m.completed ? 'Complete' : nextMod === m ? (m.started ? 'In progress' : 'Next') : m.unlocked ? 'Not started' : 'Locked' %></td></tr>
+        <% }) %>
+          <tr><td><% if (train.allComplete) { %><a href="/portal/assessment">Assessment</a><% } else { %>Assessment<% } %></td>
+            <td><%= train.assessment && train.assessment.passed ? 'Passed' : train.allComplete ? 'Ready' : 'After training' %></td></tr>
+        </tbody>
+      </table>
+      <% if (!train.modules.length) { %><p class="dsmall">Training opens soon.</p><% } %>
+    </section>
+
+    <% if (!certified) { %>
+    <section class="dpanel">
+      <h2>Application</h2>
+      <table class="dtable">
+        <thead><tr><th>Step</th><th>Status</th></tr></thead>
+        <tbody>
+        <% appSteps.forEach(s => { %>
+          <tr class="<%= !s.done && !s.href ? 'is-locked' : '' %>"><td><% if (s.href) { %><a href="<%= s.href %>"><%= s.label %></a><% } else { %><%= s.label %><% } %></td><td><%= stepState(s) %></td></tr>
+        <% }) %>
+        </tbody>
+      </table>
+    </section>
     <% } %>
   </div>
-</section>
-<% } %>
-
-<% if (!certified) { %>
-<section class="home-card dash-card">
-  <h2 class="home-card-band dash-band">All steps <span><%= doneCount %> of <%= steps.length %> complete</span></h2>
-  <ol class="dash-steps">
-    <% steps.forEach(s => { const isNext = next && s === next; %>
-    <li class="<%= [s.done ? 'done' : '', isNext ? 'next' : '', !s.done && !s.href ? 'locked' : ''].filter(Boolean).join(' ') %>">
-      <span class="dash-dot" aria-hidden="true"><% if (s.done) { %><%- include('../partials/check') %><% } %></span>
-      <% if (s.href) { %><a href="<%= s.href %>"><%= s.label %></a><% } else { %><span><%= s.label %></span><% } %>
-      <% if (isNext) { %><a class="button gold small dash-go" href="<%= s.href %>" aria-label="Continue: <%= s.label %>"><%= s.cta || 'Start' %></a>
-      <% } else { %><span class="dash-state"><%= s.done ? (s.doneState || 'Complete') : s.href ? (s.state || 'Start') : (s.hint || '') %></span><% } %>
-    </li>
-    <% }) %>
-  </ol>
-</section>
-<% } %>
-
-<p class="dash-links"><a href="/portal/account">Account settings</a><% if (paid) { %> · <a href="/portal/billing">Billing</a><% } %> · <a href="/support">Contact</a></p>
-
-
+</div>
 <%- include('../partials/foot') %>

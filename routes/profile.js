@@ -61,7 +61,10 @@ router.get('/dashboard', async (req, res, next) => {
   try {
     const [progress, flagged, train] = await Promise.all([progressFor(req.registrant), hasOpenFlag(req.registrant.id), training.stateFor(req.registrant.id)]);
     const sc = progress.registration && progress.registration.id ? await screening.forRegistration(progress.registration.id) : null;
-    res.render('portal/dashboard', { pageTitle: 'Certification Dashboard', progress, flagged, train, screening: sc, saved: req.query.saved === '1' });
+    const { data: job } = await db().from('csbfp_employment_relationships').select('company_name')
+      .eq('registrant_id', req.registrant.id).eq('is_current', true).order('created_at', { ascending: false }).limit(1).maybeSingle();
+    res.render('portal/dashboard', { pageTitle: 'Certification Dashboard', progress, flagged, train, screening: sc, saved: req.query.saved === '1',
+      employer: job ? job.company_name : null, phone: v.fmtPhone(req.registrant.phone_e164) });
   } catch (err) { next(err); }
 });
 
