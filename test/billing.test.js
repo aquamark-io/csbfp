@@ -237,6 +237,18 @@ test('a failed renewal makes the registration Inactive; paying reactivates it an
   assert.ok(fake.tables.csbfp_payments.some(p => p.stripe_invoice_id === inv.id && p.status === 'paid' && p.billing_reason === 'renewal'));
 });
 
+test('a refund made in Stripe marks the payment Refunded and leaves the certification alone', async () => {
+  const inv = Object.values(fs.state.invoices).find(i => i.status === 'paid' && fake.tables.csbfp_payments.some(p => p.stripe_invoice_id === i.id));
+  const before = regOf('pat@example.com').reg.status;
+  const r = await webhook('charge.refunded', { id: 'ch_1', object: 'charge', payment_intent: inv._pi, amount: 19900, amount_refunded: 19900, refunded: true });
+  assert.equal(r.body.result, 'refunded');
+  assert.equal(fake.tables.csbfp_payments.find(p => p.stripe_invoice_id === inv.id).status, 'refunded');
+  assert.equal(regOf('pat@example.com').reg.status, before);
+  assert.match((await pat.req('/portal/billing')).text, /Refunded/);
+  await webhook('invoice.paid', fs.state.invoices[inv.id]);
+  assert.equal(fake.tables.csbfp_payments.find(p => p.stripe_invoice_id === inv.id).status, 'refunded', 'a later invoice update does not undo it');
+});
+
 test('if the subscription ends while Inactive, they rejoin through checkout and keep their number', async () => {
   const sub = Object.values(fs.state.subscriptions)[0];
   const number = regOf('pat@example.com').reg.registration_number;

@@ -18,7 +18,7 @@ router.use(requireAdmin);
 const APP = 'csbfp';
 const PRODUCT_NAME = 'CSBFP Annual Certification';
 const AMOUNT = config.program.annualFeeCents;
-const EVENTS = ['checkout.session.completed', 'invoice.paid', 'invoice.payment_failed', 'customer.subscription.updated', 'customer.subscription.deleted'];
+const EVENTS = ['checkout.session.completed', 'invoice.paid', 'invoice.payment_failed', 'customer.subscription.updated', 'customer.subscription.deleted', 'charge.refunded'];
 
 router.get('/stripe', async (req, res, next) => {
   try {

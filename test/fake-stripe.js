@@ -20,6 +20,7 @@ function createFakeStripe() {
       status_transitions: { paid_at: paid ? now() : null },
       hosted_invoice_url: `https://invoice.stripe.com/i/${n}`,
     };
+    inv._pi = `pi_${inv.id}`;
     s.invoices[inv.id] = inv;
     return inv;
   }
@@ -56,6 +57,9 @@ function createFakeStripe() {
       cancel: async sid => { Object.assign(s.subscriptions[sid], { status: 'canceled', canceled_at: now(), ended_at: now() }); return { ...s.subscriptions[sid] }; },
     },
     invoices: { retrieve: async iid => ({ ...s.invoices[iid] }) },
+    invoicePayments: {
+      list: async ({ payment }) => ({ data: Object.values(s.invoices).filter(i => i._pi === payment.payment_intent).map(i => ({ invoice: i.id })) }),
+    },
     billingPortal: {
       sessions: { create: async () => ({ url: `https://billing.stripe.com/p/session/${n}` }) },
       configurations: {
