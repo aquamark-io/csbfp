@@ -90,7 +90,7 @@
   <h2>Training</h2>
   <% if (!train.modules.length) { %><p class="dsmall">Training opens soon.</p><% } else { %>
   <table class="dtable">
-    <thead><tr><th>#</th><th>Module</th><th class="dcheck-h">Complete</th></tr></thead>
+    <thead><tr><th>#</th><th>Module</th><th class="dcheck-h"><span class="visually-hidden">Complete</span></th></tr></thead>
     <tbody>
     <% train.modules.forEach((m, i) => { %>
       <% const open = appDone && m.unlocked; %><tr class="<%= !open && !m.completed ? 'is-locked' : '' %>"><td><%= i + 1 %></td>
