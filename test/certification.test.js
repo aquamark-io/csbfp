@@ -196,7 +196,8 @@ test('background check page: state from ZIP, exact name and email, private per-s
   assert.equal(fake.tables.csbfp_screenings.find(s => s.registration_id === reg.id).status, 'in_progress');
   dash = (await ann.req('/portal/dashboard')).text;
   assert.match(dash, /<dt>Background<\/dt><dd><span class="dstat">Submitted/);
-  assert.match(dash, /Results usually take 1–3 days/);
+  assert.match(dash, /Submitted <span class="dhint">\(allow 1–3 days\)/);
+  assert.doesNotMatch(dash, /Results usually take/);
   assert.doesNotMatch(dash, /href="\/portal\/background-check"/);
   assert.match((await ann.req('/portal/background-check')).text, /marked your background check complete/);
 

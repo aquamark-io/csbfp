@@ -914,3 +914,4 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .app-links li{border-bottom:1px solid var(--line)}
 .app-links a{display:block;padding:14px 4px;text-decoration:none;font-weight:600}
 .app-links a::after{content:"\2192";float:right;color:var(--muted)}
+.dhint{font-size:.85rem;color:var(--muted)}
