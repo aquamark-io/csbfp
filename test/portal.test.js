@@ -221,7 +221,7 @@ test('full journey: sign up, verify email, complete every form', async () => {
 });
 
 test('codes: wrong code, single use, lockout after 5 attempts', async () => {
-  fake.tables.csbfp_login_codes = []; // as if 15 minutes have passed (max 3 codes per 15 minutes)
+  fake.tables.csbfp_login_codes = []; require('../routes/portal').resetCodeRequests(); // as if 15 minutes have passed (max 3 codes per 15 minutes)
   const b = browser();
   const mark = sent.length;
   await b.req('/portal', { email: 'jane@example.com' });
@@ -248,7 +248,7 @@ test('codes: wrong code, single use, lockout after 5 attempts', async () => {
   assert.ok(sent.slice(m3).some(s => s.includes('to=john@example.com') && /No account found/.test(s)), 'no-account email instead of a code');
 
   // Five wrong tries locks the code: even the right code fails afterwards.
-  fake.tables.csbfp_login_codes = [];
+  fake.tables.csbfp_login_codes = []; require('../routes/portal').resetCodeRequests();
   const b4 = browser();
   const m4 = sent.length;
   await b4.req('/portal/resend', {}); // no login cookie yet -> back to sign in
@@ -261,13 +261,20 @@ test('codes: wrong code, single use, lockout after 5 attempts', async () => {
   assert.match(r.text, /incorrect or has expired|Too many/);
 });
 
-test('at most 3 codes per account per 15 minutes', async () => {
-  fake.tables.csbfp_login_codes = [];
+test('at most 3 codes per account per 15 minutes; the 4th request says to wait', async () => {
+  fake.tables.csbfp_login_codes = []; require('../routes/portal').resetCodeRequests();
   const m = sent.length;
-  for (let i = 0; i < 5; i++) await browser().req('/portal', { email: 'jane@example.com' });
+  const res = [];
+  for (let i = 0; i < 5; i++) res.push(await browser().req('/portal', { email: 'jane@example.com' }));
   await wait(150);
   assert.equal(sent.slice(m).filter(s => s.includes('to=jane@example.com')).length, 3);
-  fake.tables.csbfp_login_codes = [];
+  assert.deepEqual(res.map(r => r.status), [303, 303, 303, 429, 429]);
+  assert.match(res[3].text, /Too many codes have been requested for this email address/);
+  // Same answer for an address with no account, so the message doesn't reveal who has one.
+  const none = [];
+  for (let i = 0; i < 4; i++) none.push(await browser().req('/portal', { email: 'john@example.com' }));
+  assert.deepEqual(none.map(r => r.status), [303, 303, 303, 429]);
+  fake.tables.csbfp_login_codes = []; require('../routes/portal').resetCodeRequests();
 });
 
 test('the screen never reveals whether an account exists', async () => {

@@ -105,6 +105,21 @@ async function issueCode(email, ip) {
   }
 }
 
+// Visible per-address limit: the same 3-in-15-minutes rule as above, counted per request (whether or not an
+// account exists), so hitting it tells the person to wait without revealing who has an account.
+const CODE_LIMIT_MSG = 'Too many codes have been requested for this email address. Please wait 15 minutes and try again.';
+const codeRequests = new Map();
+function tooManyCodeRequests(email) {
+  const key = keyedHash('code-request', email);
+  const now = Date.now();
+  const recent = (codeRequests.get(key) || []).filter(t => now - t < CODE_WINDOW_MS);
+  if (recent.length >= MAX_CODES_PER_WINDOW) { codeRequests.set(key, recent); return true; }
+  recent.push(now);
+  codeRequests.set(key, recent);
+  if (codeRequests.size > 5000) for (const [k, v] of codeRequests) if (!v.some(t => now - t < CODE_WINDOW_MS)) codeRequests.delete(k);
+  return false;
+}
+
 const startCode = (res, email, ip) => {
   session.setLoginEmail(res, email);
   res.redirect(303, '/portal/verify');
@@ -122,6 +137,7 @@ router.post('/', signinLimiter, (req, res) => {
   const email = normEmail(req.body.email);
   if (!validEmail(email)) return res.status(422).render('portal/signin', { pageTitle: 'Sign In', error: 'Please enter a valid email address.', email });
   if (!config.previewAllowed(email)) return res.status(403).render('portal/signin', { pageTitle: 'Sign In', error: CLOSED, email });
+  if (tooManyCodeRequests(email)) return res.status(429).render('portal/signin', { pageTitle: 'Sign In', error: CODE_LIMIT_MSG, email });
   startCode(res, email, req.ip);
 });
 
@@ -179,6 +195,7 @@ router.get('/verify', (req, res) => {
 router.post('/resend', signinLimiter, (req, res) => {
   const email = session.readLoginEmail(req);
   if (!email) return res.redirect(303, '/portal');
+  if (tooManyCodeRequests(email)) return verifyView(res, email, { status: 429, error: CODE_LIMIT_MSG });
   session.setLoginEmail(res, email);
   res.redirect(303, '/portal/verify?resent=1');
   setImmediate(() => issueCode(email, req.ip));
@@ -242,4 +259,5 @@ router.post('/logout', async (req, res) => {
   res.redirect(303, '/portal');
 });
 
+router.resetCodeRequests = () => codeRequests.clear(); // tests: "15 minutes have passed"
 module.exports = router;
