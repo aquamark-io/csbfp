@@ -97,7 +97,7 @@ router.post('/training/:key/complete', async (req, res, next) => {
     }
     const nextMod = state.modules[idx + 1];
     // Back to the training list to choose the next module (a clear break between modules).
-    if (nextMod) return res.redirect(303, '/portal/dashboard');
+    if (nextMod) return res.redirect(303, `/portal/dashboard?done=${encodeURIComponent(mod.stable_key)}`);
 
     // That was the last one.
     const fresh = await training.stateFor(req.registrant.id);

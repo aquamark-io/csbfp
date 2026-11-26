@@ -1,6 +1,7 @@
 <%- include('../partials/head') %>
 <p class="backlink"><a href="/portal/dashboard">← Dashboard</a></p>
 <h1 class="visually-hidden"><%= mod.title %></h1>
+<% if (mod.completed) { %><p class="notice-ok" role="status">You completed this module. You can review it at any time.</p><% } %>
 <% if (video) { %>
 <div class="video"><iframe src="<%= video %>" title="<%= mod.title %> video" loading="lazy" allow="fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
 <% } %>

@@ -67,7 +67,8 @@ router.get('/dashboard', async (req, res, next) => {
     const sc = progress.registration && progress.registration.id ? await screening.forRegistration(progress.registration.id) : null;
     const { data: job } = await db().from('csbfp_employment_relationships').select('company_name')
       .eq('registrant_id', req.registrant.id).eq('is_current', true).order('created_at', { ascending: false }).limit(1).maybeSingle();
-    res.render('portal/dashboard', { pageTitle: 'Certification Dashboard', progress, flagged, train, screening: sc, saved: req.query.saved === '1',
+    const doneMod = typeof req.query.done === 'string' ? train.modules.find(m => m.stable_key === req.query.done && m.completed) : null;
+    res.render('portal/dashboard', { pageTitle: 'Certification Dashboard', progress, flagged, train, screening: sc, saved: req.query.saved === '1', doneMod,
       employer: job ? job.company_name : null, phone: v.fmtPhone(req.registrant.phone_e164) });
   } catch (err) { next(err); }
 });

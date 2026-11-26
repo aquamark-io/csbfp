@@ -39,6 +39,7 @@
 %>
 <h1 class="dash-title visually-hidden">Certification Dashboard</h1>
 <% if (typeof saved !== 'undefined' && saved) { %><p class="notice-ok" role="status">Saved.</p><% } %>
+<% if (typeof doneMod !== 'undefined' && doneMod) { %><p class="notice-ok" role="status">You completed <%= doneMod.title %>.</p><% } %>
 <% if (reg.is_demo) { %><p class="demo-banner">DEMO / NOT SCREENED: background checks are not active yet, so this preview credential is not a valid CSBFP certification.</p><% } %>
 
 

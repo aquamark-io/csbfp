@@ -147,7 +147,9 @@ test('modules open in order; completing them leads to the completion page and on
   assert.match(r.text, /class="goal"/);
   assert.match(r.text, /callout-remember/);
   r = await amy.req('/portal/training/intro/complete', {});
-  assert.equal(r.location, '/portal/dashboard', 'back to the dashboard after each module');
+  assert.equal(r.location, '/portal/dashboard?done=intro', 'back to the dashboard after each module');
+  assert.match((await amy.req(r.location)).text, /You completed Intro/);
+  assert.match((await amy.req('/portal/training/intro')).text, /You completed this module/);
   r = await amy.req('/portal/training/conduct/complete', {});
   assert.equal(r.location, '/portal/training/complete');
   assert.match((await amy.req('/portal/training/complete')).text, /All done here/);
