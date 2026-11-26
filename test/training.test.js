@@ -149,7 +149,7 @@ test('modules open in order; completing them leads to the completion page and on
   await amy.req('/portal/training/conduct/complete', {}); // repeat: no second email
   await wait(60);
   assert.equal(fake.tables.csbfp_email_messages.filter(m => m.template_key === 'training_completed').length, 1);
-  { const t = (await amy.req('/portal/dashboard')).text; assert.equal((t.match(/<td>Complete<\/td>/g) || []).length >= 2, true); assert.match(t, /<td>Ready<\/td>/); }
+  { const t = (await amy.req('/portal/dashboard')).text; assert.ok((t.match(/class="dbox on"/g) || []).length >= 2, 'completed modules are checked'); assert.match(t, /href="\/portal\/assessment">Assessment</); }
 });
 
 test('the assessment starts directly (no separate acknowledgment; the professional standards cover it)', async () => {
@@ -274,7 +274,7 @@ test('admin: copy to a draft, then publishing requires confirmation and replaces
   const mark = sent.length;
   await ben.req('/portal', { email: 'ben@example.com' });
   await ben.req('/portal/verify', { code: await codeFor('ben@example.com', mark) });
-  assert.match((await ben.req('/portal/dashboard')).text, /<td>After training<\/td>/);
+  assert.doesNotMatch((await ben.req('/portal/dashboard')).text, /class="dbox on"/);
 });
 
 test('admin results list shows attempts', async () => {

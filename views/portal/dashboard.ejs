@@ -35,7 +35,7 @@
     : !certified && !inCheck ? steps.find(s => !s.done && s.href) : null;
 
 %>
-<h1 class="dash-title">Certification Dashboard</h1>
+<h1 class="dash-title visually-hidden">Certification Dashboard</h1>
 <% if (typeof saved !== 'undefined' && saved) { %><p class="notice-ok" role="status">Saved.</p><% } %>
 <% if (reg.is_demo) { %><p class="demo-banner">DEMO / NOT SCREENED: background checks are not active yet, so this preview credential is not a valid CSBFP certification.</p><% } %>
 
@@ -77,28 +77,29 @@
   const go = card && card.href ? { href: card.href, label: card.cta } : next ? { href: next.href, label: `Next: ${next.label}` } : null;
   const goNote = !go && card ? card.title : '';
 %>
-<section class="dsum">
-  <div class="dsum-item"><p class="dsum-k">Name</p><p class="dsum-v"><%= name || registrant.email %></p></div>
-  <div class="dsum-item"><p class="dsum-k">Certification status</p>
-    <p class="dsum-v"><span class="dpill <%= statusTone %>"><%= statusLabel %></span><% if (go) { %> <a class="dsum-go" href="<%= go.href %>"><%= go.label %> &rarr;</a><% } %></p>
-    <% if (card && (card.text || card.html)) { %><p class="dsum-note"><% if (card.html) { %><%- card.html %><% } else { %><%= card.text %><% } %></p><% } else if (goNote) { %><p class="dsum-note"><%= goNote %></p><% } %></div>
-  <div class="dsum-item dsum-btn"><a class="button secondary" href="/portal/account">Account Settings</a></div>
+<section class="dpanel">
+  <dl class="drows">
+    <div><dt>Name</dt><dd><%= name || 'Not added yet' %></dd></div>
+    <div><dt>Certification status</dt><dd><strong><%= statusLabel %></strong><% if (card && (card.text || card.html)) { %><span class="dnote"><% if (card.html) { %><%- card.html %><% } else { %><%= card.text %><% } %></span><% } else if (goNote) { %><span class="dnote"><%= goNote %></span><% } %></dd></div>
+    <% if (go) { %><div class="drow-go"><dt>Next step</dt><dd><span><%= next && go.label === `Next: ${next.label}` ? next.label : go.label %></span><a class="button gold small" href="<%= go.href %>"><%= next && go.label === `Next: ${next.label}` ? (next.cta || 'Continue') : go.label %></a></dd></div><% } %>
+  </dl>
+  <p class="dpanel-foot"><a class="button secondary small" href="/portal/account">Account Settings</a></p>
 </section>
 
 <section class="dtrain">
   <h2>Training</h2>
   <% if (!train.modules.length) { %><p class="dsmall">Training opens soon.</p><% } else { %>
   <table class="dtable">
-    <thead><tr><th>#</th><th>Module</th><th>Status</th></tr></thead>
+    <thead><tr><th>#</th><th>Module</th><th class="dcheck-h">Complete</th></tr></thead>
     <tbody>
     <% train.modules.forEach((m, i) => { %>
       <tr class="<%= !m.unlocked && !m.completed ? 'is-locked' : '' %>"><td><%= i + 1 %></td>
         <td><% if (m.unlocked) { %><a href="/portal/training/<%= m.stable_key %>"><%= m.title %></a><% } else { %><%= m.title %><% } %></td>
-        <td><%= m.completed ? 'Complete' : nextMod === m ? (m.started ? 'In progress' : 'Not started') : m.unlocked ? 'Not started' : 'Locked' %></td></tr>
+        <td class="dcheck"><span class="dbox<%= m.completed ? ' on' : '' %>" role="img" aria-label="<%= m.completed ? 'Complete' : 'Not complete' %>"><% if (m.completed) { %><%- include('../partials/check') %><% } %></span></td></tr>
     <% }) %>
       <tr class="<%= !train.allComplete ? 'is-locked' : '' %>"><td><%= train.modules.length + 1 %></td>
         <td><% if (train.allComplete) { %><a href="/portal/assessment">Assessment</a><% } else { %>Assessment<% } %></td>
-        <td><%= train.assessment && train.assessment.passed ? 'Passed' : train.allComplete ? 'Ready' : 'After training' %></td></tr>
+        <% const passedA = train.assessment && train.assessment.passed; %><td class="dcheck"><span class="dbox<%= passedA ? ' on' : '' %>" role="img" aria-label="<%= passedA ? 'Passed' : 'Not complete' %>"><% if (passedA) { %><%- include('../partials/check') %><% } %></span></td></tr>
     </tbody>
   </table>
   <% } %>
