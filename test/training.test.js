@@ -187,6 +187,9 @@ test('a failing attempt shows the score only, emails the result, and starts the 
   const res = await amy.req(r.location);
   assert.match(res.text, /Not passed/);
   assert.match(res.text, /3 of 5/);
+  const missed = [...res.text.matchAll(/<li>(Question \d\?)<\/li>/g)].map(m => m[1]);
+  assert.match(res.text, /Questions you missed/);
+  assert.equal(missed.length, 2, 'lists the two missed questions');
   assert.doesNotMatch(res.text, /Right \d|Because \d/, 'no answers revealed after failing');
   await wait(60);
   assert.ok(sent.some(s => s.includes('to=amy@example.com') && /Assessment not passed/.test(s)));

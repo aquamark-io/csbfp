@@ -217,7 +217,9 @@ router.get('/assessment/result/:id', async (req, res, next) => {
       .eq('registrant_id', req.registrant.id).maybeSingle(), 'Attempt');
     if (!attempt || !attempt.submitted_at) return next();
     const state = await training.stateFor(req.registrant.id);
-    res.render('portal/result', { pageTitle: 'Assessment Result', attempt, state, blocked: blockedReason(state) });
+    const given = attempt.answers || {};
+    const missed = (attempt.questions_snapshot || []).filter(q => given[q.id] !== q.correct).map(q => q.prompt);
+    res.render('portal/result', { pageTitle: 'Assessment Result', attempt, state, missed, blocked: blockedReason(state) });
   } catch (err) { next(err); }
 });
 
