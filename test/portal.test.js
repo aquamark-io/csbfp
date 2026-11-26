@@ -199,7 +199,7 @@ test('full journey: sign up, verify email, complete every form', async () => {
   assert.ok(fake.tables.csbfp_legal_acceptances.some(a => a.registrant_id === jane.id && a.document_key === 'acknowledgments' && a.context === 'acknowledgments'));
 
   d = await b.req('/portal/dashboard');
-  assert.match(d.text, /<span>Training modules<\/span><a class="button gold small" href="\/portal\/training">/);
+  assert.match(d.text, /<span>Training modules<\/span><a class="button gold small" href="\/portal\/(training\/|assessment)/);
   assert.doesNotMatch(d.text, /<span>Personal information<\/span>/, "application steps done");
   assert.doesNotMatch(d.text, /demo record only/, "preview note removed from the dashboard");
   const pp = await b.req('/portal/personal');

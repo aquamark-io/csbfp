@@ -8,7 +8,7 @@
 <% } else if (blocked) { %>
   <p class="message"><%= blocked %></p>
   <% if (a && a.lastAttempt) { %><p class="muted">Your last attempt: <%= a.lastAttempt.correct_count %> of <%= a.lastAttempt.question_count %> correct.</p><% } %>
-  <div class="actions"><a class="button secondary" href="/portal/training">Review the Training</a></div>
+  <div class="actions"><a class="button secondary" href="/portal/dashboard">Review the Training</a></div>
 <% } else { %>
   <% const passCount = Math.ceil(state.settings.question_count * state.settings.pass_percent / 100); %>
   <p class="lead"><%= state.settings.question_count %> multiple-choice questions. Answer <%= passCount %> correctly to pass.</p>

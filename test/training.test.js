@@ -136,18 +136,18 @@ let boss;
 test('modules open in order; completing them leads to the completion page and one email', async () => {
   amy = await signUp('amy@example.com', '4155550101');
   let r = await amy.req('/portal/training');
-  assert.equal(r.status, 200);
-  assert.match(r.text, /Intro text/);
-  assert.match(r.text, /class="locked"/);
-  assert.equal((await amy.req('/portal/training/conduct')).location, '/portal/training', 'module 2 locked');
+  assert.equal(r.location, '/portal/dashboard', 'the module list is on the dashboard');
+  r = await amy.req('/portal/dashboard');
+  assert.match(r.text, /href="\/portal\/training\/intro"/, 'next step goes straight to module 1');
+  assert.doesNotMatch(r.text, /href="\/portal\/training\/conduct"/, 'module 2 not linked yet');
+  assert.equal((await amy.req('/portal/training/conduct')).location, '/portal/dashboard', 'module 2 locked');
   assert.equal((await amy.req('/portal/assessment/start', {})).location, '/portal/assessment', 'assessment locked');
 
   r = await amy.req('/portal/training/intro');
   assert.match(r.text, /class="goal"/);
   assert.match(r.text, /callout-remember/);
   r = await amy.req('/portal/training/intro/complete', {});
-  assert.equal(r.location, '/portal/training?done=intro', 'back to the training list after each module');
-  assert.match((await amy.req(r.location)).text, /You completed/);
+  assert.equal(r.location, '/portal/dashboard', 'back to the dashboard after each module');
   r = await amy.req('/portal/training/conduct/complete', {});
   assert.equal(r.location, '/portal/training/complete');
   assert.match((await amy.req('/portal/training/complete')).text, /All done here/);
@@ -267,7 +267,7 @@ test('admin: copy to a draft, then publishing requires confirmation and replaces
   assert.equal(v2.status, 'draft');
   assert.equal(fake.tables.csbfp_modules.filter(m => m.curriculum_version_id === v2.id).length, 2);
   assert.equal(fake.tables.csbfp_questions.filter(q => q.curriculum_version_id === v2.id).length, 5);
-  assert.match((await amy.req('/portal/training')).text, /Test|Intro/); // registrants still on Test 1
+  assert.match((await amy.req('/portal/dashboard')).text, /href="\/portal\/training\/intro"/); // registrants still on Test 1
 
   r = await boss.req(`/admin/training/v/${v2.id}/publish`, {});
   assert.match(decodeURIComponent(r.location), /confirmation/);

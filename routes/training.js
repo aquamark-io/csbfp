@@ -1,7 +1,7 @@
 /**
  * Training and assessment for signed-in registrants.
  *
- *   GET  /portal/training                     overview and module list
+ *   GET  /portal/training                     redirects to the dashboard (the module list is there)
  *   GET  /portal/training/complete            completion message
  *   GET  /portal/training/:key                one module (modules open in order)
  *   POST /portal/training/:key/complete       "I've completed this module"
@@ -49,18 +49,13 @@ function embedUrl(url) {
 
 // ---------- training ----------
 
-router.get('/training', async (req, res, next) => {
-  try {
-    const state = await training.stateFor(req.registrant.id);
-    const done = typeof req.query.done === 'string' && state.modules ? state.modules.find(m => m.stable_key === req.query.done && m.completed) : null;
-    res.render('portal/training', { pageTitle: 'Training', state, done, overviewHtml: state.curriculum ? renderMd(state.curriculum.overview_md) : '' });
-  } catch (err) { next(err); }
-});
+// The module list lives on the dashboard now.
+router.get('/training', (req, res) => res.redirect(303, '/portal/dashboard'));
 
 router.get('/training/complete', async (req, res, next) => {
   try {
     const state = await training.stateFor(req.registrant.id);
-    if (!state.allComplete) return res.redirect('/portal/training');
+    if (!state.allComplete) return res.redirect('/portal/dashboard');
     res.render('portal/training-complete', { pageTitle: 'Training Complete', state, html: renderMd(state.curriculum.completion_md) });
   } catch (err) { next(err); }
 });
@@ -75,7 +70,7 @@ router.get('/training/:key', async (req, res, next) => {
   try {
     const { state, idx, mod } = await findModule(req);
     if (!mod) return next();
-    if (!mod.unlocked) return res.redirect('/portal/training');
+    if (!mod.unlocked) return res.redirect('/portal/dashboard');
     if (!mod.started) {
       const { error } = await db().from('csbfp_training_progress').insert({ registrant_id: req.registrant.id, module_id: mod.id });
       if (error && error.code !== '23505') throw new Error(`Start module: ${error.message}`);
@@ -89,7 +84,7 @@ router.post('/training/:key/complete', async (req, res, next) => {
   try {
     const { state, idx, mod } = await findModule(req);
     if (!mod) return next();
-    if (!mod.unlocked) return res.redirect(303, '/portal/training');
+    if (!mod.unlocked) return res.redirect(303, '/portal/dashboard');
     if (!mod.completed) {
       const now = new Date().toISOString();
       const { error } = await db().from('csbfp_training_progress').insert({ registrant_id: req.registrant.id, module_id: mod.id, started_at: now, completed_at: now });
@@ -102,7 +97,7 @@ router.post('/training/:key/complete', async (req, res, next) => {
     }
     const nextMod = state.modules[idx + 1];
     // Back to the training list to choose the next module (a clear break between modules).
-    if (nextMod) return res.redirect(303, `/portal/training?done=${encodeURIComponent(mod.stable_key)}`);
+    if (nextMod) return res.redirect(303, '/portal/dashboard');
 
     // That was the last one.
     const fresh = await training.stateFor(req.registrant.id);
