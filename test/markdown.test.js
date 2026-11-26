@@ -66,3 +66,10 @@ test('slide rows with "year: subject" labels stack the label above the text; pla
   assert.match(html, /<dl class="terms stacked"><div><dt>Pre-2008: Early Foundations<\/dt><dd>Rooted in factoring\.<\/dd>/);
   assert.match(html, /<dl class="terms"><div><dt>Speed<\/dt>/);
 });
+
+test('a numbered list of "Step | description" items renders as a process timeline', () => {
+  const { renderSlides } = require('../lib/markdown');
+  const html = renderSlides('## P\n\n1. Request | The business asks.\n2. Funding | Money is sent.');
+  assert.match(html, /<ol class="process"><li><strong>Request<\/strong><span>The business asks\.<\/span><\/li><li><strong>Funding<\/strong>/);
+  assert.match(renderSlides('## Q\n\n1. One\n2. Two'), /<ol><li>One<\/li>/, 'plain numbered lists unchanged');
+});

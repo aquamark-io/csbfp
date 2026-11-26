@@ -883,3 +883,13 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 
 /* Training slides: rows whose labels are headings (year: subject) stack the label above the text */
 .slides .terms.stacked > div { grid-template-columns: 1fr; gap: 4px; padding: 16px 0; }
+
+/* Training slides: process timeline (numbered circles joined by a line) */
+.slides ol.process { list-style: none; counter-reset: proc; margin: 22px 0 26px; padding: 0; }
+.slides ol.process li { counter-increment: proc; position: relative; padding: 2px 0 22px 52px; }
+.slides ol.process li::before { content: counter(proc); position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 0.9rem; }
+.slides ol.process li::after { content: ""; position: absolute; left: 15px; top: 36px; bottom: 4px; width: 2px; background: #d9dee7; }
+.slides ol.process li:last-child { padding-bottom: 4px; }
+.slides ol.process li:last-child::after { display: none; }
+.slides ol.process strong { display: block; color: var(--ink); font-size: 1.02rem; margin-bottom: 2px; }
+.slides ol.process span { display: block; color: var(--body); line-height: 1.55; }
