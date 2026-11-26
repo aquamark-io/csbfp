@@ -1,7 +1,7 @@
 <%- include('../partials/head') %>
 <%- include('../partials/portal-nav') %>
 <h1>Background Check</h1>
-<p class="lead">The last step is a one-time background check through Checkr. It takes about 10 minutes, and results usually take 1–3 days.</p>
+<p class="lead">A one-time background check through Checkr. It takes about 10 minutes, and results usually take 1–3 days.</p>
 
 <% if (!state) { %>
   <p class="message">We couldn't match your ZIP code (<%= r.zip5 || 'not entered' %>) to a U.S. state. Please <a href="/portal/personal">check your home ZIP code</a>, or contact <a href="mailto:<%= program.supportEmail %>"><%= program.supportEmail %></a>.</p>
@@ -16,7 +16,16 @@
       <% if (link && sc && sc.link_opened_at) { %><div><dt>Status</dt><dd>Started <%= new Date(sc.link_opened_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'America/Los_Angeles' }) %></dd></div><% } %>
     </dl>
     <% if (link) { %>
-      <div class="bg-actions"><a class="button gold" href="/portal/background-check/go" target="_blank" rel="noopener" aria-label="Start your background check with Checkr">Start</a></div>
+      <% const submitted = sc && !['not_started', 'awaiting_authorization'].includes(sc.status); %>
+      <% if (submitted) { %>
+        <p class="bg-note">You've marked your background check complete. We'll email you once the results are reviewed.</p>
+      <% } else { %>
+      <ol class="bg-steps">
+        <li><span>Complete the form in Checkr.</span><a class="button gold" href="/portal/background-check/go" target="_blank" rel="noopener" aria-label="Go to Checkr (opens in a new tab)">Go to Checkr</a></li>
+        <li><span>Come back here when you've finished.</span>
+          <form method="post" action="/portal/background-check/done"><button class="button" type="submit">I've Completed It</button></form></li>
+      </ol>
+      <% } %>
     <% } else { %>
       <p class="bg-note">The background check for <%= stateName %> isn't available yet. We'll email you as soon as it is.</p>
     <% } %>

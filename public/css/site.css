@@ -904,3 +904,12 @@ h2[id], [id].anchor { scroll-margin-top: 120px; }
 .next-step p{margin:0 0 6px}
 .next-step .next-step-label{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted, #5b6474)}
 .next-step .actions{margin:16px 0 0}
+.bg-steps{list-style:none;margin:20px 0 0;padding:0;border-top:1px solid var(--line)}
+.bg-steps li{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 0;border-bottom:1px solid var(--line)}
+.bg-steps li form{margin:0}
+.bg-steps .button{min-width:170px;text-align:center}
+@media (max-width:560px){.bg-steps li{flex-direction:column;align-items:stretch}.bg-steps .button{width:100%}}
+.dstat{font-weight:600;color:var(--muted)}
+.dstat.ok{color:#1d7a46}
+.dstat.due{color:var(--ink, #14213d)}
+.dstat.warn{color:#b3261e}

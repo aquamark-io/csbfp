@@ -174,7 +174,8 @@ test('background check page: state from ZIP, exact name and email, private per-s
   assert.ok(fake.tables.csbfp_admin_audit_log.some(a => a.action === 'checkr_links_updated'));
 
   page = await ann.req('/portal/background-check');
-  assert.match(page.text, />Start<\/a>/);
+  assert.match(page.text, />Go to Checkr<\/a>/);
+  assert.match(page.text, /I've Completed It/);
   assert.doesNotMatch(page.text, /checkr\.example/, 'the link itself is not printed on the page');
   const go = await ann.req('/portal/background-check/go');
   assert.equal(go.location, 'https://checkr.example/apply/ca');
@@ -183,8 +184,21 @@ test('background check page: state from ZIP, exact name and email, private per-s
   assert.equal(sc.state, 'CA');
   assert.ok(sc.link_opened_at);
   assert.match((await admin.req('/admin/review')).text, /Opened Checkr link \(CA\)/);
-  assert.match((await ann.req('/portal/dashboard')).text, /in progress with Checkr/);
+  let dash = (await ann.req('/portal/dashboard')).text;
+  assert.match(dash, /<dt>Fee<\/dt><dd><span class="dstat ok">Paid/);
+  assert.match(dash, /<dt>Background<\/dt><dd><span class="dstat due">Started/);
+  assert.match(dash, /href="\/portal\/background-check">Continue/, 'they can get back to the background check');
   assert.match((await ann.req('/portal/background-check')).text, /<dt>Status<\/dt><dd>Started /);
+
+  // Phase 1: the applicant marks the Checkr form complete (no callback from Checkr yet)
+  const done = await ann.req('/portal/background-check/done', {});
+  assert.equal(done.location, '/portal/dashboard');
+  assert.equal(fake.tables.csbfp_screenings.find(s => s.registration_id === reg.id).status, 'in_progress');
+  dash = (await ann.req('/portal/dashboard')).text;
+  assert.match(dash, /<dt>Background<\/dt><dd><span class="dstat">Submitted/);
+  assert.match(dash, /Results usually take 1–3 days/);
+  assert.doesNotMatch(dash, /href="\/portal\/background-check"/);
+  assert.match((await ann.req('/portal/background-check')).text, /marked your background check complete/);
 
   // Not available to anyone who isn't a paid applicant waiting on the check, and never public
   assert.equal((await browser().req('/portal/background-check')).status, 303);
