@@ -22,9 +22,18 @@ const { sendQuietly, registrantVars } = require('../lib/email');
 const training = require('../lib/training');
 const { render: renderMd, renderSlides } = require('../lib/markdown');
 const { requireRegistrant } = require('../middleware/auth');
+const { progressFor } = require('../lib/progress');
 
 const router = express.Router();
 router.use(['/training', '/assessment'], requireRegistrant);
+
+// Training opens after the application (personal information, employment, products, professional standards).
+router.use(['/training', '/assessment'], async (req, res, next) => {
+  try {
+    if ((await progressFor(req.registrant)).infoComplete) return next();
+    return res.redirect(303, '/portal/dashboard');
+  } catch (err) { return next(err); }
+});
 
 const isUuid = s => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || '');
 

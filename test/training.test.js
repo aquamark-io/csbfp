@@ -14,7 +14,7 @@ Object.assign(process.env, {
   FIELD_HASH_KEY: 'test-hash-key-that-is-long-enough-and-different',
   PRE_LAUNCH: 'true',
   ADMIN_EMAILS: 'boss@example.com',
-  PREVIEW_EMAILS: 'boss@example.com,amy@example.com,ben@example.com',
+  PREVIEW_EMAILS: 'boss@example.com,amy@example.com,ben@example.com,cal@example.com',
   POSTMARK_SERVER_TOKEN: '',
 });
 
@@ -90,6 +90,11 @@ async function signUp(email, phone) {
   const mark = sent.length;
   await b.req('/portal/signup', { email, phone, agree: 'yes' });
   await b.req('/portal/verify', { code: await codeFor(email, mark) });
+  // Training opens after the application: mark it complete directly.
+  const r = fake.tables.csbfp_registrants.find(x => x.email === email);
+  Object.assign(r, { legal_first_name: 'Test', legal_last_name: 'Person', dob_hash: 'h', zip5: '94105', industry_start_month: '2020-01-01', employment_status: 'not_currently_employed' });
+  (fake.tables.csbfp_registrant_products ||= []).push({ registrant_id: r.id, product_id: 1 });
+  (fake.tables.csbfp_legal_acceptances ||= []).push({ id: `ack-${r.id}`, registrant_id: r.id, document_key: 'acknowledgments', version: 1, context: 'acknowledgments', accepted_at: new Date().toISOString() });
   return b;
 }
 async function admin() {
@@ -281,4 +286,19 @@ test('admin results list shows attempts', async () => {
   const r = await boss.req('/admin/training/results');
   assert.match(r.text, /4 of 5/);
   assert.match(r.text, /Not passed/);
+});
+
+test('training and the assessment stay locked until the application is complete', async () => {
+  const b = browser();
+  const mark = sent.length;
+  await b.req('/portal/signup', { email: 'cal@example.com', phone: '4155550303', agree: 'yes' });
+  await b.req('/portal/verify', { code: await codeFor('cal@example.com', mark) });
+  for (const p of ['/portal/training', '/portal/assessment']) {
+    const r = await b.req(p);
+    assert.equal(r.status, 303, p);
+    assert.equal(r.location, '/portal/dashboard', p);
+  }
+  const d = await b.req('/portal/dashboard');
+  assert.doesNotMatch(d.text, /href="\/portal\/training\//, 'modules are not linked yet');
+  assert.match(d.text, /<span>Personal information<\/span>/);
 });

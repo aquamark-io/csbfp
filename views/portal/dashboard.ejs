@@ -17,7 +17,7 @@
     { done: progress.employment, label: 'Employment', href: '/portal/employment', desc: 'Your current employer and role.' },
     { done: progress.products, label: 'Financing products', href: '/portal/products', desc: 'The commercial financing products you work with.' },
     { done: progress.acknowledgments, label: 'Professional standards', href: '/portal/acknowledgments', desc: 'Review and accept the CSBFP professional standards. About 2 minutes.' },
-    { done: train.allComplete, label: 'Training modules', href: '/portal/training', desc: 'Four short modules. Your progress is saved as you go.',
+    { done: train.allComplete, label: 'Training modules', href: appDone ? '/portal/training' : null, hint: 'After application', desc: 'Four short modules. Your progress is saved as you go.',
       state: `${modulesDone} of ${train.modules.length} modules`, doneState: `${modulesDone} of ${train.modules.length} modules`, cta: modulesDone ? 'Continue' : 'Start' },
     { done: passed, label: 'Assessment', href: train.allComplete ? '/portal/assessment' : null, hint: 'After training', doneState: 'Passed',
       desc: '20 multiple-choice questions. You need 16 correct to pass.' },
@@ -70,7 +70,7 @@
     pending_screening: 'Background check', under_review: 'Under review', not_approved: 'Not approved' }[reg.status] || 'In progress';
   const statusTone = reg.status === 'active' ? 'ok' : ['suspended', 'revoked', 'not_approved', 'inactive', 'expired'].includes(reg.status) ? 'warn' : 'info';
   const name = [registrant.legal_first_name, registrant.legal_last_name].filter(Boolean).join(' ');
-  const nextMod = train.modules.find(m => m.unlocked && !m.completed);
+  const nextMod = appDone ? train.modules.find(m => m.unlocked && !m.completed) : null;
 %>
 <%
   // Where the status points: the next step, or the action for the current status.
@@ -93,12 +93,12 @@
     <thead><tr><th>#</th><th>Module</th><th class="dcheck-h">Complete</th></tr></thead>
     <tbody>
     <% train.modules.forEach((m, i) => { %>
-      <tr class="<%= !m.unlocked && !m.completed ? 'is-locked' : '' %>"><td><%= i + 1 %></td>
-        <td><% if (m.unlocked) { %><a href="/portal/training/<%= m.stable_key %>"><%= m.title %></a><% } else { %><%= m.title %><% } %></td>
+      <% const open = appDone && m.unlocked; %><tr class="<%= !open && !m.completed ? 'is-locked' : '' %>"><td><%= i + 1 %></td>
+        <td><% if (open) { %><a href="/portal/training/<%= m.stable_key %>"><%= m.title %></a><% } else { %><%= m.title %><% } %></td>
         <td class="dcheck"><span class="dbox<%= m.completed ? ' on' : '' %>" role="img" aria-label="<%= m.completed ? 'Complete' : 'Not complete' %>"><% if (m.completed) { %><%- include('../partials/check') %><% } %></span></td></tr>
     <% }) %>
-      <tr class="<%= !train.allComplete ? 'is-locked' : '' %>"><td><%= train.modules.length + 1 %></td>
-        <td><% if (train.allComplete) { %><a href="/portal/assessment">Assessment</a><% } else { %>Assessment<% } %></td>
+      <tr class="<%= !(appDone && train.allComplete) ? 'is-locked' : '' %>"><td><%= train.modules.length + 1 %></td>
+        <td><% if (appDone && train.allComplete) { %><a href="/portal/assessment">Assessment</a><% } else { %>Assessment<% } %></td>
         <% const passedA = train.assessment && train.assessment.passed; %><td class="dcheck"><span class="dbox<%= passedA ? ' on' : '' %>" role="img" aria-label="<%= passedA ? 'Passed' : 'Not complete' %>"><% if (passedA) { %><%- include('../partials/check') %><% } %></span></td></tr>
     </tbody>
   </table>
