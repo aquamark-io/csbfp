@@ -28,15 +28,14 @@
 <% } else if (!ready) { %>
   <p class="message">Payments are not available right now. Please check back soon.</p>
 <% } else { %>
-  <p class="lead"><%= fee %> per year. Choose how you'd like to pay.</p>
+  <p class="lead"><%= fee %> per year.</p>
   <div class="pay-cards">
     <section class="home-card">
       <h2 class="home-card-band">I'm paying</h2>
       <form method="post" action="/portal/checkout" class="home-card-body" novalidate>
-        <p>Pay by card. Renews automatically each year; cancel anytime from your account.</p>
         <div class="field check pay-consent">
           <input id="agree_renewal" type="checkbox" name="agree_renewal" value="yes">
-          <label for="agree_renewal">I authorize CSBFP to charge <%= fee %> today and <%= fee %> each year on my renewal date until I cancel. I can cancel anytime online. Fees are non-refundable except where required by law. See the <a href="/legal/terms#6-certification-term-and-automatic-renewal" target="_blank" rel="noopener">Program Terms</a>.</label>
+          <label for="agree_renewal">I authorize CSBFP to charge <%= fee %> today and each year until I cancel online. Non-refundable except where required by law. <a href="/legal/terms#6-certification-term-and-automatic-renewal" target="_blank" rel="noopener">Program Terms</a></label>
         </div>
         <div class="pay-actions"><button class="button gold" type="submit">Pay <%= fee %></button></div>
       </form>
@@ -45,7 +44,7 @@
       <h2 class="home-card-band">My employer is paying</h2>
       <form method="post" action="/portal/checkout#employer" class="home-card-body" novalidate>
         <input type="hidden" name="method" value="employer">
-        <p>Enter the Employer ID from your employer. A credit covers one year and doesn't renew automatically.</p>
+        <p>Covers one year. Doesn't auto-renew.</p>
         <div class="field">
           <label for="employer_number">Employer ID</label>
           <input id="employer_number" name="employer_number" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ER-XXXXXX" maxlength="20" value="<%= employerNumber %>">
@@ -58,6 +57,6 @@
       </form>
     </section>
   </div>
-  <p class="muted pay-foot">Card payments are processed securely by Stripe and appear on your statement as <%= program.statementDescriptor %>.</p>
+  <p class="muted pay-foot">Secured by Stripe. Appears on your statement as <%= program.statementDescriptor %>.</p>
 <% } %>
 <%- include('../partials/foot') %>

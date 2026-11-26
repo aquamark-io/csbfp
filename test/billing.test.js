@@ -129,7 +129,7 @@ test('checkout needs the automatic-renewal consent, records it, and sends them t
   let r = await pat.req('/portal/checkout');
   assert.match(r.text, /\$199 per year/);
   assert.match(r.text, /I authorize CSBFP to charge \$199 today/);
-  assert.match(r.text, /Fees are non-refundable/);
+  assert.match(r.text, /each year until I cancel online\. Non-refundable/);
   assert.match(r.text, /Pay \$199/);
   r = await pat.req('/portal/checkout', {});
   assert.equal(r.status, 422);
