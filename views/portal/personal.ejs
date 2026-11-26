@@ -1,6 +1,12 @@
 <%- include('../partials/head') %>
+<% const first = typeof firstTime !== 'undefined' && firstTime; %>
+<% if (first) { %>
+<h1>Before You Get Started</h1>
+<p class="lead">Tell us who you are. Your legal name will appear on your certification, and these details are used to confirm your identity. Then you'll go to your dashboard.</p>
+<% } else { %>
 <%- include('../partials/portal-nav') %>
 <h1>Personal Information</h1>
+<% } %>
 <% if (saved) { %><p class="notice-ok" role="status">Saved.</p><% } %>
 <% if (Object.keys(errors).length) { %><p class="alert" role="alert">Please correct the highlighted fields.</p><% } %>
 <form method="post" action="/portal/personal" novalidate>
@@ -28,6 +34,6 @@
   <% input('phone', 'Mobile phone number', 'type="tel" inputmode="tel" autocomplete="tel-national"') %>
   <%- include('../partials/month-year', { name: 'industry_start', label: 'When did you start working in the industry?', values: { industry_start_month: values.industry_start_month, industry_start_year: values.industry_start_year }, errors }) %>
   <p class="hint">We never ask for your Social Security number or full home address.</p>
-  <button class="button" type="submit">Save</button>
+  <button class="button" type="submit"><%= first ? 'Continue' : 'Save' %></button>
 </form>
 <%- include('../partials/foot') %>

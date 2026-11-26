@@ -141,12 +141,14 @@ test('full journey: sign up, verify email, complete every form', async () => {
   await wait(50);
   assert.ok(fake.tables.csbfp_email_messages.some(m => m.dedupe_key === `welcome:${jane.id}`), 'welcome email logged');
 
+  // First visit: personal information comes before the dashboard.
   let d = await b.req('/portal/dashboard');
-  assert.equal(d.status, 200);
-  assert.match(d.text, /Certification status/);
-  assert.match(d.text, /<dt>Name<\/dt>/);
-  assert.match(d.text, /href="\/portal\/account">Account Settings/);
-  assert.match(d.text, /<span>Personal information<\/span><a class="button gold small" href="\/portal\/personal">/);
+  assert.equal(d.status, 303);
+  assert.equal(d.location, '/portal/personal');
+  const first = await b.req('/portal/personal');
+  assert.match(first.text, /<h1>Before You Get Started<\/h1>/);
+  assert.match(first.text, />Continue<\/button>/);
+  assert.doesNotMatch(first.text, /← Dashboard/);
 
   // Personal: under 18 is refused.
   let p = await b.req('/portal/personal', { legal_first_name: 'Jane', legal_last_name: 'Smith', dob: '2015-01-01', zip5: '94105', phone: '(415) 555-1212', industry_start_month: '3', industry_start_year: '2019' });

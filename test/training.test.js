@@ -298,7 +298,9 @@ test('training and the assessment stay locked until the application is complete'
     assert.equal(r.status, 303, p);
     assert.equal(r.location, '/portal/dashboard', p);
   }
+  assert.equal((await b.req('/portal/dashboard')).location, '/portal/personal', 'personal information comes first');
+  Object.assign(fake.tables.csbfp_registrants.find(x => x.email === 'cal@example.com'), { legal_first_name: 'Cal', legal_last_name: 'Lee', dob_hash: 'h', zip5: '94105', industry_start_month: '2020-01-01' });
   const d = await b.req('/portal/dashboard');
   assert.doesNotMatch(d.text, /href="\/portal\/training\//, 'modules are not linked yet');
-  assert.match(d.text, /<span>Personal information<\/span>/);
+  assert.match(d.text, /<span>Employment<\/span>/);
 });

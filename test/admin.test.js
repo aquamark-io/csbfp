@@ -122,7 +122,7 @@ test('a registrant session does not open the admin area', async () => {
   await b.req('/portal', { email: 'jane@example.com' });
   const code = await codeFor('jane@example.com', mark);
   await b.req('/portal/verify', { code });
-  assert.equal((await b.req('/portal/dashboard')).status, 200);
+  assert.equal((await b.req('/portal/account')).status, 200);
   assert.equal((await b.req('/admin/registrants')).location, '/admin/login');
 });
 
@@ -206,7 +206,7 @@ test('locking an account ends the registrant\'s access at once', async () => {
   const mark = sent.length;
   await jake.req('/portal', { email: 'jake@example.com' });
   await jake.req('/portal/verify', { code: await codeFor('jake@example.com', mark) });
-  assert.equal((await jake.req('/portal/dashboard')).status, 200);
+  assert.equal((await jake.req('/portal/account')).status, 200);
 
   await boss.req(`/admin/registrants/${JAKE}/lock`, { action: 'lock', reason: 'Suspicious sign-ups' });
   assert.equal(fake.tables.csbfp_registrants.find(x => x.id === JAKE).account_status, 'locked');

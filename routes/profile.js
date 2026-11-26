@@ -55,10 +55,14 @@ async function lists() {
   return { titles: must(titles, 'Job titles'), products: must(products, 'Products') };
 }
 
+// First-time setup: until personal information is saved, it's the only page they see (no dashboard yet).
+const personalDone = r => Boolean(r.legal_first_name && r.legal_last_name && r.dob_hash && r.zip5 && r.industry_start_month && r.phone_e164);
+
 // ---------- dashboard ----------
 
 router.get('/dashboard', async (req, res, next) => {
   try {
+    if (!personalDone(req.registrant)) return res.redirect(303, '/portal/personal');
     const [progress, flagged, train] = await Promise.all([progressFor(req.registrant), hasOpenFlag(req.registrant.id), training.stateFor(req.registrant.id)]);
     const sc = progress.registration && progress.registration.id ? await screening.forRegistration(progress.registration.id) : null;
     const { data: job } = await db().from('csbfp_employment_relationships').select('company_name')
@@ -83,7 +87,8 @@ function personalValues(r) {
 
 router.get('/personal', async (req, res, next) => {
   try {
-    res.render('portal/personal', { pageTitle: 'Personal Information', values: personalValues(req.registrant), errors: {},
+    const firstTime = !personalDone(req.registrant);
+    res.render('portal/personal', { pageTitle: firstTime ? 'Before You Get Started' : 'Personal Information', firstTime, values: personalValues(req.registrant), errors: {},
       locked: await identityLocked(req.registrant.id), saved: req.query.saved === '1' });
   } catch (err) { next(err); }
 });
@@ -97,7 +102,8 @@ router.post('/personal', async (req, res, next) => {
 
     const { errors, data } = v.validatePersonal(body);
     if (Object.keys(errors).length) {
-      return res.status(422).render('portal/personal', { pageTitle: 'Personal Information', values: { ...req.body, ...(locked ? personalValues(r) : {}) }, errors, locked, saved: false });
+      const firstTime = !personalDone(r);
+      return res.status(422).render('portal/personal', { pageTitle: firstTime ? 'Before You Get Started' : 'Personal Information', firstTime, values: { ...req.body, ...(locked ? personalValues(r) : {}) }, errors, locked, saved: false });
     }
     const update = {
       phone_e164: data.phone_e164, zip5: data.zip5, industry_start_month: data.industry_start_month,

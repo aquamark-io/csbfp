@@ -223,6 +223,7 @@ test('active registrants get an "information updated" email, at most once a day'
   await rita.req('/portal/products', { products: '1', products_other: 'Equipment leases' });
   await wait(50);
   assert.equal(mails('rita@example.com', 'registration_info_updated').length, 1);
+  Object.assign(fake.tables.csbfp_registrants.find(x => x.email === 'rita@example.com'), { legal_first_name: 'Rita', legal_last_name: 'Lee', dob_hash: 'h', zip5: '94105', industry_start_month: '2020-01-01', phone_e164: '+14155550199' });
   const dash = await rita.req('/portal/dashboard');
   assert.match(dash.text, /Annual review/);
   await rita.req('/portal/confirm-info', {});
